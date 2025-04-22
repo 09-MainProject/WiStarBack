@@ -1,0 +1,654 @@
+아이돌 스케쥴 관리 캘린더 서비스
+
+1팀 백엔드 : 정영하, 명보경, 김태진, 고근우
+1팀 프론트 : 김종엽, 이관용, 박진호
+
+9기 메인프로젝트
+[https://legend-palm-1f1.notion.site/9-1d5caf5650aa80dea77ddd4351094fe7
+
+메인 프로젝트 팀 빌딩 / 팀 별 공간
+[https://legend-palm-1f1.notion.site/1d5caf5650aa81cfaa04c343cf459b57
+
+메인 프로젝트 개인 별 공간
+[https://legend-palm-1f1.notion.site/1d5caf5650aa81d4a026f7fb8a4fdb8c
+
+프로젝트 템플릿
+[https://legend-palm-1f1.notion.site/1d8caf5650aa80d4be63e9be6914d07f
+
+주제 선정
+[https://www.notion.so/1d5caf5650aa814a8b11e1cfb7b153d6
+
+트러블슈팅 템플릿
+[https://www.notion.so/1d5caf5650aa811d8299e5f53a64d2af
+
+프로젝트 구조
+project_name/
+├── .github/                # 깃허브 설정 파일 ( 커밋템플릿, 이슈템플릿, pr 템플릿, CI / CD 등 )
+│   ├── COMMIT_TEMPLATE/    # 하위에 커밋 템플릿을 정의
+│   ├── ISSUE_TEMPLATE/     # 하위에 이슈템플릿을 정의
+│   └── workflows/          # 하위에 CI / CD 스크립트를 정의
+│       ├── checks.yml     # develop 또는 main 브랜치에 Push 또는 PR Merge 시 데이터 베이스 연결 확인, 코드 포매팅 체크, 테스트 통과 여부를 검사하는 스크립트
+│       └── deploy.yml     # develop 또는 main 브랜치에 Push 또는 Merge시 배포 자동화를 구현한 스크립트
+├── config/                 # 프로젝트 설정 파일 (settings, urls 등)
+│   ├── __init__.py
+│   ├── asgi.py
+│   ├── settings.py
+│   ├── urls.py
+│   └── wsgi.py
+├── apps/                   # 앱 디렉토리 (앱별로 디렉토리를 나눔)
+│   ├── app_name1/
+│   │   ├── migrations/     # 마이그레이션 파일
+│   │   ├── services/       # 앱에서 사용되는 서비스 로직을 구현하는 폴더
+│   │   ├── repository/     # 앱의 데이터베이스 모델에 관련된 CRUD 동작을 정의하는 폴더
+│   │   ├── admin.py        # Django Admin 관련 설정
+│   │   ├── apps.py         # 앱 설정
+│   │   ├── models.py       # 모델 정의
+│   │   ├── tests.py        # 테스트 코드
+│   │   ├── urls.py         # 앱 전용 URL 라우팅
+│   │   └── views.py        # 뷰 로직
+│   ├── app_name2/          # 다른 앱
+│   │   ├── migrations/     # 마이그레이션 파일
+│   │   ├── services/       # 앱에서 사용되는 서비스 로직을 구현하는 폴더
+│   │   ├── repository/     # 앱의 데이터베이스 모델에 관련된 CRUD 동작을 정의하는 폴더
+│   │   ├── admin.py        # Django Admin 관련 설정
+│   │   ├── apps.py         # 앱 설정
+│   │   ├── models.py       # 모델 정의
+│   │   ├── tests.py        # 테스트 코드
+│   │   ├── urls.py         # 앱 전용 URL 라우팅
+│   │   └── views.py        # 뷰 로직
+│   └── ...
+├── envs/                   # 환경변수 파일들
+│   ├── .env.local          # 로컬 환경에서 서버 구동 및 테스트 시 필요한 환경변수
+│   └── .env.prod           # 배포 환경에서 서버 구동 및 테스트 시 필요한 환경변수
+├── resources/              # 초기 설정 파일 및 스크립트, nginx, docker, kubernetes 의 yaml 파일
+│   ├── nginx/
+│   │   └── nginx.conf      # 모델 정의
+│   ├── docker/
+│   │   ├── dockerfile      # 도커 이미지 빌드 파일
+│   │   └── docker-compose.yml   # 도커 컨테이너 정의 파일
+│   ├── kubernetes/
+│   └── scripts/
+│       ├── entrypoint.sh   # 도커 이미지 빌드 시 최종적으로 실행될 스크립트 ( 일반적으로 서버 실행 명령 )
+│       └── test.sh         # 코드 포매팅 및 테스트코드 실행 시 사용되는 스크립트
+├── manage.py               # 관리 명령어
+├── poetry.lock             # poetry 의존성 패키지 설치 정보
+└── pyproject.toml          # poetry 의존성 패키지 목록 및 설정
+
+
+poetry 초기화
+poetry init
+
+poetry로 생성된 가상환경 경로 확인
+poetry env info --path
+경로 확인 후 인터프리터 설정
+
+가상환경 터미널에 활성화 (안해도됨)
+poetry env activate
+반환 되는 값 복사해서 다시 실행
+
+전체 패키지 설치 (개발용 포함)
+poetry install
+
+배포용 패키지만 설치 (dev 제외)
+poetry install --no-dev
+안될시
+poetry install --no-root
+
+라이브러리 제거
+poetry remove 라이브러리 이름
+
+[tool.poetry.dependencies] 에는 배포 환경의 라이브러리를 설치
+poetry add 라이브러리 이름
+
+[tool.poetry.group.dev.dependencies] 에 개발환경의 라이브러리 설치
+poetry add -G dev 라이브러리 이름
+또는
+poetry add --group=dev 라이브러리 이름
+
+
+docker-compose를 사용해 PostgreSQL DB생성
+
+postgres 셋팅
+docker-compose-local.yml 생성
+
+PostgreSQL 이미지 생성 및 실행
+docker-compose -f resources/docker/docker-compose-local.yml up -d
+
+실행 중인 도커 이미지 확인 (이미지 id 확인 가능)
+docker ps
+
+도커 이미지 중지
+docker stop 이미지id
+
+팀원이 해야할 일
+
+깃 클론
+git clone https://github.com/09-MainProject/MyFavIdolBack.git
+
+poetry가 생성한 pyproject.toml에 작성된 라이브러리 목록을 기반으로 라이브러리 설치 및 초기화
+전체 패키지 설치 (개발용 포함)
+poetry install
+안될시
+poetry install --no-root
+
+git config 자동 설정
+실행 권할 설정
+chmod +x resources/scripts/setup.sh
+setup.sh 실행
+resources/scripts/setup.sh
+
+가상환경 없으면 가상환경을 자동생성함. 기본설정 : 전역위치에 가상화경 생성
+혹은 가상환경을 미리 만든 상태에선 가상환경에 라이브러리를 설치
+
+전역 가상환경 위치 확인
+poetry env info --path
+
+전역 가상환경 제거
+poetry env remove python
+
+가상환경 생성
+python3 -m venv .venv
+
+설정 파일 생성
+django-admin startproject config .
+
+앱 만들기
+python3 manage.py startapp 앱이름
+
+하위 폴더에 앱 만들기 (만들어질 앱이름의 폴더가 경로에 있어야함)
+python3 manage.py startapp 앱이름 경로
+
+postgresql db 설치
+brew install postgresql
+
+PostgreSQL 서버 실행
+brew services start postgresql
+
+실행 확인
+brew services
+
+PostgreSQL 설치시 자동으로 생성되는 데이터베이스인 postgres에 접속
+psql postgres
+
+유저 확인
+본인의 맥 유저 이름 혹은 postgres라는 유저가 있어야 정상
+\du
+
+새로운 유저를 생성
+CREATE USER 유저이름
+
+비밀번호 설정
+ALTER USER root WITH PASSWORD '비밀번호';
+
+권한 설정
+ALTER USER root WITH SUPERUSER;
+
+유저 다시 확인
+\du
+
+db 생성
+CREATE DATABASE 데이터베이스이름;
+
+db 목록 확인
+\l
+
+
+새로 생성된 유저 혹은 기본 유저를 활용하여 생성된 데이터베이스로 접속
+psql 데이터베이스 이름
+또는
+psql -U 유저이름 -d 데이터베이스이름 -W
+(W옵션은 비밀번호를 입력하여 접속하는 것 입니다. 필수는 아님)
+
+테이블 내역을 조회
+\dt
+
+PostgreSQL을 Django에서 사용하려면 필요한 psycopg 설치
+poetry add psycopg2-binary
+
+
+- 프로젝트에서 환경 변수로 관리해야하는 것
+    - 데이터베이스 연결 정보
+    - AWS 또는 NCP 등의 클라우드 연결 정보
+    - 소셜 로그인 Client ID, Client Secret, Redirect URI
+    - 외부 API 인증 정보
+    - 프로젝트 시크릿 키 ( 매우 중요 ! )
+
+
+깃 플로우
+https://legend-palm-1f1.notion.site/Git-Flow-14acaf5650aa800387a7c43e334cc72e
+https://legend-palm-1f1.notion.site/Git-Flow-14acaf5650aa80f2a4a9efa455e54f9b
+
+맥에서 홈브루로 깃 플로우 설치
+brew install git-flow-avh
+
+깃 플로우 초기화
+git flow init
+
+Branch name for production releases?
+→ 기본값은 master 이지만 main 으로 하는것 추천
+
+Branch name for "next release" development?
+→ develop (기본값)
+
+나머지 엔터
+
+
+# Feature 브랜치
+
+생성: 새로운 기능을 개발할 때 사용
+git flow feature start <기능이름>
+
+완료: 기능 개발을 마치고 develop 브랜치로 병합
+git flow feature finish <기능이름>
+
+# Release 브랜치
+
+생성: 배포 준비를 할 때 사용
+git flow release start <버전번호>
+
+완료: 릴리즈 완료 후 master와 develop에 병합
+git flow release finish <버전번호>
+
+# Hotfix 브랜치
+
+생성: 긴급한 버그 수정이 필요할 때 사용
+git flow hotfix start <버그이름>
+
+완료: 수정 완료 후 master와 develop에 병합
+git flow hotfix finish <버그이름>
+
+
+## . Git Flow 전체 흐름
+
+1. 팀 리더가 new project 생성하고 초기 세팅을 진행
+2. 팀 리더가 github repository에 올리기
+3. 나머지 팀원들은 repository에 올라 온 project를 클론받아 로컬에 가져옴
+4. 전 팀원 `git flow init` (초기화) 해줌
+    - 초기화 시 `Branch name for production releases?`질문에
+    → 기본 값은 `master` 이지만 `main` 으로 설정하시는 것을 추천..
+5. 모든 팀원 로컬 환경에서 `git branch` 명령어로 존재하는 브랜치를 확인해보면 처음에는 `main` 브랜치 뿐만 있었지만 초기화 이후  `develop` 브랜치가 로컬에 생겨있음을 확인가능.
+6. 각자 맡은 기능 개발을 위해 `git flow feature start 기능이름` 명령어로 feature 브랜치를 생성
+→ `git branch` 명령어로 확인해보면 `feature/기능이름` 브랜치가 생성되어있음.
+7. 생성된 feature 브랜치에서 기능 개발 작업합니다.
+8. 작업 완료 후 feature 브랜치를 원격 저장소에 push 해서 PR 올립니다.
+9. PR 타이틀, 설명 등 작성 후 리뷰어 팀원들 등록합니다.
+10. PR 승인 되면 Squash and Merge 버튼을 통해 압축 된 하나의 커밋으로 develop에 머지합니다.
+11. 그리고 로컬 환경에서 `develop` 브랜치로 checkout 하고, 기능 개발시에 사용했던 기존의  feature 브랜치는 삭제해줍니다.
+12. 개발된 기능이 업데이트 된 원격 저장소의 `develop` 브랜치를 `pull` 합니다.
+    - `git pull origin develop` 명령어 사용하기
+13. (( 7~13번 무한 반복 ))
+14. 각 팀원들이 기능 개발을 모두 완료했다면 배포할 준비를 해야합니다. 팀장이 배포 관련 설정을 모두 완료하고 `develop` 브랜치에 머지합니다.
+15. `main` 브랜치와 `develop` 브랜치를 compare & PR 한 후 `merge` 합니다.
+16. `main` 브랜치를 EC2 에서 클론받아 배포를 진행합니다.
+
+
+.gitignore 시크릿 폴더 업로드 제한
+.config_secret/
+
+시크릿 폴더 생성
+.config_secret
+
+시크릿 폴더에 secret.json 생성
+
+secret.json에 입력
+{
+  "DJANGO_SECRET_KEY" : "django-insecure-9u=$gmlz$b8h2^d9%3x871ti9pcile_q19lif*#yw(q@#=nb!8",
+  "email": {
+    "user": "이메일",
+    "password": "비밀번호"
+  },
+  "DB": {
+  "ENGINE": "django.db.backends.postgresql",
+  "NAME": "bank",
+  "USER": "root",
+  "PASSWORD": "1234",
+  "HOST": "localhost",
+  "PORT": "5432"
+  }
+}
+
+시크릿 파일 읽어 오기 위해 settings.py에 설정
+
+with open(BASE_DIR / '.config_secret' / 'secret.json') as f:
+    config_secret_str = f.read()
+
+SECRET = json.loads(config_secret_str)  # json 형태를 딕셔너리 형태로 바꿈
+
+# Email
+# from django.core.mail.backends.smtp import EmailBackend
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.naver.com' # 네이버 환결설정에서 볼 수 있음.
+EMAIL_USE_TLS = True  # 보안연결
+EMAIL_PORT = 587  # 네이버 메일 환경설정에서 확인 가능
+EMAIL_HOST_USER = SECRET["email"]["user"]
+EMAIL_HOST_PASSWORD =  SECRET["email"]["password"]
+
+# .config_secret 폴더 만들고
+# 폴더에 secret.json 만들고
+# .gitignore에 추가한 후 관리
+# print(SECRET['DB']['HOST'])
+# print(SECRET['DB2']['HOST'])
+# 이렇게 쓸 수도있고 dotenv를 통해 관리할 수도 있음
+
+LOGIN_URL = '/login/'
+LOGOUT_REDIRECT_URL = '/login/'
+# LOGOUT_REDIRECT_URL = '/'
+
+
+
+simplejwt 시작
+https://django-rest-framework-simplejwt.readthedocs.io/en/latest/getting_started.html
+
+simplejwt 설치
+poetry add djangorestframework-simplejwt
+
+# config/settings.py
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        ...
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        ...
+    ]
+}
+INSTALLED_APPS = [
+    ...
+    'rest_framework_simplejwt',
+    ...
+]
+
+# config/urls.py
+
+urlpatterns = [
+    ...
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
+    ...
+]
+
+simplejwt 세팅
+https://django-rest-framework-simplejwt.readthedocs.io/en/latest/settings.html#
+
+
+simplejwt 커스터 마이징
+https://django-rest-framework-simplejwt.readthedocs.io/en/latest/customizing_token_claims.html
+
+# utils/jwt_serializers.py
+
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView
+
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+
+        # Add custom claims
+        token['user_name'] = user.username  # 토큰에 유저 이름을 함께 담아서 보냄
+
+        return token
+
+# config/settings.py
+# JWT 설정
+SIMPLE_JWT = {
+  # It will work instead of the default serializer(TokenObtainPairSerializer).
+  "TOKEN_OBTAIN_SERIALIZER": "utils.jwt_serializers.MyTokenObtainPairSerializer",
+  # ...
+}
+
+토큰 정보 보는 법
+https://jwt.io/
+
+토큰 만료시간 수정
+# JWT 설정
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    # It will work instead of the default serializer(TokenObtainPairSerializer).
+    "TOKEN_OBTAIN_SERIALIZER": "utils.jwt_serializers.MyTokenObtainPairSerializer",
+    # ...
+}
+
+poetry add -G dev django-extensions
+poetry add -G dev ipython
+
+poetry.lock 업데이트
+poetry lock
+
+
+개발환경으로 가상환경에 라이브러리 설치
+poetry install --with dev --no-root
+
+로그아웃 구현
+INSTALLED_APPS = [
+    ...
+    'rest_framework_simplejwt.token_blacklist',
+]
+
+# JWT 설정
+SIMPLE_JWT = {
+    "BLACKLIST_AFTER_ROTATION": True,
+    "ROTATE_REFRESH_TOKENS": True,
+}
+
+python manage.py migrate
+
+--------------------
+이메일 보내는 기능 문제
+--------------------
+
+DEBUG=False일 때 이메일 보내는 기능에 문제생긴다면.
+
+from django.core.mail import send_mail
+send_mail 함수를 사용할 때 문제가 생긴다면
+
+try:
+    send_mail(subject, message, settings.EMAIL_HOST_USER, to_email)
+except Exception as e:
+    print(repr(e))
+    raise
+
+이렇게 해서 실패 했을 때 원인을 오류 코드로 파악한다.
+
+원인은
+SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self-signed certificate in certificate chain (_ssl.c:1018)')
+인증서를 찾지 못해서 오류가 났다는 말인데
+
+파이썬 라이브러리 certifi 설치 후
+인증서를 강제로 인식 가능하게 certifi로 설정하면 어떠한 경우에도 사용가능하다.
+인증서 경로를 인식못하든 인증서가 실제로 존재하지 않든 인식.
+
+터미널에 입력해서 일시적으로 해결하는 방법
+export SSL_CERT_FILE=$(python -m certifi)
+
+해결방법1
+터미널에 영구 적용
+
+vim ~/.zshrc
+맨 아랫 줄에 추가
+export SSL_CERT_FILE=$(python -m certifi)
+
+해결방법2
+가상환경이 활성화 될때마다 인증서 경로를 자동 지정할 수 있도록 설정한다.
+
+activate스크립트 수정
+vim .venv/bin/activate
+맨 아랫줄에 추가
+export SSL_CERT_FILE=$(python -m certifi)
+
+해결방법3 (가장 추천)
+프로젝트가 인증서 경로를 인식할 수 있도록 장고 프로젝트에 설정
+
+certifi라이브러리 없으면 설치 후
+
+settings.py 최상단에 설정
+
+import os
+import certifi
+os.environ['SSL_CERT_FILE'] = certifi.where()
+
+-----------
+  배포하기
+-----------
+https://www.notion.so/7-1c2caf5650aa806ba040f5af5cf08ce4
+
+EC2, S3, IAM 생성
+
+.env 작성하기
+값이랑 주석이랑 같은 줄에 있으면 주석도 같이 값으로 인식
+공백도 있으면 안됨
+# IAM 키 (다운받은 csv 파일에서 확인)
+S3_ACCESS_KEY=생성한 액세스 키
+S3_SECRET_ACCESS_KEY=생성한 비밀 액세스 키
+
+# S3 버킷 설정
+S3_STORAGE_BUCKET_NAME=본인 버킷 이름
+S3_REGION_NAME=ap-northeast-2
+
+django-storages, boto3 설치
+poetry add django-storages boto3
+
+- `django-storages`: static, media 같은 파일을 저장소와 연결해주는 라이브러리
+- `boto3`: AWS 에 python을 이용해서 엑세스할 수 있도록 해주는 라이브러리
+
+# settings.py에 추가
+
+# INSTALLED_APPS에 storages 추가
+INSTALLED_APPS = [
+  	...
+    "storages",
+]
+
+# Static, Media URL 수정
+STATIC_URL = f'https://{os.getenv("S3_STORAGE_BUCKET_NAME", "django-mini-project")}.s3.amazonaws.com/static/'
+MEDIA_URL = f'https://{os.getenv("S3_STORAGE_BUCKET_NAME", "django-mini-project")}.s3.amazonaws.com/media/'
+
+# STORAGES 작성
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.s3.S3Storage",
+        "OPTIONS": {
+            "access_key": os.getenv("S3_ACCESS_KEY", ""),
+            "secret_key": os.getenv("S3_SECRET_ACCESS_KEY", ""),
+            "bucket_name": os.getenv("S3_STORAGE_BUCKET_NAME", ""),
+            "region_name": os.getenv("S3_REGION_NAME", ""),
+            "location": "media",
+            "default_acl": "public-read",
+        },
+    },
+    "staticfiles": {
+        "BACKEND": "storages.backends.s3.S3Storage",
+        "OPTIONS": {
+            "access_key": os.getenv("S3_ACCESS_KEY", ""),
+            "secret_key": os.getenv("S3_SECRET_ACCESS_KEY", ""),
+            "bucket_name": os.getenv("S3_STORAGE_BUCKET_NAME", ""),
+            "region_name": os.getenv("S3_REGION_NAME", ""),
+            "custom_domain": f'{os.getenv("S3_STORAGE_BUCKET_NAME", "")}.s3.amazonaws.com',
+            "location": "static",
+            "default_acl": "public-read",
+        },
+    },
+}
+
+--------------------------
+# S3에 static 파일 업로드 하기
+--------------------------
+
+python-dotenv 설치
+poetry add python-dotenv
+
+settings.py에 설정
+from dotenv import load_dotenv
+load_dotenv(BASE_DIR / '.env')  # .env 파일 로드
+
+# S3에 static 파일 업로드
+python3 manage.py collectstatic
+
+--------------
+RDS 생성 및 설정
+--------------
+
+RDS생성
+
+.env에 DATABASES 정보 입력
+
+settings.py(prod.py)에 설정
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv("DB_NAME"),              # 생성한 DB 이름
+        'USER': os.getenv("DB_USER"),              # PostgreSQL 사용자
+        'PASSWORD': os.getenv("DB_PASSWORD"),      # 비밀번호
+        'HOST': os.getenv("DB_HOST"),              # 로컬에서 실행 중이므로 localhost
+        'PORT': os.getenv("DB_PORT", "5432"),      # RDS 엔드포인트
+    }
+}
+
+ec2 접속
+ssh -i 키/페어/저장/위치/mp-key.pem ubuntu@EC2_PUBLIC_IP
+
+--------------------------
+# Docker 세팅
+--------------------------
+
+작성한 Dockerfile을 통해 이미지를 빌드
+docker build -t django .
+
+빌드된 Docker 이미지를 통해 컨테이너 실행
+docker run -p 8000:8000 --env-file .env django
+
+Dockerfile 생성
+# 베이스 이미지 (본인 프로젝트에 맞는 버전 기입)
+FROM python:3.12-slim
+
+ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE 1
+
+# 종속성 파일 복사
+COPY ./poetry.lock /mini_project/
+COPY ./pyproject.toml /mini_project/
+
+# 작업 디렉토리 설정
+WORKDIR /mini_project
+
+# 종속성 설치
+RUN pip3 install poetry
+RUN poetry config virtualenvs.create false
+RUN poetry install
+RUN poetry add gunicorn
+
+# 애플리케이션 코드 복사
+COPY ./app /mini_project/app
+WORKDIR /mini_project/app
+
+
+# 소켓 파일 생성 디렉토리 권한 설정
+RUN mkdir -p /mini_project && chmod -R 755 /mini_project
+
+# Gunicorn을 사용하여 애플리케이션 실행
+CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "2"]
+
+쉘 스크립트 작성
+
+scripts/run.sh 생성
+mkdir -p scripts
+touch scripts/run.sh
+
+도커 빌드
+docker build -t django .
+
+빌드된 Docker 이미지를 통해 컨테이너 실행
+docker run -p 8000:8000 --env-file .env django
+
+실행중인 도커 확인
+docker ps
+
+컨테이너 중지
+docker stop <컨테이너ID 또는 이름>
+
+rds db에 접속
+psql -h <엔드포인트> -U <DB_USER> -d <DB_NAME> -p <PORT>
+
+깃 리파짓토리 특정 브랜치 클론
+git clone -b <브랜치명> <원격주소>
