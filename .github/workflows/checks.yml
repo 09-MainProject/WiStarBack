@@ -1,4 +1,6 @@
 name: Django Project CI
+# yml 검사 사이트
+# https://www.yamllint.com/
 # Trigger : main 또는 develop 브랜치에 푸쉬되거나 PR 이 생성되는 경우.
 on:
   push:
@@ -14,7 +16,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-	# services: 리눅스 기반의 운영체제는 서비스 컨테이너를 지정할 수 있다. postgres를 DB로 사용하기 위해 개별적인 컨테이너를 지정하고 실행할 수 있도록 함.
+    # services: 리눅스 기반의 운영체제는 서비스 컨테이너를 지정할 수 있다. postgres를 DB로 사용하기 위해 개별적인 컨테이너를 지정하고 실행할 수 있도록 함.
     services:
       postgres:
         image: postgres:15
@@ -36,8 +38,7 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-
-		# steps: 레포지토리 코드 가져오기 -> 사용할 파이썬 버젼 가져오기 -> poetry 설치 및 종속성 라이브러리 및 패키지 설치 -> 코드 포매팅 체크 -> 정적 타입 검사 -> 커버리지를 활용한 장고 테스트 실행의 종속된 단계를 거쳐 테스트를 실행함
+    # steps: 레포지토리 코드 가져오기 -> 사용할 파이썬 버젼 가져오기 -> poetry 설치 및 종속성 라이브러리 및 패키지 설치 -> 코드 포매팅 체크 -> 정적 타입 검사 -> 커버리지를 활용한 장고 테스트 실행의 종속된 단계를 거쳐 테스트를 실행함
     steps:
       - name: Checkout code
         uses: actions/checkout@v3

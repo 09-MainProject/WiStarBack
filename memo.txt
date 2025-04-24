@@ -282,6 +282,11 @@ chmod +x ./resources/scripts/test.sh
 ./resources/scripts/test.sh
 
 
+# yml은 탭을 허용하지 않는다.
+# yml 검사 사이트
+# https://www.yamllint.com/
+
+
 깃 플로우
 https://legend-palm-1f1.notion.site/Git-Flow-14acaf5650aa800387a7c43e334cc72e
 https://legend-palm-1f1.notion.site/Git-Flow-14acaf5650aa80f2a4a9efa455e54f9b
