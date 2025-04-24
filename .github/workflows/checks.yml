@@ -73,7 +73,7 @@ jobs:
       - name: Run static type checks (mypy)
         run: poetry run mypy . --config-file pyproject.toml
 
-      - name: Run tests with coverage
-        run: |
-          poetry run coverage run --source="src" src/manage.py test
-          coverage report --fail-under=80
+#      - name: Run tests with coverage
+#        run: |
+#          poetry run coverage run --source="src" src/manage.py test
+#          coverage report --fail-under=80

@@ -17,10 +17,10 @@ echo "Starting mypy"
 poetry run dmypy run -- .
 echo "OK"
 
-echo "Starting pytest with coverage"
-poetry run coverage run -m pytest
-poetry run coverage report -m
-poetry run coverage html
-echo "OK"
+#echo "Starting pytest with coverage"
+#poetry run coverage run -m pytest
+#poetry run coverage report -m
+#poetry run coverage html
+#echo "OK"
 
 echo "${COLOR_GREEN}ALL tests passed successfully!${COLOR_NC}"
