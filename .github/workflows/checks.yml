@@ -71,7 +71,7 @@ jobs:
           poetry run isort --check-only .
 
       - name: Run static type checks (mypy)
-        run: poetry run mypy .
+        run: poetry run mypy . --config-file pyproject.toml
 
       - name: Run tests with coverage
         run: |
