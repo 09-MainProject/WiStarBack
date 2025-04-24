@@ -1,0 +1,25 @@
+#name: Django EC2 Deployment
+#
+#on:
+#  workflow_run:
+#    workflows: ["Django Project CI"]
+#    types:
+#      - completed
+#
+#jobs:
+#  deploy:
+#    runs-on: ubuntu-latest
+#    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+#    steps:
+#      - name: EC2 ssh connection and deploy
+#        uses: appleboy/ssh-action@master
+#        with:
+#          host: ${{ secrets.SSH_HOST }}  # 연결할 EC2
+#          username: ${{ secrets.SSH_USERNAME }}	 # 사용자
+#          password: ${{ secrets.SSH_PASSWORD }}  # pem 파일 내용
+#          command_timeout: 5m	 #timeout 시간 설정
+#          script: |
+#		          cd /your_project_path
+#		          git pull origin main
+#		          sudo systemctl restart uwsgi
+#		          sudo systemctl reload nginx

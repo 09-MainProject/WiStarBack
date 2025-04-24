@@ -117,6 +117,12 @@ docker-compose -f resources/docker/docker-compose-local.yml up -d
 실행 중인 도커 이미지 확인 (이미지 id 확인 가능)
 docker ps
 
+환경 변수 채크
+docker exec myfavidol_db printenv | grep POSTGRES
+
+도커 컨테이너 데이터베이스 접속
+docker exec -it myfavidol_db psql -U postgres -d oz_project
+
 도커 이미지 중지
 docker stop 이미지id
 
@@ -212,6 +218,68 @@ poetry add psycopg2-binary
     - 소셜 로그인 Client ID, Client Secret, Redirect URI
     - 외부 API 인증 정보
     - 프로젝트 시크릿 키 ( 매우 중요 ! )
+
+
+- CI / CD 설정
+
+블랙(black) 설치
+poetry add --group=dev black
+
+블랙 실행
+black .  또는  poetry run black .
+
+
+----------
+# Mypy
+----------
+
+정적 타입 검사(static type checking)**를 할 수 있도록 도와주는 도구
+
+Mypy 설치
+poetry add --group=dev mypy
+
+mypy로 검사
+mypy .
+
+-----------
+# Pytest
+-----------
+
+- pytest는 파이썬에서 테스트 코드를 쉽게 작성하고 실행할 수 있게 도와주는 테스트 프레임워크
+
+pytest 설치
+poetry add --group=dev pytest
+
+# pytest 사용시
+# 함수 이름 앞에 test_라고 써주면 test 함수인걸 인식한다.
+
+# 파이참에서 pytest 함수를 만들면 테스트 실행버튼이 생긴다.
+# 터미널에서 테스트 실행 시 pytest . 이렇게 입력하면 됨.
+def test_simple() -> None:
+    print("Testing simple")
+
+
+
+poetry add --group=dev isort
+검사
+isort .
+
+# isort가 해당 import 정렬하지 않음
+# isort: skip
+
+해당 에러코드 무시 설정
+# noqa: 에러코드
+# noqa: F405
+# noqa: F403
+
+테스트 스크립트 생성
+./resources/scripts/test.sh  생성
+
+권한 설정
+chmod +x ./resources/scripts/test.sh
+
+전체 테스트 실행
+./resources/scripts/test.sh
 
 
 깃 플로우
