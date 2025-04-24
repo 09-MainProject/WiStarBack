@@ -1,5 +1,15 @@
-#name: Django EC2 Deployment
-#
+name: Django EC2 Deployment
+
+on:
+  workflow_dispatch:  # 수동 실행만 가능하게 설정 (사실상 비활성화)
+
+jobs:
+  skip:
+    runs-on: ubuntu-latest
+    steps:
+      - name: This workflow is temporarily disabled
+        run: echo "This workflow is disabled for now."
+
 #on:
 #  workflow_run:
 #    workflows: ["Django Project CI"]
