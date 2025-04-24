@@ -25,7 +25,7 @@ SECRET_KEY = "django-insecure-k-=4gg*i3t49&!8i14gwzuvnd+wtfsr7ihtbny-s#po8%50y@p
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS: list[str] = []
 
 
 # Application definition
@@ -40,11 +40,11 @@ DJANGO_APPS = [
 ]
 
 OWN_APPS = [
-    "user",
-    "idol",
-    "notification",
-    "post",
-    "schedule",
+    "apps.user",
+    "apps.idol",
+    "apps.notification",
+    "apps.post",
+    "apps.schedule",
 ]
 
 THIRD_PARTY_APPS = [
@@ -140,13 +140,12 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
-
 # REST_FRAMEWORK 설정
 REST_FRAMEWORK = {
     # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     # 'PAGE_SIZE': 10,
-    'DEFAULT_AUTHENTICATION_CLASSES': [
+    "DEFAULT_AUTHENTICATION_CLASSES": [
         # 'rest_framework.authentication.BasicAuthentication',
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
     ]
 }
