@@ -33,7 +33,7 @@ jobs:
         # --health-interval 10s : heath check주기를 10초로 설정
         # --health-timeout 5s : 5초동안 health check 요청에 대한 응답을 받고, 이후에는 타임아웃으로 실행시 문제가 있는것으로 판단
         # --health-retries 5 : health check의 반복 횟수
-        options: >
+        options: >-
           --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
