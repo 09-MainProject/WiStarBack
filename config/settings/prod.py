@@ -20,7 +20,8 @@ ENV = dotenv_values(BASE_DIR / "envs/prod.env")  # noqa: F405
 
 # 시크릿 키를 ENV 변수에 저장된 딕셔너리에서 가져옵니다. 만약 파일에서 읽어온 시크릿 키가 존재하지 않는다면 50자리의 무작위 문자열을 반환합니다.
 SECRET_KEY = ENV.get(
-    "DJANGO_SECRET_KEY", "".join(random.choices("abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()?", k=50))
+    "DJANGO_SECRET_KEY",
+    "".join(random.choices("abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()?", k=50)),
 )
 
 DATABASES = {
