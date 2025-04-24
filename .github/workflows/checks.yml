@@ -26,8 +26,8 @@ jobs:
           POSTGRES_PASSWORD: password
           POSTGRES_DB: test_db
         # postgres에 사용할 port를 지정. 5432 포트로 들어오는 요청을 5432 포트로 포워딩 해줌. (기본값과 동일)
-        ports:
-          - 5432:5432
+#        ports:
+#          - 5432:5432
         # 컨테이너 실행 시 사용할 수 있는 옵션을 지정해줍니다.
         # --health-cmd pg_isready : postgres가 정상적으로 실행되었는지 체크하는 명령어
         # --health-interval 10s : heath check주기를 10초로 설정
