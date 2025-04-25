@@ -16,7 +16,6 @@ User = get_user_model()
 #         model = User
 #         fields = ['username']
 
-
 class RegisterSerializer(serializers.ModelSerializer):
     password_confirm = serializers.CharField(write_only=True)
 
@@ -88,7 +87,6 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = "__all__"
-
 
 class ProfileUpdateSerializer(serializers.ModelSerializer):
     class Meta:
