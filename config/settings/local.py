@@ -33,3 +33,18 @@ DATABASES = {
         "PORT": ENV.get("POSTGRES_PORT", 5432),
     }
 }
+
+
+# Email
+# from django.core.mail.backends.smtp import EmailBackend
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.naver.com' # 네이버 환결설정에서 볼 수 있음.
+EMAIL_USE_TLS = True  # 보안연결
+EMAIL_PORT = 587  # 네이버 메일 환경설정에서 확인 가능
+EMAIL_HOST_USER = ENV.get("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD =  ENV.get("EMAIL_HOST_PASSWORD", "")
+
+
+# OAuth
+# NAVER_CLIENT_ID = ENV.get("NAVER_CLIENT_ID", "")
+# NAVER_CLIENT_SECRET = ENV.get("NAVER_CLIENT_SECRET", "")

@@ -10,6 +10,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+# 이메일 보낼 때 SSL 인증서 경로 인식 불가 시 설정
+import os
+import certifi
+os.environ['SSL_CERT_FILE'] = certifi.where()
+
+from datetime import timedelta
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -133,11 +139,35 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = '.static_root'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Auth
+AUTH_USER_MODEL = 'user.User'  # 유저 모델 지정
+
+
+# 이런식으로 아이디랑 비밀번호 설정해놓고 같이 깃에 올라가면 누군가 볼 수도있고
+# 비공개 리파짓토리라도 중간에 탈취당할 위험이 있음.
+# 그래서 환경변수를 사용해서 정보를 내 컴퓨터에서 읽어오도록함.
+# EMAIL_HOST_USER = 'test@gmail.com'
+# EMAIL_HOST_PASSWORD = '1111'
+
+
+# .config_secret 폴더 만들고
+# 폴더에 secret.json 만들고
+# .gitignore에 추가한 후 관리
+# print(SECRET['DB']['HOST'])
+# print(SECRET['DB2']['HOST'])
+# 이렇게 쓸 수도있고 dotenv를 통해 관리할 수도 있음
+
+LOGIN_URL = '/user/login/'
+LOGOUT_REDIRECT_URL = '/user/login/'
+# LOGOUT_REDIRECT_URL = '/'
+
 
 
 # REST_FRAMEWORK 설정
@@ -149,3 +179,16 @@ REST_FRAMEWORK = {
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ]
 }
+
+
+# JWT 설정
+SIMPLE_JWT = {
+    "BLACKLIST_AFTER_ROTATION": True,
+    "ROTATE_REFRESH_TOKENS": True,
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    # It will work instead of the default serializer(TokenObtainPairSerializer).
+    "TOKEN_OBTAIN_SERIALIZER": "utils.jwt_serializers.WiStarTokenObtainPairSerializer",
+    # ...
+}
+
