@@ -227,8 +227,6 @@ poetry add psycopg2-binary
 
 - CI / CD 설정
 
-
-
 --------
 # Black
 --------
