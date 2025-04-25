@@ -5,10 +5,10 @@ from dotenv import dotenv_values
 from .base import *  # noqa: F403
 
 # DEBUG = True
-# ALLOWED_HOSTS = []
+# ALLOWED_HOSTS: list[str] = []
 
 DEBUG = False
-ALLOWED_HOSTS = [
+ALLOWED_HOSTS: list[str] = [
     "127.0.0.1",
     "localhost",
     # "EC2 퍼블릭 IP",  # EC2 퍼블릭 IP

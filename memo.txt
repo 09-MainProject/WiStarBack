@@ -222,12 +222,37 @@ poetry add psycopg2-binary
 
 - CI / CD 설정
 
+
+
+--------
+# Black
+--------
+
+black이란?
+"The uncompromising Python code formatter"
+(타협 없는, 엄격한 Python 코드 포매터)
+
+🔧 무슨 역할을 하나요?
+Python 코드를 자동으로 정해진 스타일대로 정리해줍니다.
+
+개발자가 코드 스타일로 고민하지 않도록 강력한 규칙을 적용합니다.
+
+사람마다 스타일이 다른 걸 방지 → 팀 프로젝트에 특히 유리
+
 블랙(black) 설치
 poetry add --group=dev black
 
 블랙 실행
 black .  또는  poetry run black .
 
+Black	# fmt: off/on	포매팅 예외 처리 구간 설정
+
+----------
+isort
+----------
+
+isort	# isort: skip	해당 줄 import 정렬 제외
+isort	# isort: off/on	구간 단위 import 정렬 제외
 
 ----------
 # Mypy
@@ -240,6 +265,13 @@ poetry add --group=dev mypy
 
 mypy로 검사
 mypy .
+
+
+# type: ignore	해당 라인 모든 타입 에러 무시
+# type: ignore[에러코드]	특정 타입 에러만 무시
+# mypy: ignore-errors	파일 전체 타입 검사 무시
+# mypy: disable-error-code	파일 단위 특정 에러코드 무시
+# type:	변수에 타입 주석 지정
 
 -----------
 # Pytest

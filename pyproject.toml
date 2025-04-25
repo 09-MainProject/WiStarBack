@@ -34,3 +34,5 @@ isort = "^6.0.1"
 [tool.mypy]
 ignore_errors = true
 #ignore_missing_imports = true
+#follow_imports = "silent"
+#warn_unused_configs = true
