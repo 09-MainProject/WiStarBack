@@ -1,8 +1,7 @@
-from django.contrib.auth import get_user_model
 from django.db import models
+from django.contrib.auth import get_user_model
 
 User = get_user_model()
-
 
 class Idol(models.Model):
     name = models.CharField(max_length=100)
@@ -10,10 +9,9 @@ class Idol(models.Model):
     def __str__(self):
         return self.name
 
-
 class Schedule(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="schedules")
-    idol = models.ForeignKey(Idol, on_delete=models.CASCADE, related_name="schedules")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='schedules')
+    idol = models.ForeignKey(Idol, on_delete=models.CASCADE, related_name='schedules')
     title = models.CharField(max_length=255)
     description = models.TextField()
     location = models.CharField(max_length=255, default="미정")
@@ -24,7 +22,6 @@ class Schedule(models.Model):
 
     def __str__(self):
         return f"[{self.idol.name}] {self.title}"
-
 
 # 필드명	설명
 # user	일정을 등록한 관리자 계정. User 모델과 연결
