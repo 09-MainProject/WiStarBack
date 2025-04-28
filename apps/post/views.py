@@ -5,7 +5,9 @@ from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.renderers import JSONRenderer
+from django_filters import rest_framework as filters
 from .models import Post
 from .pagination import PostPagination
 from .serializers import PostCreateSerializer, PostSerializer, PostUpdateSerializer
