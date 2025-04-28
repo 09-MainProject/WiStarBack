@@ -9,7 +9,6 @@ from .utils import process_image
 
 User = get_user_model()
 
-
 class Post(models.Model):
     """
     게시물 모델
