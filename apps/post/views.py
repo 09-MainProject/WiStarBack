@@ -5,6 +5,8 @@ from rest_framework.renderers import JSONRenderer
 from django_filters import rest_framework as filters
 from .models import Post
 from .serializers import PostSerializer
+from rest_framework.viewsets import ModelViewSet
+from rest_framework.decorators import action
 
 
 class PostFilter(filters.FilterSet):
@@ -19,64 +21,40 @@ class PostFilter(filters.FilterSet):
         fields = ['title', 'content', 'created_at', 'created_at_end', 'author']
 
 
-class PostListCreateView(generics.ListCreateAPIView):
+class PostViewSet(ModelViewSet):
+    """
+    게시물 정보 관리 뷰셋
+
+    list:
+    게시물 목록 조회
+
+    create:
+    새 게시물 생성
+
+    retrieve:
+    게시물 상세 정보 조회
+
+    partial_update:
+    게시물 정보 부분 수정
+
+    destroy:
+    게시물 삭제
+    """
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
-    filter_backends = [filters.DjangoFilterBackend]
+    filter_backends = [filters.DjangoFilterBackend, filters.OrderingFilter]
     filterset_class = PostFilter
     ordering_fields = ['created_at', 'views']
     ordering = ['-created_at']
-    renderer_classes = [JSONRenderer]
+    http_method_names = ['get', 'post', 'patch', 'delete']  # PUT 제거, PATCH만 허용
 
     def perform_create(self, serializer):
         """게시물 생성 시 작성자 정보 추가"""
         serializer.save(author=self.request.user)
 
-
-class PostRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
-    """
-    게시물 상세 조회, 수정, 삭제 뷰
-
-    GET: 게시물 상세 조회
-    PUT: 게시물 수정
-    DELETE: 게시물 삭제
-    """
-    queryset = Post.objects.all()
-    serializer_class = PostSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
-
-    def perform_update(self, serializer):
-        """게시물 수정 시 작성자 확인"""
-        if serializer.instance.author != self.request.user:
-            return Response(
-                {"detail": "게시물을 수정할 권한이 없습니다."},
-                status=status.HTTP_403_FORBIDDEN
-            )
-        serializer.save()
-
-    def perform_destroy(self, instance):
-        """게시물 삭제 시 작성자 확인"""
-        if instance.author != self.request.user:
-            return Response(
-                {"detail": "게시물을 삭제할 권한이 없습니다."},
-                status=status.HTTP_403_FORBIDDEN
-            )
-        instance.delete()
-
-
-class PostIncreaseViewsView(generics.UpdateAPIView):
-    """
-    게시물 조회수 증가 뷰
-
-    POST: 게시물 조회수 증가
-    """
-    queryset = Post.objects.all()
-    serializer_class = PostSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
-    http_method_names = ['post']
-
-    def post(self, request, *args, **kwargs):
+    @action(detail=True, methods=['post'])
+    def increase_views(self, request, pk=None):
         """게시물 조회수 증가"""
         post = self.get_object()
         post.increase_views()
