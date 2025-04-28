@@ -18,4 +18,4 @@ services:
 #      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       PGDATA: /var/lib/postgresql/data/myfavidol_db/
     ports:
-      - "54322:5432"
+      - "5432"

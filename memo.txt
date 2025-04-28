@@ -1,3 +1,7 @@
+----------
+WiStar
+----------
+
 아이돌 스케쥴 관리 캘린더 서비스
 
 1팀 백엔드 : 정영하, 명보경, 김태진, 고근우
@@ -131,10 +135,11 @@ docker stop 이미지id
 깃 클론
 git clone https://github.com/09-MainProject/MyFavIdolBack.git
 
+pyenv로 파이썬 3.13.1버전 설치
+pyenv install 3.13.1
+
 poetry가 생성한 pyproject.toml에 작성된 라이브러리 목록을 기반으로 라이브러리 설치 및 초기화
 전체 패키지 설치 (개발용 포함)
-poetry install
-안될시
 poetry install --no-root
 
 git config 자동 설정
@@ -222,8 +227,6 @@ poetry add psycopg2-binary
 
 - CI / CD 설정
 
-
-
 --------
 # Black
 --------
@@ -251,6 +254,15 @@ Black	# fmt: off/on	포매팅 예외 처리 구간 설정
 isort
 ----------
 
+isort란?
+import 정리 도구: 파이썬 파일 내의 import 구문을 알파벳 순서로 정렬하고, 표준 라이브러리, 서드파티 라이브러리, 로컬 모듈을 구분해서 깔끔하게 정렬해줍니다.
+협업 시 코드 스타일을 통일하고 가독성을 높여줍니다.
+Black, Flake8, Ruff 등 다른 포맷터나 린터와 함께 자주 사용됩니다.
+
+isort your_file.py   단일 파일 정렬
+isort .  프로젝트 전체 정렬
+isort . --check   검사만 하고 수정하지 않기 (CI 용도)
+
 isort	# isort: skip	해당 줄 import 정렬 제외
 isort	# isort: off/on	구간 단위 import 정렬 제외
 
@@ -258,7 +270,12 @@ isort	# isort: off/on	구간 단위 import 정렬 제외
 # Mypy
 ----------
 
+mypy란?
 정적 타입 검사(static type checking)**를 할 수 있도록 도와주는 도구
+mypy는 Python 코드에 작성된 **타입 힌트(type hint)**를 기반으로, 코드 실행 없이 타입 오류를 사전에 찾아주는 도구입니다.
+Python은 기본적으로 동적 타입 언어이지만, 타입 힌트를 활용하면 정적 타입처럼 관리할 수 있습니다.
+타입 관련 버그를 줄이고, 코드의 안정성과 가독성을 높이는 데 도움을 줍니다.
+
 
 Mypy 설치
 poetry add --group=dev mypy
