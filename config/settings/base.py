@@ -26,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-k-=4gg*i3t49&!8i14gwzuvnd+wtfsr7ihtbny-s#po8%50y@p"
+# SECRET_KEY = "django-insecure-k-=4gg*i3t49&!8i14gwzuvnd+wtfsr7ihtbny-s#po8%50y@p"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -59,19 +59,31 @@ THIRD_PARTY_APPS = [
     "rest_framework_simplejwt",  # poetry add djangorestframework-simplejwt
     "rest_framework_simplejwt.token_blacklist",
     "storages",
+    "corsheaders",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + OWN_APPS + THIRD_PARTY_APPS
 
 MIDDLEWARE = [
-    "django.middleware.security.SecurityMiddleware",
-    "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.security.SecurityMiddleware",  # 보안 관련 HTTP 헤더 자동 설정 (예: X-Content-Type-Options, X-Frame-Options, HTTPS 리다이렉트 등).
+    "django.contrib.sessions.middleware.SessionMiddleware",   # Django의 세션 관리를 담당. 서버 기반 세션(Cookie + DB)에 사용. 주로 서버 렌더링 웹사이트에서 로그인 상태 유지 등에 사용됨.
+    "django.middleware.common.CommonMiddleware",  # 여러 가지 일반적인 HTTP 처리 기능 제공. URL 끝에 슬래시 자동 추가 (APPEND_SLASH). 잘못된 요청 보완, 간단한 리다이렉트 처리 등.
+    "django.middleware.csrf.CsrfViewMiddleware",   # Django의 기본 CSRF 보호 미들웨어.  서버 렌더링 기반 웹사이트에 최적화.  쿠키 + 폼 기반 CSRF 검증 수행.
+    # 'utils.middleware.CustomCSRFMiddleware',   # 커스텀 CSRF 보호 미들웨어
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+
 ]
+
+# 프론트 도메인 등록
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+]
+
+# 쿠키 포함 허용
+CORS_ALLOW_CREDENTIALS = True
 
 ROOT_URLCONF = "config.urls"
 
@@ -184,8 +196,8 @@ REST_FRAMEWORK = {
 # JWT 설정
 SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": True,
-    "ROTATE_REFRESH_TOKENS": True,
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    # "ROTATE_REFRESH_TOKENS": True,  # 리프레시 토큰을 사용할 때마다 새로운 리프레시 토큰을 발급. 기본값 False
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     # It will work instead of the default serializer(TokenObtainPairSerializer).
     "TOKEN_OBTAIN_SERIALIZER": "utils.jwt_serializers.WiStarTokenObtainPairSerializer",

@@ -5,6 +5,9 @@ from django.core.exceptions import ValidationError
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from utils.responses.user import INVALID_REFRESH_TOKEN
+from utils.exceptions import CustomAPIException
+
 User = get_user_model()
 
 # class UsernameSerializer(serializers.ModelSerializer):
@@ -14,9 +17,11 @@ User = get_user_model()
 #         fields = ['username']
 
 class RegisterSerializer(serializers.ModelSerializer):
+    password_confirm = serializers.CharField(write_only=True)
+
     class Meta:
         model = User
-        fields = ["id", "email", "password", "name", "nickname"]
+        fields = ["id", "email", "password", "password_confirm", "name", "nickname"]
         read_only_fields = ["id"]
         extra_kwargs = {
             'password': {'write_only':True},  # write_only : 쓰기만 되고 읽어 오진 않음.
@@ -24,23 +29,28 @@ class RegisterSerializer(serializers.ModelSerializer):
         }
 
     # 데이터 검증
-    # def validate(self, data):
-    #     user = User(**data)
-    #
-    #     errors = dict()
-    #     try:
-    #         # validate_password는 settings.py에 AUTH_PASSWORD_VALIDATORS 설정된 조건을 만족하는지 검사
-    #         validate_password(password=data['password'], user=user)
-    #     # 에러 여러개를 대비한 처리
-    #     # except ValidationError as e:
-    #     #     errors['password'] = list(e.messages)
-    #     # if errors:
-    #     #     raise serializers.ValidationError(errors)
-    #
-    #     except ValidationError as e:
-    #         raise serializers.ValidationError(list(e.messages))
-    #
-    #     return super().validate(data)
+    def validate(self, data):
+        # 비밀번호 일치 여부 확인
+        if data['password'] != data['password_confirm']:
+            raise serializers.ValidationError({"password_confirm": "비밀번호가 일치하지 않습니다."})
+        data.pop('password_confirm')  # 모델에 없는 필드 제거
+
+        user = User(**data)
+
+        errors = dict()
+        try:
+            # validate_password는 settings.py에 AUTH_PASSWORD_VALIDATORS 설정된 조건을 만족하는지 검사
+            validate_password(password=data['password'], user=user)
+        # 에러 여러개를 대비한 처리
+        # except ValidationError as e:
+        #     errors['password'] = list(e.messages)
+        # if errors:
+        #     raise serializers.ValidationError(errors)
+
+        except ValidationError as e:
+            raise serializers.ValidationError(list(e.messages))
+
+        return super().validate(data)
 
     def create(self, validated_data):
         # create_user() -> 비밀번호 해싱
@@ -53,15 +63,10 @@ class RegisterSerializer(serializers.ModelSerializer):
         return user
 
 class LogoutSerializer(serializers.Serializer):
-    refresh = serializers.CharField()
-
-    # error_messages 딕셔너리 추가
-    default_error_messages = {
-        'bad_token': '유효하지 않은 토큰입니다.',
-    }
+    refresh_token = serializers.CharField()
 
     def validate(self, attrs):
-        self.token = attrs['refresh']
+        self.token = attrs['refresh_token']
         return attrs
 
     def save(self, **kwargs):
@@ -70,7 +75,8 @@ class LogoutSerializer(serializers.Serializer):
             print(f"토큰 타입: {token.get('token_type')}")  # 디코드된 토큰 타입 확인
             token.blacklist() # 블랙리스트 등록
         except Exception as e:
-            self.fail('bad_token') # 유효하지 않은 토큰이면 예외 발생
+            raise CustomAPIException(INVALID_REFRESH_TOKEN)
+
 
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:

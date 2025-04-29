@@ -2,7 +2,9 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
 
-from .views import RegisterView, ProfileView, LogoutAPIView, verify_email, CustomTokenObtainPairView
+from . import oauth_views
+from .views import RegisterView, ProfileView, LogoutAPIView, verify_email, CustomTokenObtainPairView, \
+    CustomTokenRefreshView
 
 app_name = 'user'
 
@@ -20,8 +22,15 @@ urlpatterns = [
     path('profile', ProfileView.as_view(), name="profile"),
 
     # JWT
-    path('token', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('token/refresh', TokenRefreshView.as_view(), name='token_refresh'),
+    path('token/login', CustomTokenObtainPairView.as_view(), name='token_login'),
+    path('token/logout', LogoutAPIView.as_view(), name='token_logout'),
+    path('token/refresh', CustomTokenRefreshView.as_view(), name='token_refresh'),
     path('token/verify', TokenVerifyView.as_view(), name='token_verify'),
+
+    # oauth
+    # # naver
+    path('naver/login/', oauth_views.NaverLoginRedirectView.as_view(), name='naver_login'),
+    path('naver/callback/', oauth_views.naver_callback, name='naver_callback'),
+    path('nickname/', oauth_views.oauth_nickname, name='nickname'),
 
 ]
