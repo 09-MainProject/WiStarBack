@@ -308,3 +308,5 @@ pyrightconfig.json
 app/.config_secret/
 .config_secret/
 secret.json
+
+.static_root/

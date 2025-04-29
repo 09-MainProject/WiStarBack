@@ -151,8 +151,16 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = "static/"
-STATIC_ROOT = '.static_root'
+# 개발 환경에서 사용하는 경로
+STATIC_URL = 'static/'
+STATIC_DIR = BASE_DIR / 'static'
+
+STATICFILES_DIRS = [
+    STATIC_DIR,
+]
+
+# 배포할 때 사용하는 경로
+STATIC_ROOT = BASE_DIR / '.static_root'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -177,8 +185,8 @@ AUTH_USER_MODEL = 'user.User'  # 유저 모델 지정
 # print(SECRET['DB2']['HOST'])
 # 이렇게 쓸 수도있고 dotenv를 통해 관리할 수도 있음
 
-LOGIN_URL = '/user/login/'
-LOGOUT_REDIRECT_URL = '/user/login/'
+LOGIN_URL = '/api/user/login/'
+LOGOUT_REDIRECT_URL = '/api/user/login/'
 # LOGOUT_REDIRECT_URL = '/'
 
 
