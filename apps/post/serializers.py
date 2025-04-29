@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Post
+from .models import Post, Comment
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -23,8 +23,10 @@ class PostSerializer(serializers.ModelSerializer):
         updated_at (datetime): 수정 시간
         views (int): 조회수
         author (User): 작성자
+        comment_count (int): 댓글 수
     """
     author = UserSerializer(read_only=True)
+    comment_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
@@ -37,8 +39,13 @@ class PostSerializer(serializers.ModelSerializer):
             'updated_at',  # 수정 시간
             'views',  # 조회수
             'author',  # 작성자
+            'comment_count',  # 댓글 수
         ]
-        read_only_fields = ['id', 'created_at', 'updated_at', 'views', 'author']
+        read_only_fields = ['id', 'created_at', 'updated_at', 'views', 'author', 'comment_count']
+
+    def get_comment_count(self, obj):
+        """댓글 수를 반환합니다."""
+        return obj.comments.filter(is_deleted=False).count()
 
     def validate_title(self, value):
         """게시물 제목 유효성 검사"""
@@ -57,3 +64,62 @@ class PostSerializer(serializers.ModelSerializer):
         if value and not value.startswith(('http://', 'https://')):
             raise serializers.ValidationError("올바른 URL 형식이어야 합니다.")
         return value
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    """
+    댓글 정보를 직렬화하는 Serializer
+    
+    Attributes:
+        id (int): 댓글 고유 ID
+        post (Post): 연결된 게시물
+        author (User): 작성자
+        content (str): 댓글 내용
+        created_at (datetime): 생성 시간
+        updated_at (datetime): 수정 시간
+        is_deleted (bool): 삭제 여부
+        deleted_at (datetime): 삭제 시간
+        deleted_by (User): 삭제한 사용자
+        parent (Comment): 부모 댓글
+        replies (Comment): 대댓글 목록
+    """
+    author = UserSerializer(read_only=True)
+    deleted_by = UserSerializer(read_only=True)
+    replies = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Comment
+        fields = [
+            'id',  # 댓글 고유 ID
+            'post',  # 연결된 게시물
+            'author',  # 작성자
+            'content',  # 댓글 내용
+            'created_at',  # 생성 시간
+            'updated_at',  # 수정 시간
+            'is_deleted',  # 삭제 여부
+            'deleted_at',  # 삭제 시간
+            'deleted_by',  # 삭제한 사용자
+            'parent',  # 부모 댓글
+            'replies',  # 대댓글 목록
+        ]
+        read_only_fields = ['id', 'post', 'author', 'created_at', 'updated_at', 'is_deleted', 'deleted_at', 'deleted_by', 'replies']
+
+    def get_replies(self, obj):
+        """대댓글 목록을 반환합니다."""
+        if obj.parent is None:  # 부모 댓글인 경우에만 대댓글 표시
+            replies = obj.replies.filter(is_deleted=False).order_by('created_at')
+            return CommentSerializer(replies, many=True).data
+        return []
+
+    def validate_content(self, value):
+        """댓글 내용 유효성 검사"""
+        if len(value.strip()) < 2:
+            raise serializers.ValidationError("댓글 내용은 최소 2자 이상이어야 합니다.")
+        return value
+
+    def validate(self, data):
+        """댓글 데이터 유효성 검사"""
+        # 삭제된 댓글은 수정할 수 없음
+        if self.instance and self.instance.is_deleted:
+            raise serializers.ValidationError("삭제된 댓글은 수정할 수 없습니다.")
+        return data
