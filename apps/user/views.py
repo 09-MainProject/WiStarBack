@@ -42,7 +42,6 @@ from utils.responses.user import (
 )
 
 
-# 회원 가입
 class RegisterView(CreateAPIView):
     queryset = User.objects.all()  # Model
     serializer_class = RegisterSerializer  # Serializer
