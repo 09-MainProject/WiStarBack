@@ -23,6 +23,8 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("name", models.CharField(db_index=True, max_length=100)),
+                ("debut_date", models.DateField()),
+                ("agency", models.CharField(max_length=100)),
                 ("description", models.TextField(blank=True)),
                 ("profile_image", models.URLField(blank=True, null=True)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
@@ -34,7 +36,11 @@ class Migration(migrations.Migration):
                 "verbose_name_plural": "아이돌들",
                 "ordering": ["name"],
                 "indexes": [
-                    models.Index(fields=["name"], name="idol_idol_name_e2162c_idx")
+                    models.Index(fields=["name"], name="idol_idol_name_e2162c_idx"),
+                    models.Index(fields=["agency"], name="idol_idol_agency_e178e1_idx"),
+                    models.Index(
+                        fields=["debut_date"], name="idol_idol_debut_d_584779_idx"
+                    ),
                 ],
             },
         ),
