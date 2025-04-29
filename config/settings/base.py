@@ -19,6 +19,9 @@ os.environ["SSL_CERT_FILE"] = certifi.where()
 
 from datetime import timedelta
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 from dotenv import load_dotenv
 
