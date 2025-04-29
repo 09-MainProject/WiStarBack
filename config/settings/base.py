@@ -45,6 +45,7 @@ OWN_APPS = [
     "apps.notification",
     "apps.post",
     "apps.schedule",
+    "apps.comment",
 ]
 
 THIRD_PARTY_APPS = [
@@ -52,6 +53,7 @@ THIRD_PARTY_APPS = [
     # 'django_extensions',
     "rest_framework_simplejwt",  # poetry add djangorestframework-simplejwt
     "rest_framework_simplejwt.token_blacklist",
+    "django_filters",  # 필터링 기능
 ]
 
 INSTALLED_APPS = DJANGO_APPS + OWN_APPS + THIRD_PARTY_APPS
@@ -156,5 +158,10 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         # 'rest_framework.authentication.BasicAuthentication',
         "rest_framework_simplejwt.authentication.JWTAuthentication",
-    ]
+    ],
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
+    ],
 }
