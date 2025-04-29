@@ -1,6 +1,11 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils import timezone
+from django.conf import settings
+from .utils import process_image
+import requests
+from io import BytesIO
+from django.core.files.base import ContentFile
 
 User = get_user_model()
 
@@ -40,6 +45,29 @@ class Post(models.Model):
         related_name='deleted_posts'
     )
 
+    def save(self, *args, **kwargs):
+        # 이미지 파일이 있는 경우
+        if self.image and hasattr(self.image, 'file'):
+            processed_image = process_image(self.image)
+            self.image.save(processed_image.name, processed_image, save=False)
+        
+        # 이미지 URL이 있는 경우
+        elif self.image_url and not self.image:
+            try:
+                response = requests.get(self.image_url)
+                if response.status_code == 200:
+                    # 이미지 다운로드 및 처리
+                    image_file = BytesIO(response.content)
+                    processed_image = process_image(image_file)
+                    # 파일명 생성
+                    filename = f"downloaded_{timezone.now().strftime('%Y%m%d_%H%M%S')}.webp"
+                    # 이미지 필드에 저장
+                    self.image.save(filename, processed_image, save=False)
+            except Exception as e:
+                print(f"이미지 URL 처리 중 오류 발생: {e}")
+        
+        super().save(*args, **kwargs)
+
     class Meta:
         ordering = ['-created_at']
         indexes = [
@@ -68,14 +96,14 @@ class Post(models.Model):
         self.is_deleted = True
         self.deleted_at = timezone.now()
         self.deleted_by = user
-        self.save(update_fields=['is_deleted', 'deleted_at', 'deleted_by'])
+        self.save()
 
     def restore(self):
         """삭제된 게시물을 복구합니다."""
         self.is_deleted = False
         self.deleted_at = None
         self.deleted_by = None
-        self.save(update_fields=['is_deleted', 'deleted_at', 'deleted_by'])
+        self.save()
 
 
 class Comment(models.Model):
@@ -131,11 +159,11 @@ class Comment(models.Model):
         self.is_deleted = True
         self.deleted_at = timezone.now()
         self.deleted_by = user
-        self.save(update_fields=['is_deleted', 'deleted_at', 'deleted_by'])
+        self.save()
 
     def restore(self):
         """삭제된 댓글을 복구합니다."""
         self.is_deleted = False
         self.deleted_at = None
         self.deleted_by = None
-        self.save(update_fields=['is_deleted', 'deleted_at', 'deleted_by'])
+        self.save()

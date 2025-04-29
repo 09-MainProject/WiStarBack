@@ -52,7 +52,6 @@ THIRD_PARTY_APPS = [
     # 'django_extensions',
     "rest_framework_simplejwt",  # poetry add djangorestframework-simplejwt
     "rest_framework_simplejwt.token_blacklist",
-    "storages",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + OWN_APPS + THIRD_PARTY_APPS
@@ -136,8 +135,13 @@ STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Media files
-MEDIA_URL = "media/"
+MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
+
+# 이미지 처리 설정
+IMAGE_QUALITY = 85  # WebP 이미지 품질 (0-100)
+IMAGE_MAX_SIZE = 1024  # 최대 이미지 크기 (픽셀)
+IMAGE_FORMAT = 'WEBP'  # 변환할 이미지 포맷
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
