@@ -12,6 +12,7 @@ class Post(models.Model):
     Attributes:
         title (str): 게시물 제목
         content (str): 게시물 내용
+        image (ImageField): 게시물 이미지
         image_url (str): 게시물 이미지 URL
         created_at (datetime): 생성 시간
         updated_at (datetime): 수정 시간
@@ -23,6 +24,7 @@ class Post(models.Model):
     """
     title = models.CharField(max_length=200)
     content = models.TextField()
+    image = models.ImageField(upload_to='posts/%Y/%m/%d/', blank=True, null=True)
     image_url = models.URLField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -89,7 +91,6 @@ class Comment(models.Model):
         is_deleted (bool): 삭제 여부
         deleted_at (datetime): 삭제 시간
         deleted_by (User): 삭제한 사용자
-        parent (Comment): 부모 댓글 (대댓글인 경우)
     """
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
@@ -105,13 +106,6 @@ class Comment(models.Model):
         blank=True, 
         related_name='deleted_comments'
     )
-    parent = models.ForeignKey(
-        'self',
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-        related_name='replies'
-    )
 
     class Meta:
         ordering = ['-created_at']
@@ -119,7 +113,6 @@ class Comment(models.Model):
             models.Index(fields=['-created_at']),
             models.Index(fields=['post', '-created_at']),
             models.Index(fields=['author', '-created_at']),
-            models.Index(fields=['parent', '-created_at']),
         ]
         verbose_name = '댓글'
         verbose_name_plural = '댓글들'
