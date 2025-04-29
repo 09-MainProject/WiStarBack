@@ -896,3 +896,6 @@ class CustomCSRFMiddleware:
             if not self.is_valid(token):
                 return HttpResponseForbidden("CSRF 검증 실패")
         return self.get_response(request)
+
+
+아마존 서버에서 배포 설정하기
