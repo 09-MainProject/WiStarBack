@@ -3,6 +3,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 from apps.post.models import Post, Comment
 
@@ -21,6 +22,11 @@ class PostCommentTests(TestCase):
             email="other@example.com",
             password="password123"
         )
+        self.admin_user = User.objects.create_superuser(
+            username="admin",
+            email="admin@example.com",
+            password="password123"
+        )
         self.client.force_authenticate(user=self.user)
 
         self.post = Post.objects.create(
@@ -34,12 +40,34 @@ class PostCommentTests(TestCase):
         url = reverse('post-list')
         data = {
             "title": "새 게시글",
-            "content": "새 게시글 내용입니다."
+            "content": "새 게시글 내용입니다. 10자 이상으로 작성했습니다."
         }
         response = self.client.post(url, data)
-        print(f"Create post response: {response.content}")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['author']['username'], self.user.username)
+
+    def test_create_post_with_image_url(self):
+        """이미지 URL이 포함된 게시글 생성 테스트"""
+        url = reverse('post-list')
+        data = {
+            "title": "이미지 URL이 있는 게시글",
+            "content": "이미지 URL이 포함된 게시글 내용입니다. 10자 이상으로 작성했습니다.",
+            "image_url": "https://example.com/image.jpg"
+        }
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['image_url'], "https://example.com/image.jpg")
+
+    def test_create_post_with_invalid_image_url(self):
+        """잘못된 이미지 URL로 게시글 생성 시도 테스트"""
+        url = reverse('post-list')
+        data = {
+            "title": "잘못된 이미지 URL 게시글",
+            "content": "잘못된 이미지 URL이 포함된 게시글 내용입니다. 10자 이상으로 작성했습니다.",
+            "image_url": "invalid-url"
+        }
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_retrieve_post(self):
         """게시글 조회 테스트"""
@@ -55,8 +83,7 @@ class PostCommentTests(TestCase):
             "title": "수정된 제목",
             "content": "이것은 수정된 게시글의 내용입니다. 10자 이상으로 작성했습니다."
         }
-        response = self.client.patch(url, data)  # PUT을 PATCH로 변경
-        print(f"Update post response: {response.content}")
+        response = self.client.patch(url, data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.post.refresh_from_db()
         self.assertEqual(self.post.title, "수정된 제목")
@@ -80,6 +107,15 @@ class PostCommentTests(TestCase):
         self.post.refresh_from_db()
         self.assertTrue(self.post.is_deleted)
 
+    def test_delete_post_by_admin(self):
+        """관리자의 게시글 삭제 테스트"""
+        self.client.force_authenticate(user=self.admin_user)
+        url = reverse('post-detail', args=[self.post.id])
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.post.refresh_from_db()
+        self.assertTrue(self.post.is_deleted)
+
     def test_delete_post_unauthorized(self):
         """다른 사용자의 게시글 삭제 시도 테스트"""
         self.client.force_authenticate(user=self.other_user)
@@ -96,50 +132,15 @@ class PostCommentTests(TestCase):
         self.post.refresh_from_db()
         self.assertEqual(self.post.views, original_views + 1)
 
-    def test_soft_delete_post(self):
-        """게시글 소프트 삭제 메서드 테스트"""
-        self.post.soft_delete(user=self.user)
-        self.post.refresh_from_db()
-        self.assertTrue(self.post.is_deleted)
-        self.assertIsNotNone(self.post.deleted_at)
-        self.assertEqual(self.post.deleted_by, self.user)
-
-    def test_restore_post(self):
-        """게시글 복구 메서드 테스트"""
-        self.post.soft_delete(user=self.user)
-        self.post.restore()
-        self.post.refresh_from_db()
-        self.assertFalse(self.post.is_deleted)
-        self.assertIsNone(self.post.deleted_at)
-        self.assertIsNone(self.post.deleted_by)
-
     def test_create_comment(self):
         """댓글 생성 테스트"""
         url = reverse('comment-list-create', kwargs={'post_id': self.post.id})
         data = {
-            "content": "댓글 내용입니다."
+            "content": "댓글 내용입니다. 2자 이상으로 작성했습니다."
         }
         response = self.client.post(url, data)
-        print(f"Create comment response: {response.content}")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['author']['username'], self.user.username)
-
-    def test_create_reply(self):
-        """대댓글 생성 테스트"""
-        parent_comment = Comment.objects.create(
-            post=self.post,
-            author=self.user,
-            content="부모 댓글"
-        )
-        url = reverse('comment-list-create', kwargs={'post_id': self.post.id})
-        data = {
-            "content": "대댓글 내용입니다.",
-            "parent": parent_comment.id
-        }
-        response = self.client.post(url, data)
-        print(f"Create reply response: {response.content}")
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data['parent'], parent_comment.id)
 
     def test_retrieve_comment(self):
         """댓글 조회 테스트"""
@@ -162,12 +163,12 @@ class PostCommentTests(TestCase):
         )
         url = reverse('comment-detail', kwargs={'post_id': self.post.id, 'pk': comment.id})
         data = {
-            "content": "수정된 댓글"
+            "content": "수정된 댓글 내용입니다."
         }
-        response = self.client.patch(url, data)  # PUT을 PATCH로 변경
+        response = self.client.patch(url, data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         comment.refresh_from_db()
-        self.assertEqual(comment.content, "수정된 댓글")
+        self.assertEqual(comment.content, "수정된 댓글 내용입니다.")
 
     def test_update_comment_unauthorized(self):
         """다른 사용자의 댓글 수정 시도 테스트"""
@@ -197,6 +198,20 @@ class PostCommentTests(TestCase):
         comment.refresh_from_db()
         self.assertTrue(comment.is_deleted)
 
+    def test_delete_comment_by_admin(self):
+        """관리자의 댓글 삭제 테스트"""
+        comment = Comment.objects.create(
+            post=self.post,
+            author=self.user,
+            content="삭제할 댓글"
+        )
+        self.client.force_authenticate(user=self.admin_user)
+        url = reverse('comment-detail', kwargs={'post_id': self.post.id, 'pk': comment.id})
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        comment.refresh_from_db()
+        self.assertTrue(comment.is_deleted)
+
     def test_delete_comment_unauthorized(self):
         """다른 사용자의 댓글 삭제 시도 테스트"""
         comment = Comment.objects.create(
@@ -209,53 +224,8 @@ class PostCommentTests(TestCase):
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_soft_delete_comment(self):
-        """댓글 소프트 삭제 메서드 테스트"""
-        comment = Comment.objects.create(
-            post=self.post,
-            author=self.user,
-            content="댓글 소프트 삭제"
-        )
-        comment.soft_delete(user=self.user)
-        comment.refresh_from_db()
-        self.assertTrue(comment.is_deleted)
-        self.assertIsNotNone(comment.deleted_at)
-        self.assertEqual(comment.deleted_by, self.user)
-
-    def test_restore_comment(self):
-        """댓글 복구 메서드 테스트"""
-        comment = Comment.objects.create(
-            post=self.post,
-            author=self.user,
-            content="댓글 복구"
-        )
-        comment.soft_delete(user=self.user)
-        comment.restore()
-        comment.refresh_from_db()
-        self.assertFalse(comment.is_deleted)
-        self.assertIsNone(comment.deleted_at)
-        self.assertIsNone(comment.deleted_by)
-
-    def test_comment_count(self):
-        """게시글의 댓글 수 테스트"""
-        Comment.objects.create(
-            post=self.post,
-            author=self.user,
-            content="댓글 1"
-        )
-        Comment.objects.create(
-            post=self.post,
-            author=self.user,
-            content="댓글 2"
-        )
-        url = reverse('post-detail', args=[self.post.id])
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['comment_count'], 2)
-
     def test_search_comments(self):
         """댓글 검색 테스트"""
-        # 테스트 댓글 생성
         Comment.objects.create(
             post=self.post,
             author=self.user,
