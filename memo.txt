@@ -117,6 +117,7 @@ docker-compose-local.yml 생성
 
 PostgreSQL 이미지 생성 및 실행
 docker-compose -f resources/docker/docker-compose-local.yml up -d
+docker-compose -f resources/docker/docker-compose-prod.yml up -d
 
 실행 중인 도커 이미지 확인 (이미지 id 확인 가능)
 docker ps
