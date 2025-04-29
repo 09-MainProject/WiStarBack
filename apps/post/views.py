@@ -24,6 +24,18 @@ class PostFilter(filters.FilterSet):
         fields = ['title', 'content', 'created_at', 'created_at_end', 'author']
 
 
+class CommentFilter(filters.FilterSet):
+    """댓글 필터"""
+    content = filters.CharFilter(lookup_expr='icontains')  # 내용 검색
+    author = filters.NumberFilter()  # 작성자 ID로 필터링
+    created_at = filters.DateTimeFilter(lookup_expr='gte')
+    created_at_end = filters.DateTimeFilter(field_name='created_at', lookup_expr='lte')
+
+    class Meta:
+        model = Comment
+        fields = ['content', 'author', 'created_at', 'created_at_end', 'parent']
+
+
 class PostViewSet(ModelViewSet):
     """
     게시물 정보 관리 뷰셋
@@ -122,8 +134,9 @@ class CommentListCreateView(generics.ListCreateAPIView):
     """
     serializer_class = CommentSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
-    filter_backends = [filters.DjangoFilterBackend, filters.OrderingFilter]
-    filterset_fields = ['post', 'parent']
+    filter_backends = [filters.DjangoFilterBackend, drf_filters.OrderingFilter, drf_filters.SearchFilter]
+    filterset_class = CommentFilter
+    search_fields = ['content']  # 내용으로 검색 가능
     ordering_fields = ['created_at']
     ordering = ['-created_at']
     pagination_class = CommentPagination
