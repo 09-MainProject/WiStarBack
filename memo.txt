@@ -123,10 +123,10 @@ docker-compose -f resources/docker/docker-compose-prod.yml up -d
 docker ps
 
 환경 변수 채크
-docker exec myfavidol_db printenv | grep POSTGRES
+docker exec wistar_db printenv | grep POSTGRES
 
 도커 컨테이너 데이터베이스 접속
-docker exec -it myfavidol_db psql -U postgres -d oz_project
+docker exec -it wistar_db psql -U postgres -d oz_project
 
 도커 이미지 중지
 docker stop 이미지id
@@ -995,3 +995,6 @@ docker exec -it wistar_db psql -U postgres -d oz_project
 
 정적 파일 수집
 python manage.py collectstatic
+
+# (추가) 필요한 경우 pip 업그레이드
+sudo python3 -m ensurepip --upgrade
