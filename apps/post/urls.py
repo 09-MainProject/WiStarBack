@@ -1,9 +1,11 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import PostViewSet
-
-# API 버전
-API_VERSION = 'v1'
+from .views import (
+    PostViewSet,
+    PostListByAuthorView,
+    CommentListCreateView,
+    CommentRetrieveUpdateDestroyView
+)
 
 # 1. router 만들기
 router = DefaultRouter()
@@ -14,9 +16,25 @@ router.register(r'posts', PostViewSet, basename='post')
 
 # 3. 최종 URL 패턴
 urlpatterns = [
-    # API 버전을 포함한 URL 패턴
-    path(f'api/{API_VERSION}/', include(router.urls)),
-
-    # API 문서 URL (Swagger/OpenAPI)
-    path('api/docs/', include('rest_framework.urls')),
+    # 게시물 관련 엔드포인트
+    path('', include(router.urls)),
+    
+    # 작성자별 게시물 목록 조회
+    path(
+        'posts/author/<int:author_id>/',
+        PostListByAuthorView.as_view(),
+        name='post-list-by-author'
+    ),
+    
+    # 댓글 관련 엔드포인트
+    path(
+        'posts/<int:post_id>/comments/',
+        CommentListCreateView.as_view(),
+        name='comment-list-create'
+    ),
+    path(
+        'posts/<int:post_id>/comments/<int:pk>/',
+        CommentRetrieveUpdateDestroyView.as_view(),
+        name='comment-detail'
+    ),
 ]
