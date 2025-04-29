@@ -227,6 +227,8 @@ poetry add psycopg2-binary
 
 - CI / CD 설정
 
+ruff + pre-commit 추천
+
 --------
 # Black
 --------
@@ -838,6 +840,15 @@ docker ps
 
 컨테이너 중지
 docker stop <컨테이너ID 또는 이름>
+
+컨테이저 삭제
+docker rm <컨테이너ID 또는 이름>
+
+빌드된 이미지 목록
+docker images
+
+이미지도 삭제 (원할 경우)
+docker rmi [이미지명]
 
 rds db에 접속
 psql -h <엔드포인트> -U <DB_USER> -d <DB_NAME> -p <PORT>
