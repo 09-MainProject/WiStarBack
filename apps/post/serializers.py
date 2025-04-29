@@ -18,6 +18,7 @@ class PostSerializer(serializers.ModelSerializer):
     Attributes:
         title (str): 게시물 제목
         content (str): 게시물 내용
+        image (ImageField): 게시물 이미지
         image_url (str): 게시물 이미지 URL
         created_at (datetime): 생성 시간
         updated_at (datetime): 수정 시간
@@ -34,6 +35,7 @@ class PostSerializer(serializers.ModelSerializer):
             'id',  # 게시물 고유 ID
             'title',  # 게시물 제목
             'content',  # 게시물 내용
+            'image',  # 게시물 이미지
             'image_url',  # 게시물 이미지 URL
             'created_at',  # 생성 시간
             'updated_at',  # 수정 시간
@@ -59,6 +61,17 @@ class PostSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("내용은 최소 10자 이상이어야 합니다.")
         return value
 
+    def validate_image(self, value):
+        """게시물 이미지 유효성 검사"""
+        if value:
+            # 이미지 크기 제한 (5MB)
+            if value.size > 5 * 1024 * 1024:
+                raise serializers.ValidationError("이미지 크기는 5MB를 초과할 수 없습니다.")
+            # 이미지 형식 검사
+            if not value.content_type.startswith('image/'):
+                raise serializers.ValidationError("이미지 파일만 업로드 가능합니다.")
+        return value
+
     def validate_image_url(self, value):
         """게시물 이미지 URL 유효성 검사"""
         if value and not value.startswith(('http://', 'https://')):
@@ -80,12 +93,9 @@ class CommentSerializer(serializers.ModelSerializer):
         is_deleted (bool): 삭제 여부
         deleted_at (datetime): 삭제 시간
         deleted_by (User): 삭제한 사용자
-        parent (Comment): 부모 댓글
-        replies (Comment): 대댓글 목록
     """
     author = UserSerializer(read_only=True)
     deleted_by = UserSerializer(read_only=True)
-    replies = serializers.SerializerMethodField()
 
     class Meta:
         model = Comment
@@ -99,17 +109,8 @@ class CommentSerializer(serializers.ModelSerializer):
             'is_deleted',  # 삭제 여부
             'deleted_at',  # 삭제 시간
             'deleted_by',  # 삭제한 사용자
-            'parent',  # 부모 댓글
-            'replies',  # 대댓글 목록
         ]
-        read_only_fields = ['id', 'post', 'author', 'created_at', 'updated_at', 'is_deleted', 'deleted_at', 'deleted_by', 'replies']
-
-    def get_replies(self, obj):
-        """대댓글 목록을 반환합니다."""
-        if obj.parent is None:  # 부모 댓글인 경우에만 대댓글 표시
-            replies = obj.replies.filter(is_deleted=False).order_by('created_at')
-            return CommentSerializer(replies, many=True).data
-        return []
+        read_only_fields = ['id', 'post', 'author', 'created_at', 'updated_at', 'is_deleted', 'deleted_at', 'deleted_by']
 
     def validate_content(self, value):
         """댓글 내용 유효성 검사"""

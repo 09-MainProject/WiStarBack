@@ -33,7 +33,7 @@ class CommentFilter(filters.FilterSet):
 
     class Meta:
         model = Comment
-        fields = ['content', 'author', 'created_at', 'created_at_end', 'parent']
+        fields = ['content', 'author', 'created_at', 'created_at_end']
 
 
 class PostViewSet(ModelViewSet):
