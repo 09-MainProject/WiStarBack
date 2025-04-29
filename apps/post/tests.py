@@ -252,3 +252,35 @@ class PostCommentTests(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['comment_count'], 2)
+
+    def test_search_comments(self):
+        """댓글 검색 테스트"""
+        # 테스트 댓글 생성
+        Comment.objects.create(
+            post=self.post,
+            author=self.user,
+            content="첫 번째 댓글입니다."
+        )
+        Comment.objects.create(
+            post=self.post,
+            author=self.user,
+            content="두 번째 댓글입니다."
+        )
+        Comment.objects.create(
+            post=self.post,
+            author=self.other_user,
+            content="다른 사용자의 댓글입니다."
+        )
+
+        # 내용으로 검색
+        url = reverse('comment-list-create', kwargs={'post_id': self.post.id})
+        response = self.client.get(f"{url}?content=첫 번째")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data['results']), 1)
+        self.assertEqual(response.data['results'][0]['content'], "첫 번째 댓글입니다.")
+
+        # 작성자로 필터링
+        response = self.client.get(f"{url}?author={self.other_user.id}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data['results']), 1)
+        self.assertEqual(response.data['results'][0]['content'], "다른 사용자의 댓글입니다.")
