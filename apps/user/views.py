@@ -1,20 +1,31 @@
+import jwt
 from django.conf import settings
 from django.core import signing
 from django.core.signing import TimestampSigner, SignatureExpired
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import CreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_410_GONE, HTTP_401_UNAUTHORIZED, \
+    HTTP_403_FORBIDDEN
+from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 
+from utils.csrf import validate_csrf_token, generate_csrf_token
 from utils.email import send_email
 from apps.user.models import User
 from apps.user.serializers import RegisterSerializer, ProfileSerializer, ProfileUpdateSerializer, LogoutSerializer
+from utils.responses.user import MISSING_REFRESH_TOKEN, LOGOUT_SUCCESS, LOGIN_SUCCESS, CSRF_VALIDATION_FAILED, \
+    CSRF_INVALID_TOKEN, TOKEN_REFRESH_RESPONSE, SIGNATURE_EXPIRED, INVALID_SIGNATURE, VERIFY_EMAIL_SUCCESS, \
+    DELETE_SUCCESS
 
 
+# 회원 가입
 class RegisterView(CreateAPIView):
     queryset =  User.objects.all() # Model
     serializer_class = RegisterSerializer # Serializer
@@ -58,6 +69,7 @@ class RegisterView(CreateAPIView):
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+# 이메일 인증
 def verify_email(request):
     code = request.GET.get('code', '')  # code가 없으면 공백으로 처리
     signer = TimestampSigner()
@@ -70,46 +82,139 @@ def verify_email(request):
         # email = signer.unsign(code, max_age = 60 * 5)  # 5분 설정
     # except Exception as e:  # 이렇게 처리 많이 하지만 에러를 지정해서 하는게 제일 좋음.
     except (SignatureExpired):  # 시간 지나서 오류발생하면 오류처리
-        return JsonResponse({'detail': '인증 링크가 만료되었습니다.'}, status=400)
+        return JsonResponse(SIGNATURE_EXPIRED, HTTP_410_GONE)
     except Exception:
-        return JsonResponse({'detail': '유효하지 않은 인증 코드입니다.'}, status=400)
+        return Response(INVALID_SIGNATURE, HTTP_400_BAD_REQUEST)
 
     user = get_object_or_404(User, email=email, is_active=False)
     user.is_active = True
     user.save()
 
-    return JsonResponse({'detail': '이메일 인증이 완료되었습니다.'}, status=200)
+    return Response(VERIFY_EMAIL_SUCCESS, HTTP_200_OK)
 
-
+# 로그인
 class CustomTokenObtainPairView(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
 
         tokens = response.data
+        access_token = tokens.get("access")
+        refresh_token = tokens.get("refresh")
 
-        custom_response = {
-            "code": 200,
-            "message": "로그인 성공",
-            "data": {
-                "token_type": "bearer",
-                "refresh": tokens.get("refresh"),
-                "access": tokens.get("access")
-            }
+        # 커스텀 CSRF 토큰 발급
+        csrf_token = generate_csrf_token()
+        # csrf_token = get_token(request)
+
+        custom_response = LOGIN_SUCCESS
+        custom_response["data"] = {
+            "access_token": access_token,
+            "csrf_token": csrf_token
         }
 
-        return Response(custom_response, status=status.HTTP_200_OK)
+        # Refresh Token을 HttpOnly 쿠키로 설정
+        final_response = Response(custom_response, status=status.HTTP_200_OK)
+        final_response.set_cookie(
+            key='refresh_token',
+            value=refresh_token,
+            httponly=True,
+            # secure=True,        # HTTPS 환경에서만 전송
+            secure=False,        # 로컬 개발 환경에 맞춰서 설정
+            samesite='Lax',     # CSRF 공격 방지 설정
+            path='/api/users/token',  # 필요한 경로에만 쿠키 사용
+            max_age=60 * 60 * 24 * 1,  # 1일 (초 단위)
+        )
 
-class LogoutAPIView(CreateAPIView):
-    permission_classes = [IsAuthenticated]  # 인증된 사용자만 데이터 접근 가능
-    serializer_class = LogoutSerializer
+        return final_response
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({"detail": "로그아웃되었습니다."}, status=status.HTTP_205_RESET_CONTENT)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+# class LogoutAPIView(CreateAPIView):
+#     # permission_classes = [IsAuthenticated]  # 인증된 사용자만 데이터 접근 가능
+#     permission_classes = []  # 인증 없이 호출 가능
+#     serializer_class = LogoutSerializer
+#
+#     def create(self, request, *args, **kwargs):
+#         serializer = self.get_serializer(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response({"detail": "로그아웃되었습니다."}, status=status.HTTP_205_RESET_CONTENT)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+# 로그아웃
+class LogoutAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    # permission_classes = []  # 인증 없이 호출 가능
+
+    def post(self, request, *args, **kwargs):
+
+        # token = request.headers.get('X-CSRFToken')
+        #
+        # if not validate_csrf_token(token):
+        #     raise PermissionDenied(CSRF_VALIDATION_FAILED)
+
+        # 쿠키에서 Refresh Token 가져오기
+        refresh_token = request.COOKIES.get('refresh_token')
+
+        if not refresh_token:
+            return Response(MISSING_REFRESH_TOKEN, status=status.HTTP_401_UNAUTHORIZED)
+
+        serializer = LogoutSerializer(data={'refresh_token': refresh_token})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        # 쿠키 삭제
+        response = Response(LOGOUT_SUCCESS, status=status.HTTP_200_OK)
+        response.delete_cookie('refresh_token', path='/api/users/token')  # Path 일치해야 함
+
+        return response
+
+# 엑세스 토큰 리프레시
+class CustomTokenRefreshView(APIView):
+    def post(self, request, *args, **kwargs):
+        # CSRF 토큰 검증
+        csrf_token = request.headers.get('X-CSRFToken')
+        if not csrf_token or not validate_csrf_token(csrf_token):
+            return Response(CSRF_INVALID_TOKEN, HTTP_403_FORBIDDEN)
+
+        # 리프레시 토큰 쿠키에서 가져오기
+        refresh_token = request.COOKIES.get('refresh_token')
+        if not refresh_token:
+            return Response(MISSING_REFRESH_TOKEN, HTTP_401_UNAUTHORIZED)
+
+        # SimpleJWT Serializer로 Access Token 재발급
+        serializer = TokenRefreshSerializer(data={"refresh": refresh_token})
+        serializer.is_valid(raise_exception=True)
+        new_access_token = serializer.validated_data.get("access")
+
+        # 새로운 커스텀 CSRF 토큰 발급 (선택)
+        new_csrf_token = generate_csrf_token()
+
+        # 새로운 리프레시 토큰이 있다면 (ROTATE 설정 시)
+        new_refresh_token = serializer.validated_data.get("refresh")
+
+        # 응답 데이터 구성
+        custom_response = TOKEN_REFRESH_RESPONSE
+        custom_response["data"] = {
+            "access_token": new_access_token,
+            "csrf_token": new_csrf_token
+        }
+
+        # 최종 응답
+        final_response = Response(custom_response, status=status.HTTP_200_OK)
+
+        # 새 리프레시 토큰이 있을 때만 쿠키에 다시 설정
+        if new_refresh_token:
+            final_response.set_cookie(
+                key='refresh_token',
+                value=new_refresh_token,
+                httponly=True,
+                secure=False,        # 로컬 개발환경
+                samesite='Lax',
+                path='/api/users/token',
+                max_age=60 * 60 * 24 * 1
+            )
+
+        return final_response
+
+# 유저 수정
 class ProfileView(RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
     # serializer_class = UserMeReadSerializer
@@ -138,7 +243,7 @@ class ProfileView(RetrieveUpdateDestroyAPIView):
 
         user = self.get_object()
         user.delete()
-        return Response({"detail": "Deleted successfully"}, status=status.HTTP_200_OK)
+        return Response(DELETE_SUCCESS, status=status.HTTP_200_OK)
 
 
 # 토큰 정보 확인

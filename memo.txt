@@ -593,6 +593,35 @@ JS 접근 불가	document.cookie로 읽기/쓰기 불가
 보안 강화	XSS 공격으로부터 안전
 삭제 방법	오직 서버가 쿠키 만료 처리 (Set-Cookie로)
 
+final_response = Response(custom_response, status=status.HTTP_200_OK)
+final_response.set_cookie(
+    key='refresh_token',
+    value=refresh_token,
+    httponly=True,
+    # secure=True,        # HTTPS 환경에서만 전송
+    secure=False,        # 로컬 개발 환경에 맞춰서 설정
+    samesite='Lax',     # CSRF 공격 방지 설정
+    path='/api/token',  # 필요한 경로에만 쿠키 사용
+    max_age=60 * 60 * 24 * 7,  # 7일 (초 단위)
+)
+return final_response
+
+settings.py 설정
+INSTALLED_APPS += ['corsheaders']
+
+MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',   # 최상단에 추가
+    # ... 기타 미들웨어
+]
+
+# 프론트 도메인 등록
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+]
+
+# 쿠키 포함 허용
+CORS_ALLOW_CREDENTIALS = True
+
 
 --------------------
 이메일 보내는 기능 문제
@@ -753,10 +782,13 @@ ssh -i 키/페어/저장/위치/mp-key.pem ubuntu@EC2_PUBLIC_IP
 --------------------------
 
 작성한 Dockerfile을 통해 이미지를 빌드
-docker build -t django .
+# docker build -t django .
+docker build -f resources/docker/Dockerfile -t wistarback .
 
 빌드된 Docker 이미지를 통해 컨테이너 실행
-docker run -p 8000:8000 --env-file .env django
+# docker run -p 8000:8000 --env-file .env django
+docker run -p 8000:8000 --env-file ./envs/local.env wistarback
+docker run -p 8000:8000 --env-file ./envs/prod.env wistarback
 
 Dockerfile 생성
 # 베이스 이미지 (본인 프로젝트에 맞는 버전 기입)
@@ -812,3 +844,55 @@ psql -h <엔드포인트> -U <DB_USER> -d <DB_NAME> -p <PORT>
 
 깃 리파짓토리 특정 브랜치 클론
 git clone -b <브랜치명> <원격주소>
+
+
+
+import hashlib
+import hmac
+
+from django.http import HttpResponseForbidden
+from django.middleware.csrf import CsrfViewMiddleware
+
+from config.settings import SECRET_KEY
+
+
+class CustomCSRFMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+        self.exempt_paths = [
+            '/api'     # 예: 토큰 발급 경로 등
+        ]
+        self.csrf_protected_paths = [
+            '/api/users/token/refresh',
+            '/api/users/logout'
+        ]
+
+    def __call__(self, request):
+
+        path = request.path
+
+        # 1️⃣ CSRF 검사 예외 처리
+        if any(path.startswith(exempt) for exempt in self.exempt_paths):
+            # 2️⃣ 특정 경로는 다시 CSRF 검사 수행
+            if path in self.csrf_protected_paths:
+                return CsrfViewMiddleware(self.get_response)(request)
+            # 그 외 API는 CSRF 무시
+            return self.get_response(request)
+
+        # 기본 웹 요청은 기존 CSRF 처리
+        return CsrfViewMiddleware(self.get_response)(request)
+
+
+
+
+    def __call__(self, request):
+
+        # 예외 경로는 검증 제외
+        if request.path in self.exempt_paths:
+            return self.get_response(request)
+
+        if request.method in ['POST', 'PUT', 'DELETE']:  # 중요 요청만 검증
+            token = request.headers.get('X-CSRFToken')
+            if not self.is_valid(token):
+                return HttpResponseForbidden("CSRF 검증 실패")
+        return self.get_response(request)

@@ -14,5 +14,4 @@
 #     path('nickname/', oauth_views.oauth_nickname, name='nickname'),
 #
 #
-#
 # ]
