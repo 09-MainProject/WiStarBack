@@ -8,7 +8,6 @@ from django.core.files.uploadedfile import UploadedFile
 from PIL import Image
 
 
-
 def process_image(image_file: UploadedFile) -> UploadedFile:
     """
     이미지 파일을 처리합니다.
