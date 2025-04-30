@@ -9,8 +9,7 @@ from rest_framework.views import APIView
 
 from .models import Post
 from .pagination import PostPagination
-from .serializers import (PostCreateSerializer, PostSerializer,
-                          PostUpdateSerializer)
+from .serializers import PostCreateSerializer, PostSerializer, PostUpdateSerializer
 from .utils import process_image
 
 
