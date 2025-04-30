@@ -1,11 +1,12 @@
-from django.test import TestCase
-from django.urls import reverse
-from rest_framework import status
-from rest_framework.test import APIClient
+import io
+
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import TestCase
+from django.urls import reverse
 from PIL import Image
-import io
+from rest_framework import status
+from rest_framework.test import APIClient
 
 from apps.post.models import Post
 
