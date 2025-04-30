@@ -46,6 +46,7 @@ OWN_APPS = [
     "apps.post",
     "apps.schedule",
     "apps.comment",
+    "apps.like",
 ]
 
 THIRD_PARTY_APPS = [
@@ -143,7 +144,7 @@ MEDIA_ROOT = BASE_DIR / "media"
 # 이미지 처리 설정
 IMAGE_QUALITY = 85  # WebP 이미지 품질 (0-100)
 IMAGE_MAX_SIZE = 1024  # 최대 이미지 크기 (픽셀)
-IMAGE_FORMAT = 'WEBP'  # 변환할 이미지 포맷
+IMAGE_FORMAT = "WEBP"  # 변환할 이미지 포맷
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -159,9 +160,9 @@ REST_FRAMEWORK = {
         # 'rest_framework.authentication.BasicAuthentication',
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
-    'DEFAULT_FILTER_BACKENDS': [
-        'django_filters.rest_framework.DjangoFilterBackend',
-        'rest_framework.filters.SearchFilter',
-        'rest_framework.filters.OrderingFilter',
+    "DEFAULT_FILTER_BACKENDS": [
+        "django_filters.rest_framework.DjangoFilterBackend",
+        "rest_framework.filters.SearchFilter",
+        "rest_framework.filters.OrderingFilter",
     ],
 }
