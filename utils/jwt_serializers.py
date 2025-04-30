@@ -14,5 +14,6 @@ class WiStarTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         return token
 
+
 # 토큰 정보 확인
 # https://jwt.io/
