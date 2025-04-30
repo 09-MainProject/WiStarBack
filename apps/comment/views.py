@@ -1,17 +1,16 @@
-from rest_framework import viewsets, status, filters
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
 from django_filters import rest_framework as django_filters
-from .models import Comment
-from .serializers import (
-    CommentSerializer,
-    CommentCreateSerializer,
-    CommentUpdateSerializer,
-)
+from rest_framework import filters, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+
 from apps.post.models import Post
+
+from .models import Comment
+from .serializers import (CommentCreateSerializer, CommentSerializer,
+                          CommentUpdateSerializer)
 
 
 class CommentFilter(django_filters.FilterSet):
