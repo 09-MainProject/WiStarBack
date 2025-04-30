@@ -55,7 +55,12 @@ class PostViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """게시물 목록을 반환합니다."""
-        return Post.objects.filter(is_deleted=False)
+        queryset = Post.objects.filter(is_deleted=False)
+        if self.action == "list":
+            # 필터링, 검색, 정렬 적용
+            for backend in list(self.filter_backends):
+                queryset = backend().filter_queryset(self.request, queryset, self)
+        return queryset
 
     def get_serializer_class(self):
         """액션에 따라 적절한 시리얼라이저를 반환합니다."""
@@ -99,12 +104,12 @@ class PostViewSet(viewsets.ModelViewSet):
             raise PermissionDenied("게시물을 삭제할 권한이 없습니다.")
         instance.soft_delete(self.request.user)
 
-    @action(detail=True, methods=["post"])
-    def increase_views(self, request, pk=None):
-        """조회수를 증가시킵니다."""
-        post = self.get_object()
-        post.increase_views()
-        return Response(PostSerializer(post).data)
+    def retrieve(self, request, *args, **kwargs):
+        """게시물을 조회하고 조회수를 증가시킵니다."""
+        instance = self.get_object()
+        instance.increase_views()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
     @action(detail=True, methods=["post"])
     def restore(self, request, pk=None):

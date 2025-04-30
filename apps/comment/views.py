@@ -3,6 +3,7 @@ from django_filters import rest_framework as django_filters
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
@@ -14,6 +15,14 @@ from .serializers import (
     CommentSerializer,
     CommentUpdateSerializer,
 )
+
+
+class CommentPagination(PageNumberPagination):
+    """댓글 페이지네이션"""
+
+    page_size = 10
+    page_size_query_param = "page_size"
+    max_page_size = 100
 
 
 class CommentFilter(django_filters.FilterSet):
@@ -33,6 +42,7 @@ class CommentFilter(django_filters.FilterSet):
 class CommentViewSet(viewsets.ModelViewSet):
     """댓글 뷰셋"""
 
+    queryset = Comment.objects.filter(is_deleted=False)
     filter_backends = [
         django_filters.DjangoFilterBackend,
         filters.SearchFilter,
@@ -42,6 +52,15 @@ class CommentViewSet(viewsets.ModelViewSet):
     search_fields = ["content"]
     ordering_fields = ["created_at"]
     ordering = ["-created_at"]
+    pagination_class = CommentPagination
+
+    def get_queryset(self):
+        """post_id에 해당하는 게시물의 댓글만 필터링합니다."""
+        queryset = super().get_queryset()
+        post_id = self.kwargs.get("post_id")
+        if post_id:
+            queryset = queryset.filter(post_id=post_id)
+        return queryset
 
     def get_permissions(self):
         """
@@ -53,11 +72,6 @@ class CommentViewSet(viewsets.ModelViewSet):
             return [AllowAny()]
         return [IsAuthenticated()]
 
-    def get_queryset(self):
-        """댓글 목록을 반환합니다."""
-        post_id = self.kwargs.get("post_pk")
-        return Comment.objects.filter(post_id=post_id, is_deleted=False)
-
     def get_serializer_class(self):
         """액션에 따라 적절한 시리얼라이저를 반환합니다."""
         if self.action == "create":
@@ -68,19 +82,31 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         """댓글을 생성합니다."""
-        post_id = self.kwargs.get("post_pk")
+        post_id = self.kwargs.get("post_id")
         post = get_object_or_404(Post, id=post_id)
-        serializer.save(author=self.request.user, post=post)
+        comment = serializer.save(author=self.request.user, post=post)
+        return comment
+
+    def create(self, request, *args, **kwargs):
+        """댓글을 생성하고 전체 정보를 반환합니다."""
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        comment = self.perform_create(serializer)
+        response_serializer = CommentSerializer(comment)
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            response_serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        )
 
     def perform_update(self, serializer):
         """댓글을 수정합니다."""
         comment = self.get_object()
-        if comment.author != self.request.user:
+        if comment.author != self.request.user and not self.request.user.is_staff:
             raise PermissionDenied("댓글을 수정할 권한이 없습니다.")
         serializer.save()
 
     def perform_destroy(self, instance):
         """댓글을 소프트 삭제합니다."""
-        if instance.author != self.request.user:
+        if instance.author != self.request.user and not self.request.user.is_staff:
             raise PermissionDenied("댓글을 삭제할 권한이 없습니다.")
         instance.soft_delete(self.request.user)
