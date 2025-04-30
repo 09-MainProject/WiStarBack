@@ -20,8 +20,13 @@ from django.urls import include, path
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    # idol_schedule 앱의 URLs를 include
-    path(
-        "api/", include("apps.idol_schedule.urls")
-    ),  # 'apps.idol_schedule.urls'로 수정
+    path("api/users/", include("apps.user.urls")),
+    # path("api/posts/", include("apps.post.urls")),
+    # path("api/posts/", include("apps.comment.urls")),
+    # path("api/", include("apps.like.urls")),
+    # path("api/idols/", include("apps.idol.urls")),
+    # path("api/idols/", include("apps.idol_schedule.urls")),
+    # path("api/users/", include("apps.user_schedule.urls")),
+    # path("api/", include("apps.notification.urls")),
+    # path("api/", include("apps.notification_set.urls")),
 ]
