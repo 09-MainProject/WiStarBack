@@ -36,6 +36,10 @@ isort = "^6.0.1"
 #[tool.black]
 #line-length = 99
 
+# isort 설정 black 스타일에 맞춰 정렬
+[tool.isort]
+profile = "black"
+
 [tool.mypy]
 ignore_errors = true
 #ignore_missing_imports = true

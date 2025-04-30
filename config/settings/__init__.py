@@ -5,5 +5,3 @@ from .local import *  # noqa: F403
 # print(f"DEBUG = {DEBUG}")
 # print(ENV.get("DJANGO_SECRET_KEY"))
 # print(ENV.get("POSTGRES_PASSWORD"))
-
-print()

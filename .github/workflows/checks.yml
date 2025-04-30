@@ -67,8 +67,8 @@ jobs:
 
       - name: Run code format check (black & isort)
         run: |
-          poetry run black --check .
           poetry run isort --check-only .
+          poetry run black --check .
 
       - name: Run static type checks (mypy)
         run: poetry run mypy . --config-file pyproject.toml

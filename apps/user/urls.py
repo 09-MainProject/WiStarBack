@@ -1,8 +1,14 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenVerifyView
 
-from .views import (CustomTokenObtainPairView, CustomTokenRefreshView,
-                    LogoutAPIView, ProfileView, RegisterView, verify_email)
+from .views import (
+    CustomTokenObtainPairView,
+    CustomTokenRefreshView,
+    LogoutAPIView,
+    ProfileView,
+    RegisterView,
+    verify_email,
+)
 
 app_name = "user"
 
