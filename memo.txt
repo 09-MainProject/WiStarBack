@@ -117,15 +117,16 @@ docker-compose-local.yml 생성
 
 PostgreSQL 이미지 생성 및 실행
 docker-compose -f resources/docker/docker-compose-local.yml up -d
+docker-compose -f resources/docker/docker-compose-prod.yml up -d
 
 실행 중인 도커 이미지 확인 (이미지 id 확인 가능)
 docker ps
 
 환경 변수 채크
-docker exec myfavidol_db printenv | grep POSTGRES
+docker exec wistar_db printenv | grep POSTGRES
 
 도커 컨테이너 데이터베이스 접속
-docker exec -it myfavidol_db psql -U postgres -d oz_project
+docker exec -it wistar_db psql -U postgres -d oz_project
 
 도커 이미지 중지
 docker stop 이미지id
@@ -226,6 +227,8 @@ poetry add psycopg2-binary
 
 
 - CI / CD 설정
+
+ruff + pre-commit 추천
 
 --------
 # Black
@@ -354,6 +357,13 @@ Branch name for "next release" development?
 
 나머지 엔터
 
+git push origin develop
+
+이후 팀원 설정
+git fetch origin   또는  git fetch --all
+
+원격 develop 브랜치 기준으로 로컬 develop 브랜치 생성
+git checkout -b develop origin/develop
 
 # Feature 브랜치
 
@@ -556,6 +566,66 @@ SIMPLE_JWT = {
 
 python manage.py migrate
 
+엑세스 토큰 (Access Token) 관리
+
+# 1.엑세스 토큰 localStorage에 저장 및 삭제
+// 로그인 시 저장
+localStorage.setItem('access_token', accessToken);
+// 로그아웃 시 삭제
+localStorage.removeItem('access_token');
+
+sessionStorage 사용 시
+sessionStorage.removeItem('access_token');
+
+React 상태 관리 (Redux 등)	상태 초기화
+dispatch({ type: 'LOGOUT' });  // 토큰 상태 null 처리
+
+서버에서 제어 (프론트에서 토큰을 사용할 수 없음)
+HttpOnly Cookie	JS에서 삭제 불가 → 서버에서 쿠키 만료 처리
+
+
+
+
+----------------------
+HttpOnly 쿠키의 핵심 특징
+----------------------
+
+특징	설명
+JS 접근 불가	document.cookie로 읽기/쓰기 불가
+자동 전송	같은 도메인 요청 시 자동으로 포함
+보안 강화	XSS 공격으로부터 안전
+삭제 방법	오직 서버가 쿠키 만료 처리 (Set-Cookie로)
+
+final_response = Response(custom_response, status=status.HTTP_200_OK)
+final_response.set_cookie(
+    key='refresh_token',
+    value=refresh_token,
+    httponly=True,
+    # secure=True,        # HTTPS 환경에서만 전송
+    secure=False,        # 로컬 개발 환경에 맞춰서 설정
+    samesite='Lax',     # CSRF 공격 방지 설정
+    path='/api/token',  # 필요한 경로에만 쿠키 사용
+    max_age=60 * 60 * 24 * 7,  # 7일 (초 단위)
+)
+return final_response
+
+settings.py 설정
+INSTALLED_APPS += ['corsheaders']
+
+MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',   # 최상단에 추가
+    # ... 기타 미들웨어
+]
+
+# 프론트 도메인 등록
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+]
+
+# 쿠키 포함 허용
+CORS_ALLOW_CREDENTIALS = True
+
+
 --------------------
 이메일 보내는 기능 문제
 --------------------
@@ -715,10 +785,13 @@ ssh -i 키/페어/저장/위치/mp-key.pem ubuntu@EC2_PUBLIC_IP
 --------------------------
 
 작성한 Dockerfile을 통해 이미지를 빌드
-docker build -t django .
+# docker build -t django .
+docker build -f resources/docker/Dockerfile -t wistarback .
 
 빌드된 Docker 이미지를 통해 컨테이너 실행
-docker run -p 8000:8000 --env-file .env django
+# docker run -p 8000:8000 --env-file .env django
+docker run -p 8000:8000 --env-file ./envs/local.env wistarback
+docker run -p 8000:8000 --env-file ./envs/prod.env wistarback
 
 Dockerfile 생성
 # 베이스 이미지 (본인 프로젝트에 맞는 버전 기입)
@@ -769,8 +842,243 @@ docker ps
 컨테이너 중지
 docker stop <컨테이너ID 또는 이름>
 
+컨테이저 삭제
+docker rm <컨테이너ID 또는 이름>
+
+빌드된 이미지 목록
+docker images
+
+이미지도 삭제 (원할 경우)
+docker rmi [이미지명]
+
 rds db에 접속
 psql -h <엔드포인트> -U <DB_USER> -d <DB_NAME> -p <PORT>
 
 깃 리파짓토리 특정 브랜치 클론
 git clone -b <브랜치명> <원격주소>
+
+
+
+import hashlib
+import hmac
+
+from django.http import HttpResponseForbidden
+from django.middleware.csrf import CsrfViewMiddleware
+
+from config.settings import SECRET_KEY
+
+
+class CustomCSRFMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+        self.exempt_paths = [
+            '/api'     # 예: 토큰 발급 경로 등
+        ]
+        self.csrf_protected_paths = [
+            '/api/users/token/refresh',
+            '/api/users/logout'
+        ]
+
+    def __call__(self, request):
+
+        path = request.path
+
+        # 1️⃣ CSRF 검사 예외 처리
+        if any(path.startswith(exempt) for exempt in self.exempt_paths):
+            # 2️⃣ 특정 경로는 다시 CSRF 검사 수행
+            if path in self.csrf_protected_paths:
+                return CsrfViewMiddleware(self.get_response)(request)
+            # 그 외 API는 CSRF 무시
+            return self.get_response(request)
+
+        # 기본 웹 요청은 기존 CSRF 처리
+        return CsrfViewMiddleware(self.get_response)(request)
+
+
+
+
+    def __call__(self, request):
+
+        # 예외 경로는 검증 제외
+        if request.path in self.exempt_paths:
+            return self.get_response(request)
+
+        if request.method in ['POST', 'PUT', 'DELETE']:  # 중요 요청만 검증
+            token = request.headers.get('X-CSRFToken')
+            if not self.is_valid(token):
+                return HttpResponseForbidden("CSRF 검증 실패")
+        return self.get_response(request)
+
+
+아마존 리눅스 서버에서 배포 설정하기
+
+# docker 이미지 생성 및 테스트
+# docker build : Dockerfile을 기반으로 도커 이미지를 빌드
+# -t는 이미지에 태그(이름)을 지정하는 옵션
+# 현재 디렉토리(.)를 빌드 컨텍스트로 지정
+docker build -t wistar_backend ./resources/docker
+# 실행
+docker run wistar_backend
+
+
+도커 설치 -y 모든 질문 yes
+sudo yum install -y docker
+도커 설치 확인
+docker --version
+Docker 데몬(서버)을 수동으로 지금 바로 실행. 이걸 하지 않으면 docker run을 해도 동작하지 않음.
+sudo systemctl start docker
+서버를 껐다 켜도 Docker 서비스가 자동으로 다시 시작되게 설정
+sudo systemctl enable docker
+ssh -i ~/Downloads/mykey02.pem ec2-user@13.124.181.116
+
+sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+
+sudo chmod +x /usr/local/bin/docker-compose
+
+docker-compose --version
+
+
+mv ~/Downloads/mykey02.pem ~/.ssh
+ls -l
+
+chmod 400 mykey02.pem   # 읽기 모드 설정
+ls -l
+
+ssh -i ~/.ssh/mykey02.pem ec2-user@13.124.181.116
+
+
+1. scp&docker-compose
+2. GitHub & docker-compose  (보안위협)
+3. docker build
+
+서버에 프로젝트 복사
+
+프로젝트 경로에서 명령어 입력
+scp -i ~/.ssh/mykey02.pem -r . ec2-user@13.124.181.116:~/app
+
+# docker-compose: 도커 컴포즈 실행 명령어 (여러 컨테이너를 정의하고 관리하는 도구)
+# -f docker-compose-prod.yml: 사용할 설정 파일을 명시적으로 지정 (docker-compose.yml이 아닌 다른 파일을 지정할 때 필요)
+# up: 컨테이너를 생성 및 실행하는 명령
+# -d: 백그라운드 실행 (터미널 점유 X)
+sudo docker-compose -f docker-compose-prod.yml up -d
+
+connect: permission denied 이런 오류 뜰 시
+ec2-user를 docker 그룹에 추가 후 ec2서버 재접속
+sudo usermod -aG docker ec2-user
+
+sudo docker ps
+
+ec2 서버안의 도커 이미지에 접속
+sudo docker exec -it instagram_backend bash
+
+환경변수 확인
+echo $DJANGO_SETTINGS_MODULE
+
+python3 manage.py makemigrations
+
+python3 manage.py migrate
+
+python3 manage.py createsuperuser
+
+
+
+컨테이너 정지 및 제거
+sudo docker-compose -f docker-compose-prod.yml down
+
+변경사항 반영하여 재빌드 및 재실행
+sudo docker-compose -f docker-compose-prod.yml up --build -d
+
+서버 데이터베이스 접속
+docker exec -it wistar_db psql -U postgres -d oz_project
+
+정적 파일 수집
+python manage.py collectstatic --noinput
+
+# (추가) 필요한 경우 pip 업그레이드
+sudo python3 -m ensurepip --upgrade
+
+도커 컨테이너 터미널 실행
+sudo docker exec -it wistarback bash
+
+
+nginx 설치 (Amazon Linux 2용)
+sudo yum update -y
+sudo yum install nginx -y
+설치확인
+nginx -v
+
+2단계: nginx 시작
+sudo systemctl start nginx
+sudo systemctl enable nginx
+
+3단계: nginx 설정 파일 만들기
+sudo vi /etc/nginx/conf.d/wistarback.conf
+
+복붙
+server {
+    listen 80;
+    server_name _;  # 일단 모든 요청 허용
+
+    # Static 파일 요청 처리
+    location /static/ {
+        alias /WiStarBack/.static_root/;
+    }
+
+    # Django 백엔드 요청은 Gunicorn(8000포트)으로 넘기기
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+
+4단계: nginx 재시작
+sudo nginx -t
+sudo systemctl reload nginx
+
+5단계: 방화벽(보안 그룹) 확인
+
+6단계: 최종 확인
+
+.static_root 폴더 전송
+scp -i ~/Downloads/your-key.pem -r .static_root/ ec2-user@3.39.10.22:/home/ec2-user/WiStarBack/
+scp -i ~/Downloads/wistar.pem -r .static_root/ ec2-user@3.39.10.22:/home/ec2-user/WiStarBack/
+
+server {
+    listen 80;
+    server_name _;
+
+    location /static/ {
+        alias /home/ec2-user/WiStarBack/.static_root/;
+        access_log off;
+        expires max;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+
+에러 로그 확인
+sudo tail -n 100 /var/log/nginx/error.log
+
+권한 수정
+sudo chmod -R 755 /home/ec2-user/WiStarBack/.static_root
+sudo nginx -t
+sudo systemctl reload nginx
+
+nginx 권한 설정
+sudo chown -R nginx:nginx /home/ec2-user/WiStarBack/.static_root
+sudo systemctl reload nginx
+
+nginx 권한 설정
+sudo chmod +x /home
+sudo chmod +x /home/ec2-user
+sudo chmod +x /home/ec2-user/WiStarBack
+sudo chmod +x /home/ec2-user/WiStarBack/.static_root
+
+
+http://3.39.10.22/redoc/
+http://3.39.10.22/swagger/
