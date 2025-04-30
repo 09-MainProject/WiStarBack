@@ -2,6 +2,7 @@ from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
 from django_filters import rest_framework as django_filters
 from .models import Comment
@@ -50,29 +51,11 @@ class CommentViewSet(viewsets.ModelViewSet):
         """댓글을 수정합니다."""
         comment = self.get_object()
         if comment.author != self.request.user:
-            return Response(
-                {"detail": "댓글을 수정할 권한이 없습니다."},
-                status=status.HTTP_403_FORBIDDEN
-            )
+            raise PermissionDenied("댓글을 수정할 권한이 없습니다.")
         serializer.save()
     
     def perform_destroy(self, instance):
         """댓글을 소프트 삭제합니다."""
         if instance.author != self.request.user:
-            return Response(
-                {"detail": "댓글을 삭제할 권한이 없습니다."},
-                status=status.HTTP_403_FORBIDDEN
-            )
-        instance.soft_delete(self.request.user)
-    
-    @action(detail=True, methods=['post'])
-    def restore(self, request, pk=None, post_pk=None):
-        """삭제된 댓글을 복구합니다."""
-        comment = self.get_object()
-        if comment.author != request.user:
-            return Response(
-                {"detail": "댓글을 복구할 권한이 없습니다."},
-                status=status.HTTP_403_FORBIDDEN
-            )
-        comment.restore()
-        return Response(CommentSerializer(comment).data) 
+            raise PermissionDenied("댓글을 삭제할 권한이 없습니다.")
+        instance.soft_delete(self.request.user) 
