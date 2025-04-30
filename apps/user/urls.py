@@ -3,7 +3,6 @@ from rest_framework_simplejwt.views import (
     TokenVerifyView,
 )
 
-from . import oauth_views
 from .views import (
     CustomTokenObtainPairView,
     CustomTokenRefreshView,
