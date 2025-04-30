@@ -9,11 +9,8 @@ from rest_framework.response import Response
 from apps.post.models import Post
 
 from .models import Comment
-from .serializers import (
-    CommentCreateSerializer,
-    CommentSerializer,
-    CommentUpdateSerializer,
-)
+from .serializers import (CommentCreateSerializer, CommentSerializer,
+                          CommentUpdateSerializer)
 
 
 class CommentFilter(django_filters.FilterSet):
