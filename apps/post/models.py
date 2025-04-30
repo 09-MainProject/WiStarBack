@@ -27,30 +27,33 @@ class Post(models.Model):
         deleted_at (datetime): 삭제 시간
         deleted_by (User): 삭제한 사용자
     """
+
     title = models.CharField(max_length=200)
     content = models.TextField()
-    image = models.ImageField(upload_to='posts/%Y/%m/%d/', blank=True, null=True)
+    image = models.ImageField(upload_to="posts/%Y/%m/%d/", blank=True, null=True)
     image_url = models.URLField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     views = models.PositiveIntegerField(default=0)
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts', null=True, blank=True)
+    author = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="posts", null=True, blank=True
+    )
     is_deleted = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(null=True, blank=True)
     deleted_by = models.ForeignKey(
-        User, 
-        on_delete=models.SET_NULL, 
-        null=True, 
-        blank=True, 
-        related_name='deleted_posts'
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="deleted_posts",
     )
 
     def save(self, *args, **kwargs):
         # 이미지 파일이 있는 경우
-        if self.image and hasattr(self.image, 'file'):
+        if self.image and hasattr(self.image, "file"):
             processed_image = process_image(self.image)
             self.image.save(processed_image.name, processed_image, save=False)
-        
+
         # 이미지 URL이 있는 경우
         elif self.image_url and not self.image:
             try:
@@ -60,22 +63,24 @@ class Post(models.Model):
                     image_file = BytesIO(response.content)
                     processed_image = process_image(image_file)
                     # 파일명 생성
-                    filename = f"downloaded_{timezone.now().strftime('%Y%m%d_%H%M%S')}.webp"
+                    filename = (
+                        f"downloaded_{timezone.now().strftime('%Y%m%d_%H%M%S')}.webp"
+                    )
                     # 이미지 필드에 저장
                     self.image.save(filename, processed_image, save=False)
             except Exception as e:
                 print(f"이미지 URL 처리 중 오류 발생: {e}")
-        
+
         super().save(*args, **kwargs)
 
     class Meta:
-        ordering = ['-created_at']
+        ordering = ["-created_at"]
         indexes = [
-            models.Index(fields=['-created_at']),
-            models.Index(fields=['author', '-created_at']),
+            models.Index(fields=["-created_at"]),
+            models.Index(fields=["author", "-created_at"]),
         ]
-        verbose_name = '게시물'
-        verbose_name_plural = '게시물들'
+        verbose_name = "게시물"
+        verbose_name_plural = "게시물들"
 
     def __str__(self):
         """게시물의 문자열 표현을 반환합니다."""
@@ -84,12 +89,12 @@ class Post(models.Model):
     def increase_views(self):
         """조회수를 1 증가시킵니다."""
         self.views += 1
-        self.save(update_fields=['views'])
-  
+        self.save(update_fields=["views"])
+
     def soft_delete(self, user):
         """
         게시물을 소프트 삭제합니다.
-        
+
         Args:
             user (User): 삭제를 수행하는 사용자
         """
