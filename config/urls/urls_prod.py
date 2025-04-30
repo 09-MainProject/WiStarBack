@@ -17,6 +17,9 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import include, path
+from django.urls import include, path
+
+from apps import user_schedule
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -29,4 +32,5 @@ urlpatterns = [
     # path("api/users/", include("apps.user_schedule.urls")),
     # path("api/", include("apps.notification.urls")),
     # path("api/", include("apps.notification_set.urls")),
+    path("api/users/", include("user_schedule.urls")),
 ]
