@@ -958,7 +958,7 @@ Docker 데몬(서버)을 수동으로 지금 바로 실행. 이걸 하지 않으
 sudo systemctl start docker
 서버를 껐다 켜도 Docker 서비스가 자동으로 다시 시작되게 설정
 sudo systemctl enable docker
-ssh -i ~/Downloads/mykey02.pem ec2-user@13.124.181.116
+ssh -i ~/Downloads/wistar.pem ec2-user@3.39.10.22
 
 sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 
@@ -981,6 +981,15 @@ ssh -i ~/.ssh/mykey02.pem ec2-user@13.124.181.116
 3. docker build
 
 서버에 프로젝트 복사
+
+깃 클론
+git clone 리파짓토리
+
+업데이트
+git fetch origin
+
+배포용 브랜치로 이동
+git checkout -b test/prod origin/test/prod
 
 프로젝트 경로에서 명령어 입력
 scp -i ~/.ssh/mykey02.pem -r . ec2-user@13.124.181.116:~/app
