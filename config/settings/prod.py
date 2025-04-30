@@ -1,6 +1,6 @@
-import random
+# ruff: noqa: F405
 
-from dotenv import dotenv_values
+import random
 
 from .base import *  # noqa: F403
 
@@ -34,15 +34,14 @@ DATABASES = {
 
 # Email
 # from django.core.mail.backends.smtp import EmailBackend
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.naver.com' # 네이버 환결설정에서 볼 수 있음.
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.naver.com"  # 네이버 환결설정에서 볼 수 있음.
 EMAIL_USE_TLS = True  # 보안연결
 EMAIL_PORT = 587  # 네이버 메일 환경설정에서 확인 가능
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
-EMAIL_HOST_PASSWORD =  os.getenv("EMAIL_HOST_PASSWORD", "")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
 
 
 # OAuth
 NAVER_CLIENT_ID = os.getenv("NAVER_CLIENT_ID", "")
 NAVER_CLIENT_SECRET = os.getenv("NAVER_CLIENT_SECRET", "")
-

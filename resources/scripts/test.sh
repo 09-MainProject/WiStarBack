@@ -14,13 +14,15 @@ poetry run ruff check --fix
 echo "OK"
 
 echo "Starting mypy"
+#poetry run dmypy stop
 poetry run dmypy run -- .
+#poetry run mypy .
 echo "OK"
 
-#echo "Starting pytest with coverage"
-#poetry run coverage run -m pytest
-#poetry run coverage report -m
-#poetry run coverage html
-#echo "OK"
+echo "Starting pytest with coverage"
+poetry run coverage run -m pytest
+poetry run coverage report -m
+poetry run coverage html
+echo "OK"
 
 echo "${COLOR_GREEN}ALL tests passed successfully!${COLOR_NC}"

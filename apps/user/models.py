@@ -1,18 +1,18 @@
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
-from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 from utils.models import TimestampModel
+
 
 # 사용자 지정 메니져
 class UserManager(BaseUserManager):
     def create_user(self, email, password, **kwargs):
         if not email:
-            raise ValueError('올바른 이메일을 입력하세요.')
-        user = self.model ( email = self.normalize_email(email), **kwargs )
-        user.set_password(password) # 해시화
+            raise ValueError("올바른 이메일을 입력하세요.")
+        user = self.model(email=self.normalize_email(email), **kwargs)
+        user.set_password(password)  # 해시화
         # user.is_active = True
-        user.save(using = self._db)
+        user.save(using=self._db)
         return user
 
     def create_superuser(self, email, password, nickname):
@@ -23,6 +23,7 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
+
 # 암호화는 복호화가 가능함
 # 암호화는 qwer1234 -> aslkfjdslkfj322kj43 -> 복호화 -> qwer1234
 # 해시화는 복호화가 불가능함
@@ -30,30 +31,39 @@ class UserManager(BaseUserManager):
 # 장고는 SHA256를 사용
 # SHA-256은 암호학에서 사용하는 해시 함수(hash function) 중 하나예요. 주로 데이터 무결성 확인, 비밀번호 저장, 디지털 서명, 블록체인 같은 곳에 쓰임.
 
+
 class User(AbstractBaseUser, TimestampModel):  # 기본 기능은 상속받아서 사용
-    email = models.EmailField(verbose_name='이메일', max_length= 50, unique = True)  # 로그인시 사용
-    name = models.CharField(verbose_name='이름', max_length=25)
-    nickname = models.CharField('닉네임', max_length=25, unique=True)
+    email = models.EmailField(
+        verbose_name="이메일", max_length=50, unique=True
+    )  # 로그인시 사용
+    name = models.CharField(verbose_name="이름", max_length=25)
+    nickname = models.CharField("닉네임", max_length=25, unique=True)
     # profile_image = models.ImageField('이미지', upload_to='post/%Y/%m/%d')  # 이미지 경로가 post/년/월/일
-    last_login = models.DateTimeField(verbose_name='마지막 로그인', null=True)
-    is_staff = models.BooleanField(verbose_name='스태프 권한', default = False)  # is_staff 기능
-    is_superuser = models.BooleanField(verbose_name='관리자 권한', default = False)  # is_superuser(관리자) 기능
-    is_active = models.BooleanField(verbose_name='계정 활성화', default = False) # 기본적으로 비활성화 시켜놓고 확인 절차를 거친 후 활성화
+    last_login = models.DateTimeField(verbose_name="마지막 로그인", null=True)
+    is_staff = models.BooleanField(
+        verbose_name="스태프 권한", default=False
+    )  # is_staff 기능
+    is_superuser = models.BooleanField(
+        verbose_name="관리자 권한", default=False
+    )  # is_superuser(관리자) 기능
+    is_active = models.BooleanField(
+        verbose_name="계정 활성화", default=False
+    )  # 기본적으로 비활성화 시켜놓고 확인 절차를 거친 후 활성화
 
     # 사용자 지정 메니져
     # User.objects.all()   <- objects가 메니져
     objects = UserManager()  # 메니져는 UserManager()
 
-    USERNAME_FIELD = 'email'  # 기본 유저네임(아이디)를 email로 지정
-    EMAIL_FIELD = 'email'
-    REQUIRED_FIELDS = ['nickname']
+    USERNAME_FIELD = "email"  # 기본 유저네임(아이디)를 email로 지정
+    EMAIL_FIELD = "email"
+    REQUIRED_FIELDS = ["nickname"]
 
     class Meta:
-        db_table = 'user'
-        verbose_name = '유저'
-        verbose_name_plural = f'{verbose_name} 목록'
+        db_table = "user"
+        verbose_name = "유저"
+        verbose_name_plural = f"{verbose_name} 목록"
 
-    def get_full_name(self): # 사용자의 전체 이름(Full name)을 반환. 성과 이름을 합침
+    def get_full_name(self):  # 사용자의 전체 이름(Full name)을 반환. 성과 이름을 합침
         # return f"{self.first_name} {self.last_name}"
         return self.name
 
@@ -74,6 +84,7 @@ class User(AbstractBaseUser, TimestampModel):  # 기본 기능은 상속받아�
         return self.is_superuser
 
     #############################################
+
 
 # @property
 # 함수는 user.is_superuser() 이렇게 쓰는걸 user.c 이렇게 변수처럼 쓸 수 있게 만들어줌
