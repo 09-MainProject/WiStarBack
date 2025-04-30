@@ -22,9 +22,12 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path('api/', include('apps.post.urls')),
-    path('api/posts/<int:post_pk>/', include('apps.comment.urls')),
+    path('api/', include([
+        path('posts/', include('apps.post.urls')),
+        path('posts/<int:post_pk>/', include('apps.comment.urls')),
+    ])),
 ]
 
+# 개발 환경에서만 미디어 파일 서빙
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
