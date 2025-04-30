@@ -15,6 +15,7 @@ class Idol(models.Model):
         updated_at (datetime): 수정 시간
         is_active (bool): 활동 상태
     """
+
     name = models.CharField(max_length=100, db_index=True)  # 아이돌 이름
     debut_date = models.DateField()  # 데뷔 날짜
     agency = models.CharField(max_length=100)  # 소속사
@@ -25,14 +26,14 @@ class Idol(models.Model):
     is_active = models.BooleanField(default=True)  # 활동 상태
 
     class Meta:
-        ordering = ['name']
+        ordering = ["name"]
         indexes = [
-            models.Index(fields=['name']),
-            models.Index(fields=['agency']),
-            models.Index(fields=['debut_date']),
+            models.Index(fields=["name"]),
+            models.Index(fields=["agency"]),
+            models.Index(fields=["debut_date"]),
         ]
-        verbose_name = '아이돌'
-        verbose_name_plural = '아이돌들'
+        verbose_name = "아이돌"
+        verbose_name_plural = "아이돌들"
 
     def __str__(self):
         """아이돌의 문자열 표현을 반환합니다."""
@@ -41,9 +42,9 @@ class Idol(models.Model):
     def deactivate(self):
         """아이돌을 비활성화합니다."""
         self.is_active = False
-        self.save(update_fields=['is_active'])
+        self.save(update_fields=["is_active"])
 
     def activate(self):
         """아이돌을 활성화합니다."""
         self.is_active = True
-        self.save(update_fields=['is_active'])
+        self.save(update_fields=["is_active"])
