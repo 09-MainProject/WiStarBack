@@ -13,9 +13,12 @@ class CommentSerializer(serializers.ModelSerializer):
 
 class CommentCreateSerializer(serializers.ModelSerializer):
     """댓글 생성 시리얼라이저"""
+    author = UserSerializer(read_only=True)
+    
     class Meta:
         model = Comment
-        fields = ['post', 'content']
+        fields = ['content', 'author']
+        read_only_fields = ['author']
 
 class CommentUpdateSerializer(serializers.ModelSerializer):
     """댓글 수정 시리얼라이저"""
