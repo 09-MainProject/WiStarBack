@@ -684,6 +684,29 @@ import os
 import certifi
 os.environ['SSL_CERT_FILE'] = certifi.where()
 
+
+-------------------
+# 소셜 로그인 기능 추가
+-------------------
+
+1. 사용자가 프론트에서 '소셜 로그인' 버튼 클릭
+     ↓
+2. 프론트가 백엔드의 /oauth/naver/login 같은 엔드포인트로 이동 (RedirectView)
+     ↓
+3. 백엔드가 Naver 로그인 페이지로 리다이렉트
+     ↓
+4. 사용자가 Naver에서 로그인하고 콜백 URL로 이동
+     ↓
+5. 백엔드가 access_token 받고 사용자 정보 조회
+     ↓
+6. 백엔드에서 회원 생성 또는 로그인 처리
+     ↓
+7. **JWT 토큰을 발급해서 프론트로 전달 (ex. 쿼리파라미터 or URL Fragment)**
+     ↓
+8. 프론트는 전달받은 토큰을 저장(localStorage 등)하고 로그인 완료 처리
+
+
+
 -----------
   배포하기
 -----------
@@ -914,7 +937,9 @@ class CustomCSRFMiddleware:
         return self.get_response(request)
 
 
+-----------------------------
 아마존 리눅스 서버에서 배포 설정하기
+-----------------------------
 
 # docker 이미지 생성 및 테스트
 # docker build : Dockerfile을 기반으로 도커 이미지를 빌드
@@ -1086,3 +1111,43 @@ sudo chmod +x /home/ec2-user/WiStarBack/.static_root
 
 http://3.39.10.22/redoc/
 http://3.39.10.22/swagger/
+
+
+커밋 로그 안남기고 최신 커밋에 합치는법
+git add .
+git commit --amend --no-edit
+git push --force-with-lease origin feature/user
+
+해당 커밋까지 상태를 되돌리되, 작업 내용은 staging 상태(index)에 유지
+git reset --soft 해시코드
+
+
+브랜치 트랙킹 설정 확인
+git branch -vv
+
+브랜치 트랙킹 설정
+git branch --set-upstream-to=origin/develop develop
+
+이후 트랙킹 설정된 브랜치 pull 가능
+
+
+작업은 병렬로, 브랜치 최신화는 나중에
+작업을 미리 시작하고, 나중에 develop 머지가 끝난 후 최신 develop을 반영(rebase or merge)
+
+📌 1. 지금 당장 작업을 시작하는 방법
+# 최신 develop 기준이 아직 merge 안 되었더라도
+git checkout -b feature/my-task
+# 여기서 바로 작업 시작 가능
+이 시점에서는 *"구-develop 기준"*으로 작업이 시작됩니다.
+상관없습니다. 나중에 최신화만 잘 하면 됩니다.
+
+📌 2. develop이 완전히 merge된 후 최신화하는 방법
+git fetch origin
+git checkout feature/my-task
+git rebase origin/develop  # 또는 git merge origin/develop
+이 과정에서 충돌이 나면 해결하면 되고,
+그렇지 않으면 깔끔하게 최신 develop 기반으로 작업을 이어갈 수 있습니다.
+
+📌 3. 이후 정상적으로 PR 보내기
+git push origin feature/my-task
+# 그리고 PR 보내기
