@@ -7,14 +7,9 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
-from apps.post.models import Post
-
 from .models import Comment
-from .serializers import (
-    CommentCreateSerializer,
-    CommentSerializer,
-    CommentUpdateSerializer,
-)
+from .serializers import CommentCreateSerializer, CommentSerializer, CommentUpdateSerializer
+from apps.post.models import Post
 
 
 class CommentPagination(PageNumberPagination):
