@@ -1,11 +1,13 @@
-from django.db import models
-from django.contrib.auth import get_user_model
-from django.utils import timezone
-from django.conf import settings
-from .utils import process_image
-import requests
 from io import BytesIO
+
+import requests
+from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
+from django.db import models
+from django.utils import timezone
+
+from .utils import process_image
 
 User = get_user_model()
 
