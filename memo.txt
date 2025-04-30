@@ -978,6 +978,15 @@ ssh -i ~/.ssh/mykey02.pem ec2-user@13.124.181.116
 
 서버에 프로젝트 복사
 
+깃 클론
+git clone 리파짓토리
+
+업데이트
+git fetch origin
+
+배포용 브랜치로 이동
+git checkout -b test/prod origin/test/prod
+
 프로젝트 경로에서 명령어 입력
 scp -i ~/.ssh/mykey02.pem -r . ec2-user@13.124.181.116:~/app
 
