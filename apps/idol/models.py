@@ -7,8 +7,8 @@ class Idol(models.Model):
 
     Attributes:
         name (str): 아이돌 이름
-        debut_date (date): 데뷔 날짜
-        agency (str): 소속사
+        debut_date (date, optional): 데뷔 날짜
+        agency (str, optional): 소속사
         description (str): 소개글
         profile_image (str): 프로필 이미지 URL
         created_at (datetime): 생성 시간
@@ -17,8 +17,8 @@ class Idol(models.Model):
     """
 
     name = models.CharField(max_length=100, db_index=True)  # 아이돌 이름
-    debut_date = models.DateField()  # 데뷔 날짜
-    agency = models.CharField(max_length=100)  # 소속사
+    debut_date = models.DateField(null=True, blank=True)  # 데뷔 날짜
+    agency = models.CharField(max_length=100, null=True, blank=True)  # 소속사
     description = models.TextField(blank=True)  # 소개글
     profile_image = models.URLField(blank=True, null=True)  # 프로필 이미지 URL
     created_at = models.DateTimeField(auto_now_add=True)  # 생성 시간
