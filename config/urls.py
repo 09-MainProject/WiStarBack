@@ -16,10 +16,12 @@ Including another URLconf
 """
 
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import include, path
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path("admin/", admin.site.urls),
     # idol_schedule 앱의 URLs를 include
-    path('api/', include('apps.idol_schedule.urls')),  # 'apps.idol_schedule.urls'로 수정
+    path(
+        "api/", include("apps.idol_schedule.urls")
+    ),  # 'apps.idol_schedule.urls'로 수정
 ]
