@@ -6,9 +6,14 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
-from .models import Comment
-from .serializers import CommentCreateSerializer, CommentSerializer, CommentUpdateSerializer
 from apps.post.models import Post
+
+from .models import Comment
+from .serializers import (
+    CommentCreateSerializer,
+    CommentSerializer,
+    CommentUpdateSerializer,
+)
 
 
 class CommentFilter(django_filters.FilterSet):
