@@ -73,7 +73,7 @@ class User(AbstractBaseUser, TimestampModel):  # 기본 기능은 상속받아�
     def __str__(self):
         return self.nickname
 
-    #############################################
+    ############################################
 
     # 특정 권한(perm)에 대해 사용자가 권한을 가지고 있는지 판단
     def has_perm(self, perm, obj=None):
@@ -83,7 +83,7 @@ class User(AbstractBaseUser, TimestampModel):  # 기본 기능은 상속받아�
     def has_module_perms(self, app_label):
         return self.is_superuser
 
-    #############################################
+    ############################################
 
 
 # @property
