@@ -3,6 +3,7 @@ from django.db import models
 
 User = get_user_model()
 
+
 class Idol(models.Model):
     name = models.CharField(max_length=100)
     managers = models.ManyToManyField(
@@ -11,6 +12,7 @@ class Idol(models.Model):
 
     def __str__(self):
         return self.name
+
 
 class Schedule(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="schedules")
@@ -25,6 +27,7 @@ class Schedule(models.Model):
 
     def __str__(self):
         return f"[{self.idol.name}] {self.title}"
+
 
 # 필드명	설명
 # user	일정을 등록한 관리자 계정. User 모델과 연결
