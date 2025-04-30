@@ -7,38 +7,24 @@ from rest_framework import status
 from rest_framework.generics import CreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.status import (
-    HTTP_200_OK,
-    HTTP_400_BAD_REQUEST,
-    HTTP_401_UNAUTHORIZED,
-    HTTP_403_FORBIDDEN,
-    HTTP_410_GONE,
-)
+from rest_framework.status import (HTTP_200_OK, HTTP_400_BAD_REQUEST,
+                                   HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN,
+                                   HTTP_410_GONE)
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from apps.user.models import User
-from apps.user.serializers import (
-    LogoutSerializer,
-    ProfileSerializer,
-    ProfileUpdateSerializer,
-    RegisterSerializer,
-)
+from apps.user.serializers import (LogoutSerializer, ProfileSerializer,
+                                   ProfileUpdateSerializer, RegisterSerializer)
 from utils.csrf import generate_csrf_token, validate_csrf_token
 from utils.email import send_email
-from utils.responses.user import (
-    CSRF_INVALID_TOKEN,
-    DELETE_SUCCESS,
-    INVALID_SIGNATURE,
-    LOGIN_SUCCESS,
-    LOGOUT_SUCCESS,
-    MISSING_REFRESH_TOKEN,
-    SIGNATURE_EXPIRED,
-    TOKEN_REFRESH_RESPONSE,
-    VERIFY_EMAIL_SUCCESS,
-)
+from utils.responses.user import (CSRF_INVALID_TOKEN, DELETE_SUCCESS,
+                                  INVALID_SIGNATURE, LOGIN_SUCCESS,
+                                  LOGOUT_SUCCESS, MISSING_REFRESH_TOKEN,
+                                  SIGNATURE_EXPIRED, TOKEN_REFRESH_RESPONSE,
+                                  VERIFY_EMAIL_SUCCESS)
 
 
 # 회원 가입

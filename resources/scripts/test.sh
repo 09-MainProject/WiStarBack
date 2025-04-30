@@ -8,10 +8,14 @@ echo "Starting black"
 poetry run black .
 echo "OK"
 
-echo "Starting ruff"
-poetry run ruff check --select I --fix
-poetry run ruff check --fix
+echo "Starting isort"
+poetry run isort .
 echo "OK"
+
+#echo "Starting ruff"
+#poetry run ruff check --select I --fix
+#poetry run ruff check --fix
+#echo "OK"
 
 echo "Starting mypy"
 #poetry run dmypy stop
