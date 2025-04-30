@@ -1,6 +1,6 @@
 from django_filters import rest_framework as dj_filters
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, permissions
+from rest_framework import filters, permissions, status
 from rest_framework.decorators import action
 
 # , ScheduleSerializer
@@ -59,11 +59,22 @@ class IdolViewSet(ModelViewSet):
 
     queryset = Idol.objects.all()
     serializer_class = IdolSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_class = IdolFilter
     ordering_fields = ["debut_date", "name", "created_at"]
     ordering = ["name"]
+
+    def get_permissions(self):
+        """
+        각 액션에 따라 다른 권한 설정
+        - list, retrieve: 모든 사용자 허용
+        - 그 외: 인증된 사용자만 허용
+        """
+        if self.action in ["list", "retrieve"]:
+            permission_classes = [permissions.AllowAny]
+        else:
+            permission_classes = [permissions.IsAuthenticated]
+        return [permission() for permission in permission_classes]
 
     def get_queryset(self):
         """기본적으로 활성화된 아이돌만 조회"""
@@ -73,9 +84,13 @@ class IdolViewSet(ModelViewSet):
         """아이돌 생성 시 활성화 상태 True로 저장"""
         serializer.save(is_active=True)
 
-    def perform_destroy(self, instance):
+    def destroy(self, request, *args, **kwargs):
         """아이돌 삭제 대신 비활성화"""
+        instance = self.get_object()
         instance.deactivate()
+        return Response(
+            {"detail": "아이돌 정보가 비활성화되었습니다."}, status=status.HTTP_200_OK
+        )
 
     @action(detail=True, methods=["post"])
     def activate(self, request, pk=None):

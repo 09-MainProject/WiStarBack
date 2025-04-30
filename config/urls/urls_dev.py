@@ -22,11 +22,11 @@ from config.schema import schema_view
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("api/users/", include("apps.user.urls")),
+    path("api/users/", include("apps.user.urls", namespace="users")),
+    path("api/idols/", include("apps.idol.urls", namespace="idols")),
     # path("api/posts/", include("apps.post.urls")),
     # path("api/posts/", include("apps.comment.urls")),
     # path("api/", include("apps.like.urls")),
-    # path("api/idols/", include("apps.idol.urls")),
     # path("api/idols/", include("apps.idol_schedule.urls")),
     # path("api/users/", include("apps.user_schedule.urls")),
     # path("api/", include("apps.notification.urls")),

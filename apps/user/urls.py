@@ -10,21 +10,15 @@ from .views import (
     verify_email,
 )
 
-app_name = "user"
+app_name = "users"
 
 urlpatterns = [
-    path("signup", RegisterView.as_view(), name="signup"),
+    path("register", RegisterView.as_view(), name="register"),
     path("verify/email", verify_email, name="verify_email"),
-    # POST /api/users/login/ -> 로그인
-    # path("login", CustomTokenObtainPairView.as_view(), name="login"),
-    # POST /api/users/login/ -> 로그아웃
-    # path("logout", LogoutAPIView.as_view(), name="logout"),
-    # GET /api/users/profile/ -> 내 프로필 조회
-    # PATCH /api/users/me/ -> 내 프로필 수정
     path("profile", ProfileView.as_view(), name="profile"),
     # JWT
-    path("token/login", CustomTokenObtainPairView.as_view(), name="token_login"),
-    path("token/logout", LogoutAPIView.as_view(), name="token_logout"),
+    path("token/login", CustomTokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("token/logout", LogoutAPIView.as_view(), name="logout"),
     path("token/refresh", CustomTokenRefreshView.as_view(), name="token_refresh"),
     path("token/verify", TokenVerifyView.as_view(), name="token_verify"),
     # oauth

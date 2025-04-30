@@ -32,6 +32,19 @@ class IdolFilter(django_filters.FilterSet):
 
 
 class IdolSerializer(serializers.ModelSerializer):
+    """아이돌 정보 시리얼라이저"""
+
     class Meta:
         model = Idol
-        fields = "all"
+        fields = [
+            "id",
+            "name",
+            "debut_date",
+            "agency",
+            "description",
+            "profile_image",
+            "is_active",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["id", "created_at", "updated_at"]
