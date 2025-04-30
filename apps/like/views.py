@@ -1,4 +1,3 @@
-from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -18,8 +17,6 @@ class LikeViewSet(viewsets.ModelViewSet):
         return Like.objects.filter(type=type, object_id=object_id)
 
     def create(self, request, *args, **kwargs):
-        type = self.kwargs.get("type")
-        object_id = self.kwargs.get("id")
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
