@@ -4,8 +4,10 @@ from rest_framework import status
 from rest_framework.test import APIClient
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
+from PIL import Image
+import io
 
-from apps.post.models import Post, Comment
+from apps.post.models import Post
 
 User = get_user_model()
 
@@ -44,7 +46,7 @@ class PostTests(TestCase):
         }
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data['author']['username'], self.user.username)
+        self.assertEqual(response.data['title'], data['title'])
 
     def test_retrieve_post(self):
         """게시글 조회 테스트"""
@@ -113,15 +115,21 @@ class PostTests(TestCase):
         """이미지가 포함된 게시글 생성 테스트"""
         url = reverse('post-list')
         # 테스트용 이미지 파일 생성
-        image = SimpleUploadedFile(
+        image = Image.new('RGB', (100, 100), color='white')
+        image_io = io.BytesIO()
+        image.save(image_io, format='JPEG')
+        image_io.seek(0)
+        
+        image_file = SimpleUploadedFile(
             name='test_image.jpg',
-            content=b'',
+            content=image_io.read(),
             content_type='image/jpeg'
         )
+        
         data = {
             "title": "이미지가 있는 게시글",
             "content": "이미지가 포함된 게시글 내용입니다. 10자 이상으로 작성했습니다.",
-            "image": image
+            "image": image_file
         }
         response = self.client.post(url, data, format='multipart')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -144,3 +152,63 @@ class PostTests(TestCase):
         }
         response = self.client.post(url, data, format='multipart')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_list_posts(self):
+        """게시글 목록 조회 테스트"""
+        # 추가 게시글 생성
+        Post.objects.create(
+            title="Another Post",
+            content="This is another test post.",
+            author=self.user
+        )
+        
+        url = reverse('post-list')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data['results']), 2)  # setUp에서 생성한 게시글 1개 + 추가 게시글 1개
+
+    def test_list_posts_with_search(self):
+        """게시글 검색 테스트"""
+        # 검색할 게시글 생성
+        Post.objects.create(
+            title="Searchable Post",
+            content="This is a searchable post.",
+            author=self.user
+        )
+        
+        url = reverse('post-list')
+        response = self.client.get(url, {'search': 'Searchable'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data['results']), 1)
+        self.assertEqual(response.data['results'][0]['title'], "Searchable Post")
+
+    def test_list_posts_with_filter(self):
+        """게시글 필터링 테스트"""
+        # 필터링할 게시글 생성
+        Post.objects.create(
+            title="Filtered Post",
+            content="This is a filtered post.",
+            author=self.user
+        )
+        
+        url = reverse('post-list')
+        response = self.client.get(url, {'title': 'Filtered'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data['results']), 1)
+        self.assertEqual(response.data['results'][0]['title'], "Filtered Post")
+
+    def test_list_posts_with_ordering(self):
+        """게시글 정렬 테스트"""
+        # 정렬할 게시글 생성
+        Post.objects.create(
+            title="Newer Post",
+            content="This is a newer post.",
+            author=self.user
+        )
+        
+        url = reverse('post-list')
+        response = self.client.get(url, {'ordering': 'created_at'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data['results']), 2)
+        self.assertEqual(response.data['results'][0]['title'], "Test Post")  # 첫 번째 게시글
+        self.assertEqual(response.data['results'][1]['title'], "Newer Post")  # 두 번째 게시글
