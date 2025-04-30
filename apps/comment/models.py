@@ -5,10 +5,11 @@ from apps.post.models import Post
 
 User = get_user_model()
 
+
 class Comment(models.Model):
     """
     댓글 모델
-    
+
     Attributes:
         post (Post): 연결된 게시물
         author (User): 작성자
@@ -19,30 +20,31 @@ class Comment(models.Model):
         deleted_at (datetime): 삭제 시간
         deleted_by (User): 삭제한 사용자
     """
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
+
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments")
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_deleted = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(null=True, blank=True)
     deleted_by = models.ForeignKey(
-        User, 
-        on_delete=models.SET_NULL, 
-        null=True, 
-        blank=True, 
-        related_name='deleted_comments'
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="deleted_comments",
     )
 
     class Meta:
-        ordering = ['-created_at']
+        ordering = ["-created_at"]
         indexes = [
-            models.Index(fields=['-created_at']),
-            models.Index(fields=['post', '-created_at']),
-            models.Index(fields=['author', '-created_at']),
+            models.Index(fields=["-created_at"]),
+            models.Index(fields=["post", "-created_at"]),
+            models.Index(fields=["author", "-created_at"]),
         ]
-        verbose_name = '댓글'
-        verbose_name_plural = '댓글들'
+        verbose_name = "댓글"
+        verbose_name_plural = "댓글들"
 
     def __str__(self):
         """댓글의 문자열 표현을 반환합니다."""
@@ -51,7 +53,7 @@ class Comment(models.Model):
     def soft_delete(self, user):
         """
         댓글을 소프트 삭제합니다.
-        
+
         Args:
             user (User): 삭제를 수행하는 사용자
         """
@@ -65,4 +67,4 @@ class Comment(models.Model):
         self.is_deleted = False
         self.deleted_at = None
         self.deleted_by = None
-        self.save() 
+        self.save()
