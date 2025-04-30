@@ -1,10 +1,11 @@
-import os
-from PIL import Image
-from io import BytesIO
-from django.core.files.base import ContentFile
-from django.conf import settings
-from django.core.files.uploadedfile import UploadedFile
 import io
+import os
+from io import BytesIO
+
+from django.conf import settings
+from django.core.files.base import ContentFile
+from django.core.files.uploadedfile import UploadedFile
+from PIL import Image
 
 
 def process_image(image_file: UploadedFile) -> UploadedFile:

@@ -1,4 +1,5 @@
 from django.urls import path
+
 from .views import LikeViewSet
 
 like_list = LikeViewSet.as_view(
