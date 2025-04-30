@@ -53,6 +53,8 @@ OWN_APPS = [
     "apps.notification",
     "apps.post",
     "apps.idol_schedule",
+    "apps.comment",
+    "apps.like",
 ]
 
 THIRD_PARTY_APPS = [
