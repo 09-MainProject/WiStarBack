@@ -1,16 +1,18 @@
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
-from rest_framework import generics, permissions, status
 from django.db.models import Q
+from rest_framework import generics, permissions, status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from .models import Schedule, Idol
+from .models import Idol, Schedule
 from .serializers import ScheduleSerializer
+
 
 class IsManager(permissions.BasePermission):
     """
     아이돌 매니저(=is_staff=True)만 일정 등록을 할 수 있도록 권한 설정
     """
+
     def has_permission(self, request, view):
         # 스태프 권한을 가진 사용자만 일정 등록을 할 수 있습니다.
         return request.user and request.user.is_authenticated and request.user.is_staff
@@ -38,11 +40,12 @@ class IsIdolManagerOrOwner(permissions.BasePermission):
                 return True
         return False
 
+
 class ScheduleListCreateView(generics.ListCreateAPIView):
     serializer_class = ScheduleSerializer
     # permission_classes = [IsManager]  # 아이돌 매니저만 일정 생성 가능
 
-    permission_classes = [AllowAny] # 포스트맨 테스트용
+    permission_classes = [AllowAny]  # 포스트맨 테스트용
 
     def get_queryset(self):
         idol_id = self.kwargs["idol_id"]
@@ -71,33 +74,33 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
         # 필터 조건을 적용하여 쿼리셋 반환
         return queryset.filter(filters)
 
-
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True)
 
-        return Response({
-            "code": 200,
-            "message": "일정 목록 조회 성공" if queryset else "일정이 없습니다.",
-            "data": serializer.data
-        }, status=status.HTTP_200_OK)
+        return Response(
+            {
+                "code": 200,
+                "message": "일정 목록 조회 성공" if queryset else "일정이 없습니다.",
+                "data": serializer.data,
+            },
+            status=status.HTTP_200_OK,
+        )
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             self.perform_create(serializer)
-            return Response({
-                "code": 201,
-                "message": "일정 등록 성공",
-                "data": serializer.data
-            }, status=status.HTTP_201_CREATED)
+            return Response(
+                {"code": 201, "message": "일정 등록 성공", "data": serializer.data},
+                status=status.HTTP_201_CREATED,
+            )
         else:
             print("Serializer Errors:", serializer.errors)
-            return Response({
-                "code": 400,
-                "message": "일정 등록에 실패하였습니다.",
-                "data": None
-            }, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"code": 400, "message": "일정 등록에 실패하였습니다.", "data": None},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
     # 실제 사용
     def perform_create(self, serializer):
@@ -117,7 +120,9 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
     #     serializer.save(user=user, idol=idol)  # serializer에 user와 idol 추가하여 저장
 
 
-class ScheduleRetrieveUpdateDeleteView(generics.RetrieveAPIView, generics.DestroyAPIView):
+class ScheduleRetrieveUpdateDeleteView(
+    generics.RetrieveAPIView, generics.DestroyAPIView
+):
     serializer_class = ScheduleSerializer
     permission_classes = [IsIdolManagerOrOwner]  # 커스텀 권한 추가
 
@@ -130,19 +135,19 @@ class ScheduleRetrieveUpdateDeleteView(generics.RetrieveAPIView, generics.Destro
         try:
             instance = self.get_object()
             serializer = self.get_serializer(instance)
-            return Response({
-                "code": 200,
-                "message": "일정 조회 성공",
-                "data": {
-                    "schedule_view": serializer.data
-                }
-            }, status=status.HTTP_200_OK)
+            return Response(
+                {
+                    "code": 200,
+                    "message": "일정 조회 성공",
+                    "data": {"schedule_view": serializer.data},
+                },
+                status=status.HTTP_200_OK,
+            )
         except ObjectDoesNotExist:
-            return Response({
-                "code": 404,
-                "message": "일정을 찾을 수 없습니다.",
-                "data": None
-            }, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"code": 404, "message": "일정을 찾을 수 없습니다.", "data": None},
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
     def patch(self, request, *args, **kwargs):
         """
@@ -151,26 +156,29 @@ class ScheduleRetrieveUpdateDeleteView(generics.RetrieveAPIView, generics.Destro
         partial = True  # 수정은 부분 업데이트로 처리
         try:
             instance = self.get_object()
-            serializer = self.get_serializer(instance, data=request.data, partial=partial)
+            serializer = self.get_serializer(
+                instance, data=request.data, partial=partial
+            )
             if serializer.is_valid():
                 self.perform_update(serializer)
-                return Response({
-                    "code": 200,
-                    "message": "일정 수정 성공",
-                    "data": serializer.data
-                }, status=status.HTTP_200_OK)
+                return Response(
+                    {"code": 200, "message": "일정 수정 성공", "data": serializer.data},
+                    status=status.HTTP_200_OK,
+                )
             else:
-                return Response({
-                    "code": 400,
-                    "message": "일정 수정에 실패하였습니다.",
-                    "data": None
-                }, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {
+                        "code": 400,
+                        "message": "일정 수정에 실패하였습니다.",
+                        "data": None,
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
         except PermissionDenied:
-            return Response({
-                "code": 403,
-                "message": "수정 권한이 없습니다.",
-                "data": None
-            }, status=status.HTTP_403_FORBIDDEN)
+            return Response(
+                {"code": 403, "message": "수정 권한이 없습니다.", "data": None},
+                status=status.HTTP_403_FORBIDDEN,
+            )
 
     def delete(self, request, *args, **kwargs):
         """
@@ -179,19 +187,19 @@ class ScheduleRetrieveUpdateDeleteView(generics.RetrieveAPIView, generics.Destro
         try:
             instance = self.get_object()
             self.perform_destroy(instance)
-            return Response({
-                "code": 204,
-                "message": "일정 삭제 성공",
-                "data": {
-                    "schedule_id": instance.id
-                }
-            }, status=status.HTTP_204_NO_CONTENT)
+            return Response(
+                {
+                    "code": 204,
+                    "message": "일정 삭제 성공",
+                    "data": {"schedule_id": instance.id},
+                },
+                status=status.HTTP_204_NO_CONTENT,
+            )
         except PermissionDenied:
-            return Response({
-                "code": 403,
-                "message": "삭제 권한이 없습니다.",
-                "data": None
-            }, status=status.HTTP_403_FORBIDDEN)
+            return Response(
+                {"code": 403, "message": "삭제 권한이 없습니다.", "data": None},
+                status=status.HTTP_403_FORBIDDEN,
+            )
 
     def perform_update(self, serializer):
         """
