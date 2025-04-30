@@ -1,24 +1,27 @@
 # fmt: off
 
-# 로그인
-LOGIN_SUCCESS = {
-    "code": 200,
-    "message": "로그인을 성공했습니다.",
+# 회원가입
+SIGNUP_SUCCESS = {
+    "code": 201,
+    "message": "회원가입이 완료되었습니다.",
     "data": None,
 }
-# INVALID_CREDENTIALS = {
-#     "code": 401,
-#     "message": "이메일 또는 비밀번호가 올바르지 않습니다.",
-#     "data": None
-# }
-LOGOUT_SUCCESS = {
+SIGNUP_FAILED = {
     "code": 200,
-    "message": "로그아웃되었습니다.",
+    "message": "회원가입을 실패하였습니다.",
+    "data": None,
+}
+SIGNUP_PASSWORD_MISMATCH = {
+    "code": 400,
+    "message": "비밀번호가 일치하지 않습니다.",
+    "data": None,
+}
+WEAK_PASSWORD = {
+    "code": 400,
+    "message": "비밀번호가 보안 기준을 만족하지 않습니다.",
     "data": None,
 }
 
-
-# 회원가입 및 수정
 # EMAIL_NOT_VERIFIED = {
 #     "code": 400,
 #     "message": "이메일 인증이 완료되지 않았습니다.",
@@ -47,6 +50,23 @@ INVALID_SIGNATURE = {
     "data": None,
 }
 
+# 로그인 로그아웃
+LOGIN_SUCCESS = {
+    "code": 200,
+    "message": "로그인을 성공했습니다.",
+    "data": None,
+}
+LOGIN_FAILED = {
+    "code": 401,
+    "message": "이메일 또는 비밀번호가 올바르지 않습니다.",
+    "data": None,
+}
+LOGOUT_SUCCESS = {
+    "code": 200,
+    "message": "로그아웃되었습니다.",
+    "data": None,
+}
+
 # CSRF토큰
 CSRF_VALIDATION_FAILED = {
     "code": 403,
@@ -62,7 +82,7 @@ CSRF_INVALID_TOKEN = {
 # Refresh 토큰
 INVALID_REFRESH_TOKEN = {
     "code": 401,
-    "message": "유효하지 않은 Refresh Token입니다.",
+    "message": "유효하지 않은 리프레시 토큰입니다.",
     "data": None,
 }
 MISSING_REFRESH_TOKEN = {
@@ -72,7 +92,7 @@ MISSING_REFRESH_TOKEN = {
 }
 TOKEN_REFRESH_RESPONSE = {
     "code": 200,
-    "message": "토큰 재발급을 완료했습니다.",
+    "message": "액세스 토큰이 재발급되었습니다.",
     "data": None,
 }
 

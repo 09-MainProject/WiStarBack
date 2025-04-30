@@ -30,4 +30,8 @@ poetry run coverage report -m
 poetry run coverage html
 echo "OK"
 
+#echo "Starting pytest with coverage"
+#poetry run pytest --cov=. --cov-report=term-missing --cov-report=html
+#echo "OK"
+
 echo "${COLOR_GREEN}ALL tests passed successfully!${COLOR_NC}"
