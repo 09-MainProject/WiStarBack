@@ -10,8 +10,7 @@ from rest_framework.renderers import JSONRenderer
 from django_filters import rest_framework as filters
 from .models import Post
 from .pagination import PostPagination
-from .serializers import (PostCreateSerializer, PostSerializer,
-                          PostUpdateSerializer)
+from .serializers import PostCreateSerializer, PostSerializer, PostUpdateSerializer
 from .utils import process_image
 
 
