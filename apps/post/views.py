@@ -10,54 +10,64 @@ from .serializers import PostSerializer, PostCreateSerializer, PostUpdateSeriali
 from .pagination import PostPagination
 from .utils import process_image
 
+
 class PostFilter(django_filters.FilterSet):
     """게시글 필터"""
-    title = django_filters.CharFilter(lookup_expr='icontains')
-    content = django_filters.CharFilter(lookup_expr='icontains')
-    created_at = django_filters.DateTimeFilter(lookup_expr='gte')
-    created_at_end = django_filters.DateTimeFilter(field_name='created_at', lookup_expr='lte')
+
+    title = django_filters.CharFilter(lookup_expr="icontains")
+    content = django_filters.CharFilter(lookup_expr="icontains")
+    created_at = django_filters.DateTimeFilter(lookup_expr="gte")
+    created_at_end = django_filters.DateTimeFilter(
+        field_name="created_at", lookup_expr="lte"
+    )
 
     class Meta:
         model = Post
-        fields = ['title', 'content', 'created_at', 'created_at_end']
+        fields = ["title", "content", "created_at", "created_at_end"]
+
 
 class PostViewSet(viewsets.ModelViewSet):
     """게시물 뷰셋"""
-    filter_backends = [django_filters.DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+
+    filter_backends = [
+        django_filters.DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    ]
     filterset_class = PostFilter
-    search_fields = ['title', 'content']
-    ordering_fields = ['created_at', 'views']
-    ordering = ['-created_at']
+    search_fields = ["title", "content"]
+    ordering_fields = ["created_at", "views"]
+    ordering = ["-created_at"]
     pagination_class = PostPagination
-    
+
     def get_permissions(self):
         """
         액션에 따라 권한을 설정합니다.
         - 조회(GET): 모든 사용자 가능
         - 생성(POST), 수정(PATCH), 삭제(DELETE): 인증된 사용자만 가능
         """
-        if self.action in ['list', 'retrieve']:
+        if self.action in ["list", "retrieve"]:
             return [AllowAny()]
         return [IsAuthenticated()]
-    
+
     def get_queryset(self):
         """게시물 목록을 반환합니다."""
         return Post.objects.filter(is_deleted=False)
-    
+
     def get_serializer_class(self):
         """액션에 따라 적절한 시리얼라이저를 반환합니다."""
-        if self.action == 'create':
+        if self.action == "create":
             return PostCreateSerializer
-        elif self.action in ['update', 'partial_update']:
+        elif self.action in ["update", "partial_update"]:
             return PostUpdateSerializer
         return PostSerializer
-    
+
     def perform_create(self, serializer):
         """게시물을 생성합니다."""
         try:
             # 이미지 처리
-            if 'image' in self.request.FILES:
-                image_file = self.request.FILES['image']
+            if "image" in self.request.FILES:
+                image_file = self.request.FILES["image"]
                 processed_image = process_image(image_file)
                 serializer.save(author=self.request.user, image=processed_image)
             else:
@@ -65,35 +75,35 @@ class PostViewSet(viewsets.ModelViewSet):
         except Exception as e:
             print(f"이미지 처리 중 오류 발생: {e}")
             raise
-    
+
     def perform_update(self, serializer):
         """게시물을 수정합니다."""
         post = self.get_object()
         if post.author != self.request.user and not self.request.user.is_staff:
             raise PermissionDenied("게시물을 수정할 권한이 없습니다.")
-        
+
         # 이미지 처리
-        if 'image' in self.request.FILES:
-            image_file = self.request.FILES['image']
+        if "image" in self.request.FILES:
+            image_file = self.request.FILES["image"]
             processed_image = process_image(image_file)
             serializer.save(image=processed_image)
         else:
             serializer.save()
-    
+
     def perform_destroy(self, instance):
         """게시물을 소프트 삭제합니다."""
         if instance.author != self.request.user and not self.request.user.is_staff:
             raise PermissionDenied("게시물을 삭제할 권한이 없습니다.")
         instance.soft_delete(self.request.user)
-    
-    @action(detail=True, methods=['post'])
+
+    @action(detail=True, methods=["post"])
     def increase_views(self, request, pk=None):
         """조회수를 증가시킵니다."""
         post = self.get_object()
         post.increase_views()
         return Response(PostSerializer(post).data)
-    
-    @action(detail=True, methods=['post'])
+
+    @action(detail=True, methods=["post"])
     def restore(self, request, pk=None):
         """삭제된 게시물을 복구합니다."""
         post = self.get_object()
