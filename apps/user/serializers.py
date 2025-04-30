@@ -24,6 +24,15 @@ class UsernameSerializer(serializers.ModelSerializer):
         model = User
         fields = ["username"]
 
+class UserSerializer(serializers.ModelSerializer):
+    """사용자 시리얼라이저"""
+
+    class Meta:
+        model = User
+        fields = ["id", "email", "name", "nickname"]
+        read_only_fields = ["id"]
+
+
 class RegisterSerializer(serializers.ModelSerializer):
     password_confirm = serializers.CharField(write_only=True)
     email = serializers.EmailField(

@@ -20,6 +20,7 @@ class Comment(models.Model):
         is_deleted (bool): 삭제 여부
         deleted_at (datetime): 삭제 시간
         deleted_by (User): 삭제한 사용자
+        likes (ManyToManyField): 좋아요를 누른 사용자들
     """
 
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")
@@ -35,6 +36,11 @@ class Comment(models.Model):
         null=True,
         blank=True,
         related_name="deleted_comments",
+    )
+    likes = models.ManyToManyField(
+        User,
+        related_name="liked_comments",
+        blank=True,
     )
 
     class Meta:
@@ -69,3 +75,22 @@ class Comment(models.Model):
         self.deleted_at = None
         self.deleted_by = None
         self.save()
+
+    @property
+    def likes_count(self):
+        """좋아요 수를 반환합니다."""
+        return self.likes.count()
+
+    def is_liked_by(self, user):
+        """
+        특정 사용자가 이 댓글에 좋아요를 눌렀는지 확인합니다.
+
+        Args:
+            user (User): 확인할 사용자
+
+        Returns:
+            bool: 좋아요 여부
+        """
+        if not user.is_authenticated:
+            return False
+        return self.likes.filter(id=user.id).exists()
