@@ -1,7 +1,7 @@
 from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
 from django_filters import rest_framework as django_filters
@@ -21,12 +21,21 @@ class CommentFilter(django_filters.FilterSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     """댓글 뷰셋"""
-    permission_classes = [IsAuthenticated]
     filter_backends = [django_filters.DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_class = CommentFilter
     search_fields = ['content']
     ordering_fields = ['created_at']
     ordering = ['-created_at']
+    
+    def get_permissions(self):
+        """
+        액션에 따라 권한을 설정합니다.
+        - 조회(GET): 모든 사용자 가능
+        - 생성(POST), 수정(PATCH), 삭제(DELETE): 인증된 사용자만 가능
+        """
+        if self.action in ['list', 'retrieve']:
+            return [AllowAny()]
+        return [IsAuthenticated()]
     
     def get_queryset(self):
         """댓글 목록을 반환합니다."""
