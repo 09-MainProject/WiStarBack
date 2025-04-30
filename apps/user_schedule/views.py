@@ -1,11 +1,18 @@
-from django.http import Http404
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, generics, status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import generics, status, filters
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from django_filters.rest_framework import DjangoFilterBackend
+from .models import UserSchedule
 
-from .models import Follow, IdolSchedule, UserSchedule
-from .serializers import IdolScheduleSerializer, UserScheduleSerializer
+# Idol 및 팔로우 관련 모델 임포트는 try-except 처리
+try:
+    from .models import Follow, IdolSchedule
+    from .serializers import IdolScheduleSerializer
+    IDOL_MODELS_AVAILABLE = True
+except ImportError:
+    IDOL_MODELS_AVAILABLE = False
+
+from .serializers import UserScheduleSerializer
 
 # django-filter 설치 필요
 # 설치 방법:
@@ -23,8 +30,8 @@ class UserScheduleListCreateView(generics.ListCreateAPIView):
     serializer_class = UserScheduleSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    filterset_fields = ["title", "description", "location", "start_date", "end_date"]
-    search_fields = ["title", "description", "location"]
+    filterset_fields = ['title', 'description', 'location', 'start_date', 'end_date']
+    search_fields = ['title', 'description', 'location']
 
     def get_queryset(self):
         return UserSchedule.objects.filter(user=self.request.user)
@@ -32,39 +39,36 @@ class UserScheduleListCreateView(generics.ListCreateAPIView):
     def list(self, request, *args, **kwargs):
         user = request.user
 
-        # 사용자 개인 일정
+        # ① 사용자 개인 일정
         user_schedules = self.filter_queryset(self.get_queryset())
         user_schedule_data = UserScheduleSerializer(user_schedules, many=True).data
 
-        # 사용자가 팔로우한 아이돌의 스케줄
-        followed_idols = Follow.objects.filter(user=user).values_list("idol", flat=True)
-        idol_schedules = IdolSchedule.objects.filter(idol__in=followed_idols)
-        idol_schedule_data = IdolScheduleSerializer(idol_schedules, many=True).data
+        # ② 사용자가 팔로우한 아이돌 스케줄 (있을 경우만)
+        idol_schedule_data = []
+        if IDOL_MODELS_AVAILABLE:
+            followed_idols = Follow.objects.filter(user=user).values_list('idol', flat=True)
+            if followed_idols:
+                idol_schedules = IdolSchedule.objects.filter(idol__in=followed_idols)
+                idol_schedule_data = IdolScheduleSerializer(idol_schedules, many=True).data
 
-        return Response(
-            {
-                "code": 200,
-                "message": "사용자 + 팔로우 아이돌 일정 목록 조회 성공",
-                "data": {
-                    "user_schedules": user_schedule_data,
-                    "idol_schedules": idol_schedule_data,
-                },
-            },
-            status=status.HTTP_200_OK,
-        )
+        return Response({
+            "code": 200,
+            "message": "사용자 + 팔로우 아이돌 일정 목록 조회 성공",
+            "data": {
+                "user_schedules": user_schedule_data,
+                "idol_schedules": idol_schedule_data
+            }
+        }, status=status.HTTP_200_OK)
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         schedule = serializer.save(user=request.user)
-        return Response(
-            {
-                "code": 201,
-                "message": "사용자 일정 등록 성공",
-                "data": self.get_serializer(schedule).data,
-            },
-            status=status.HTTP_201_CREATED,
-        )
+        return Response({
+            "code": 201,
+            "message": "사용자 일정 등록 성공",
+            "data": self.get_serializer(schedule).data
+        }, status=status.HTTP_201_CREATED)
 
 
 # 사용자 일정 단건 조회/수정/삭제
