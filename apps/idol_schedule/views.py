@@ -1,5 +1,4 @@
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
-from rest_framework import generics, permissions, status
 from django.db.models import Q
 from rest_framework import generics, permissions, status
 from rest_framework.permissions import AllowAny
@@ -13,6 +12,7 @@ class IsManager(permissions.BasePermission):
     """
     아이돌 매니저(=is_staff=True)만 일정 등록을 할 수 있도록 권한 설정
     """
+
     def has_permission(self, request, view):
         # 스태프 권한을 가진 사용자만 일정 등록을 할 수 있습니다.
         return request.user and request.user.is_authenticated and request.user.is_staff
@@ -40,11 +40,12 @@ class IsIdolManagerOrOwner(permissions.BasePermission):
                 return True
         return False
 
+
 class ScheduleListCreateView(generics.ListCreateAPIView):
     serializer_class = ScheduleSerializer
     # permission_classes = [IsManager]  # 아이돌 매니저만 일정 생성 가능
 
-    permission_classes = [AllowAny] # 포스트맨 테스트용
+    permission_classes = [AllowAny]  # 포스트맨 테스트용
 
     def get_queryset(self):
         idol_id = self.kwargs["idol_id"]
@@ -72,7 +73,6 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
 
         # 필터 조건을 적용하여 쿼리셋 반환
         return queryset.filter(filters)
-
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
