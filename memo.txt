@@ -954,7 +954,7 @@ Docker 데몬(서버)을 수동으로 지금 바로 실행. 이걸 하지 않으
 sudo systemctl start docker
 서버를 껐다 켜도 Docker 서비스가 자동으로 다시 시작되게 설정
 sudo systemctl enable docker
-ssh -i ~/Downloads/mykey02.pem ec2-user@13.124.181.116
+ssh -i ~/Downloads/wistar.pem ec2-user@3.39.10.22
 
 sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 
