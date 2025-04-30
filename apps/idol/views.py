@@ -1,17 +1,19 @@
-import django_filters
-from rest_framework import generics, permissions, status, filters
+from django_filters import rest_framework as dj_filters
 from django_filters.rest_framework import DjangoFilterBackend
-from django_filters import rest_framework as django_filters
-from apps.idol.models import Idol
-#, Schedule
-from apps.idol.serializers import IdolSerializer
+from rest_framework import filters, permissions
+from rest_framework.decorators import action
+
 # , ScheduleSerializer
 from rest_framework.response import Response
-from rest_framework.decorators import action
 from rest_framework.viewsets import ModelViewSet
 
+from apps.idol.models import Idol
 
-class IdolFilter(django_filters.FilterSet):
+# , Schedule
+from apps.idol.serializers import IdolSerializer
+
+
+class IdolFilter(dj_filters.FilterSet):
     """
     아이돌 검색 필터
 
@@ -21,14 +23,15 @@ class IdolFilter(django_filters.FilterSet):
         debut_date (date): 데뷔 날짜 (이후)
         debut_date_end (date): 데뷔 날짜 (이전)
     """
-    name = django_filters.CharFilter(lookup_expr='icontains')
-    agency = django_filters.CharFilter(lookup_expr='icontains')
-    debut_date = django_filters.DateFilter(lookup_expr='gte')
-    debut_date_end = django_filters.DateFilter(field_name='debut_date', lookup_expr='lte')
+
+    name = dj_filters.CharFilter(lookup_expr="icontains")
+    agency = dj_filters.CharFilter(lookup_expr="icontains")
+    debut_date = dj_filters.DateFilter(lookup_expr="gte")
+    debut_date_end = dj_filters.DateFilter(field_name="debut_date", lookup_expr="lte")
 
     class Meta:
         model = Idol
-        fields = ['name', 'agency', 'debut_date', 'debut_date_end']
+        fields = ["name", "agency", "debut_date", "debut_date_end"]
 
 
 class IdolViewSet(ModelViewSet):
@@ -53,13 +56,14 @@ class IdolViewSet(ModelViewSet):
     destroy:
     아이돌 정보 비활성화
     """
+
     queryset = Idol.objects.all()
     serializer_class = IdolSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_class = IdolFilter
-    ordering_fields = ['debut_date', 'name', 'created_at']
-    ordering = ['name']
+    ordering_fields = ["debut_date", "name", "created_at"]
+    ordering = ["name"]
 
     def get_queryset(self):
         """기본적으로 활성화된 아이돌만 조회"""
@@ -73,14 +77,14 @@ class IdolViewSet(ModelViewSet):
         """아이돌 삭제 대신 비활성화"""
         instance.deactivate()
 
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=["post"])
     def activate(self, request, pk=None):
         """아이돌 활성화"""
         idol = self.get_object()
         idol.activate()
         return Response({"detail": "아이돌 정보가 활성화되었습니다."})
 
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=["post"])
     def deactivate(self, request, pk=None):
         """아이돌 비활성화"""
         idol = self.get_object()
@@ -152,4 +156,3 @@ class IdolViewSet(ModelViewSet):
 #     filterset_fields = ['idol']
 #     ordering_fields = ['name']
 #     ordering = ['name']
-
