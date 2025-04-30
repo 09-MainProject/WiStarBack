@@ -25,11 +25,23 @@ class PostSerializer(serializers.ModelSerializer):
         author (User): 작성자
     """
     author = UserSerializer(read_only=True)
-    
+
     class Meta:
         model = Post
-        fields = ['id', 'title', 'content', 'image', 'image_url', 'author', 'created_at', 'updated_at', 'views', 'is_deleted']
-        read_only_fields = ['author', 'created_at', 'updated_at', 'views', 'is_deleted']
+        fields = [
+            "id",
+            "title",
+            "content",
+            "image",
+            "image_url",
+            "author",
+            "created_at",
+            "updated_at",
+            "views",
+            "is_deleted",
+        ]
+        read_only_fields = ["author", "created_at", "updated_at", "views", "is_deleted"]
+
 
 class PostCreateSerializer(serializers.ModelSerializer):
     """게시물 생성 시리얼라이저"""
@@ -45,9 +57,3 @@ class PostUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = ["title", "content", "image"]
-
-    def validate_image_url(self, value):
-        """게시물 이미지 URL 유효성 검사"""
-        if value and not value.startswith(('http://', 'https://')):
-            raise serializers.ValidationError("올바른 URL 형식이어야 합니다.")
-        return value
