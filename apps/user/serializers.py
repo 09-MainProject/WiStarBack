@@ -6,15 +6,20 @@ from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from utils.exceptions import CustomAPIException
-from utils.responses.user import INVALID_REFRESH_TOKEN
+from utils.responses.user import (
+    INVALID_REFRESH_TOKEN,
+    SIGNUP_PASSWORD_MISMATCH,
+    WEAK_PASSWORD,
+)
 
 User = get_user_model()
 
-# class UsernameSerializer(serializers.ModelSerializer):
-#
-#     class Meta:
-#         model = User
-#         fields = ['username']
+
+class UsernameSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ["username"]
 
 class RegisterSerializer(serializers.ModelSerializer):
     password_confirm = serializers.CharField(write_only=True)
@@ -34,9 +39,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     def validate(self, data):
         # 비밀번호 일치 여부 확인
         if data["password"] != data["password_confirm"]:
-            raise serializers.ValidationError(
-                {"password_confirm": "비밀번호가 일치하지 않습니다."}
-            )
+            raise CustomAPIException(SIGNUP_PASSWORD_MISMATCH)
         data.pop("password_confirm")  # 모델에 없는 필드 제거
 
         user = User(**data)
@@ -52,7 +55,9 @@ class RegisterSerializer(serializers.ModelSerializer):
         #     raise serializers.ValidationError(errors)
 
         except ValidationError as e:
-            raise serializers.ValidationError(list(e.messages))
+            weak_password = WEAK_PASSWORD
+            weak_password["data"] = list(e.messages)
+            raise CustomAPIException(weak_password)
 
         return super().validate(data)
 
