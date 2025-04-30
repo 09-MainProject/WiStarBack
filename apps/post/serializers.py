@@ -15,10 +15,10 @@ class PostCreateSerializer(serializers.ModelSerializer):
     """게시물 생성 시리얼라이저"""
     class Meta:
         model = Post
-        fields = ['title', 'content', 'image', 'image_url']
+        fields = ['title', 'content', 'image']
 
 class PostUpdateSerializer(serializers.ModelSerializer):
     """게시물 수정 시리얼라이저"""
     class Meta:
         model = Post
-        fields = ['title', 'content', 'image', 'image_url']
+        fields = ['title', 'content', 'image']
