@@ -31,4 +31,5 @@ urlpatterns = [
     # path("api/users/", include("apps.user_schedule.urls")),
     # path("api/", include("apps.notification.urls")),
     # path("api/", include("apps.notification_set.urls")),
+    path("api/users/", include("user_schedule.urls")),
 ]
