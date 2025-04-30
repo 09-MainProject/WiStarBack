@@ -1,3 +1,4 @@
+from django.contrib.contenttypes.models import ContentType
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -8,13 +9,18 @@ from .serializers import LikeSerializer
 
 
 class LikeViewSet(viewsets.ModelViewSet):
+    """좋아요 뷰셋"""
+
     serializer_class = LikeSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        type = self.kwargs.get("type")
-        object_id = self.kwargs.get("id")
-        return Like.objects.filter(type=type, object_id=object_id)
+        """좋아요 목록을 반환합니다."""
+        content_type = ContentType.objects.get(
+            app_label=self.kwargs.get("app_label"), model=self.kwargs.get("model")
+        )
+        object_id = self.kwargs.get("object_id")
+        return Like.objects.filter(content_type=content_type, object_id=object_id)
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -26,13 +32,20 @@ class LikeViewSet(viewsets.ModelViewSet):
         )
 
     def perform_create(self, serializer):
-        type = self.kwargs.get("type")
-        object_id = self.kwargs.get("id")
-        serializer.save(user=self.request.user, type=type, object_id=object_id)
+        """좋아요를 생성합니다."""
+        content_type = ContentType.objects.get(
+            app_label=self.kwargs.get("app_label"), model=self.kwargs.get("model")
+        )
+        object_id = self.kwargs.get("object_id")
+        serializer.save(
+            user=self.request.user, content_type=content_type, object_id=object_id
+        )
 
-    @action(detail=False, methods=["get"], url_path="like-status")
-    def like_status(self, request, type=None, id=None):
+    @action(detail=False, methods=["get"])
+    def like_status(self, request, app_label=None, model=None, object_id=None):
+        """좋아요 상태를 반환합니다."""
+        content_type = ContentType.objects.get(app_label=app_label, model=model)
         exists = Like.objects.filter(
-            type=type, object_id=id, user=request.user
+            content_type=content_type, object_id=object_id, user=request.user
         ).exists()
         return Response({"liked": exists})
