@@ -32,9 +32,9 @@ urlpatterns = [
     path("token/verify", TokenVerifyView.as_view(), name="token_verify"),
     # oauth
     # # naver
-    path(
-        "naver/login/", oauth_views.NaverLoginRedirectView.as_view(), name="naver_login"
-    ),
-    path("naver/callback/", oauth_views.naver_callback, name="naver_callback"),
-    path("nickname/", oauth_views.oauth_nickname, name="nickname"),
+    # path(
+    #     "naver/login/", oauth_views.NaverLoginRedirectView.as_view(), name="naver_login"
+    # ),
+    # path("naver/callback/", oauth_views.naver_callback, name="naver_callback"),
+    # path("nickname/", oauth_views.oauth_nickname, name="nickname"),
 ]
