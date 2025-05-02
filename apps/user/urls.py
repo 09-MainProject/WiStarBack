@@ -1,7 +1,10 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenVerifyView
 
-from . import oauth_views
+from . import oauth_naver_views, oauth_kakao_views, oauth_google_views
+from .oauth_google_views import google_login_test_page
+from .oauth_kakao_views import kakao_login_test_page
+from .oauth_naver_views import naver_login_test_page, oauth_callback_test_page
 from .views import (
     CustomTokenObtainPairView,
     CustomTokenRefreshView,
@@ -29,11 +32,28 @@ urlpatterns = [
     path("token/logout", LogoutAPIView.as_view(), name="token_logout"),
     path("token/refresh", CustomTokenRefreshView.as_view(), name="token_refresh"),
     # path("token/verify", TokenVerifyView.as_view(), name="token_verify"),
-    # oauth
-    # # naver
+
+    # oauth naver
     path(
-        "naver/login/", oauth_views.NaverLoginRedirectView.as_view(), name="naver_login"
+        "naver/login", oauth_naver_views.NaverLoginRedirectView.as_view(), name="naver_login"
     ),
-    path("naver/callback/", oauth_views.naver_callback, name="naver_callback"),
+    path("naver/callback", oauth_naver_views.naver_callback, name="naver_callback"),
+    path("naver/login-test", naver_login_test_page, name="naver-login-test"),
+    path("oauth/callback-test", oauth_callback_test_page, name="naver-callback-test"),
+
+    # oauth kakao
+path(
+        "kakao/login", oauth_kakao_views.KakaoLoginRedirectView.as_view(), name="kakao_login"
+    ),
+    path("kakao/callback", oauth_kakao_views.kakao_callback, name="kakao_callback"),
+    path("kakao/login-test", kakao_login_test_page, name="kakao-login-test"),
+
+    # oauth google
+path(
+        "google/login", oauth_google_views.GoogleLoginRedirectView.as_view(), name="google_login"
+    ),
+    path("google/callback", oauth_google_views.google_callback, name="google_callback"),
+    path("google/login-test", google_login_test_page, name="google-login-test"),
+
     # path("nickname/", oauth_views.oauth_nickname, name="nickname"),
 ]

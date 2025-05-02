@@ -92,7 +92,7 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -231,3 +231,11 @@ SIMPLE_JWT = {
 #     },
 #     'USE_SESSION_AUTH': False,  # 세션 로그인 비활성화 (원하는 경우 True로)
 # }
+
+# 소셜로그인에 사용할 url
+# FRONTEND_URL = "/frontend_url"
+# 백엔드에서 임시로 테스트
+FRONTEND_URL = "/api/users"
+
+# 자동 슬래시 붙이는 기능 끄기
+APPEND_SLASH = False
