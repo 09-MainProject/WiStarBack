@@ -3,6 +3,7 @@ from django.core import signing
 from django.core.signing import SignatureExpired, TimestampSigner
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
 from rest_framework.generics import CreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -87,6 +88,7 @@ class RegisterView(CreateAPIView):
 
 
 # 이메일 인증
+# @csrf_exempt
 def verify_email(request):
     code = request.GET.get("code", "")  # code가 없으면 공백으로 처리
     signer = TimestampSigner()
