@@ -12,6 +12,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from utils.csrf import generate_csrf_token
+from utils.random_nickname import generate_unique_numbered_nickname
 
 User = get_user_model()
 
@@ -22,6 +23,7 @@ KAKAO_TOKEN_URL = "https://kauth.kakao.com/oauth/token"
 KAKAO_PROFILE_URL = "https://kapi.kakao.com/v2/user/me"
 
 # [사용자] → [프론트: React] → [네이버 로그인] → [백엔드: Django 콜백 + 토큰 발급] → [프론트: JWT 저장]
+
 
 class KakaoLoginRedirectView(RedirectView):
     def get_redirect_url(self, *args, **kwargs):
@@ -38,6 +40,7 @@ class KakaoLoginRedirectView(RedirectView):
         # print(f"{KAKAO_LOGIN_URL}?{urlencode(params)}")
         return f"{KAKAO_LOGIN_URL}?{urlencode(params)}"
 
+
 def kakao_callback(request):
     code = request.GET.get("code")
     state = request.GET.get("state")
@@ -49,7 +52,8 @@ def kakao_callback(request):
     print("access_token", access_token)
     profile = get_kakao_profile(access_token)
     print("profile", profile)
-    email = profile.get("email" , None)
+    email = profile.get("email")
+    print("email", email)
 
     if not email:
         return JsonResponse({"message": "이메일을 가져올 수 없습니다."}, status=400)
@@ -57,11 +61,22 @@ def kakao_callback(request):
     user = User.objects.filter(email=email).first()
 
     if not user:
-        name = profile.get("name")
-        nickname = profile.get("nickname")
+        random_nickname = generate_unique_numbered_nickname()
+        name = profile.get(
+            "name", random_nickname.split("#")[0]
+        )  # kakao는 사업자만 이름 가져올 수 있음.
+        nickname = profile.get("profile").get("nickname", random_nickname)
         # random_pw = User.objects.make_random_password()
         random_pw = "qwer1234!"
-        user = User.objects.create_user(email=email, password=random_pw, name=name, nickname=nickname,is_active=True)
+        try:
+            user = User.objects.create_user(
+                email=email, password=random_pw, name=name, nickname=nickname
+            )
+        except:
+            # print("1111")
+            user = User.objects.create_user(
+                email=email, password=random_pw, name=name, nickname=random_nickname
+            )
 
     # 유저가 활성화 되지 않았으면 활성화
     if not user.is_active:
@@ -144,46 +159,46 @@ def get_kakao_profile(access_token):
 
     result = response.json()
     print("get_kakao_profile", result)
-    return result.get("properties")
+    return result.get("kakao_account")
 
 
-class OAuthSignupView(APIView):
-    def post(self, request):
-        access_token = request.data.get("access_token")
-        nickname = request.data.get("nickname")
-        oauth = request.data.get("oauth")
-
-        if oauth != "kakao":
-            return Response({"message": "지원하지 않는 소셜 로그인입니다."}, status=400)
-
-        if not access_token or not nickname:
-            return Response({"message": "필수 값이 누락되었습니다."}, status=400)
-
-        profile = get_kakao_profile(access_token)
-        email = profile.get("email")
-
-        if not email or User.objects.filter(email=email).exists():
-            return Response({"message": "이미 가입된 이메일입니다."}, status=400)
-
-        user = User(email=email, nickname=nickname, is_active=True)
-        random_pw = User.objects.make_random_password()
-        user.set_password(random_pw)
-        user.save()
-
-        refresh = RefreshToken.for_user(user)
-        return Response(
-            {
-                "message": "회원가입 성공",
-                "access": str(refresh.access_token),
-                "refresh": str(refresh),
-            },
-            status=201,
-        )
-
+# class OAuthSignupView(APIView):
+#     def post(self, request):
+#         access_token = request.data.get("access_token")
+#         nickname = request.data.get("nickname")
+#         oauth = request.data.get("oauth")
+#
+#         if oauth != "kakao":
+#             return Response({"message": "지원하지 않는 소셜 로그인입니다."}, status=400)
+#
+#         if not access_token or not nickname:
+#             return Response({"message": "필수 값이 누락되었습니다."}, status=400)
+#
+#         profile = get_kakao_profile(access_token)
+#         email = profile.get("email")
+#
+#         if not email or User.objects.filter(email=email).exists():
+#             return Response({"message": "이미 가입된 이메일입니다."}, status=400)
+#
+#         user = User(email=email, nickname=nickname, is_active=True)
+#         random_pw = User.objects.make_random_password()
+#         user.set_password(random_pw)
+#         user.save()
+#
+#         refresh = RefreshToken.for_user(user)
+#         return Response(
+#             {
+#                 "message": "회원가입 성공",
+#                 "access": str(refresh.access_token),
+#                 "refresh": str(refresh),
+#             },
+#             status=201,
+#         )
 
 
 def kakao_login_test_page(request):
     return render(request, "kakao_test.html")
+
 
 # def oauth_callback_test_page(request):
 #     return render(request, "oauth_callback_test.html")
@@ -191,18 +206,14 @@ def kakao_login_test_page(request):
 
 # Kakao 로그인 리턴값
 # {
-#   "resultcode": "00",
-#   "message": "success",
-#   "response": {
-#     "id": "U3V2ZGF3ZXNvbWU=",
-#     "email": "testuser@kakao.com",
-#     "name": "테스트유저",
-#     "nickname": "테스트",
-#     "profile_image": "https://...",
-#     "age": "20-29",
-#     "gender": "M",
-#     "birthday": "10-01",
-#     "birthyear": "1999",
-#     "mobile": "010-1234-5678"
-#   }
+#     'id': 4243431846,
+#     'connected_at': '2025-05-02T15:52:17Z',
+#     'properties': {'nickname': '심심한베리'},
+#     'kakao_account': {
+#         'profile_nickname_needs_agreement': False,
+#         'profile': {'nic': '심심한베리', 'is_default_nickname': False},
+#         'has_email': True, 'email_needs_agreement': False,
+#         'is_email_valid': True, 'is_email_verified': True,
+#         'email': 'taejin4321@naver.com'
+#     }
 # }

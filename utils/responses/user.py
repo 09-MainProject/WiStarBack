@@ -21,6 +21,17 @@ WEAK_PASSWORD = {
     "message": "비밀번호가 보안 기준을 만족하지 않습니다.",
     "data": None,
 }
+DUPLICATE_EMAIL = {
+    "code": 400,
+    "message": "이미 존재하는 이메일입니다.",
+    "data": None
+}
+
+DUPLICATE_NICKNAME = {
+    "code": 400,
+    "message": "이미 존재하는 닉네임입니다.",
+    "data": None
+}
 
 # EMAIL_NOT_VERIFIED = {
 #     "code": 400,
