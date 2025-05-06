@@ -27,12 +27,18 @@ urlpatterns = [
     # path("api/posts/", include("apps.comment.urls")),
     # path("api/", include("apps.like.urls")),
     # path("api/idols/", include("apps.idol.urls")),
-    # path("api/idols/", include("apps.idol_schedule.urls")),
-    path("api/users/schedules/", include("apps.user_schedule.urls")),
+    path("api/idols/", include("apps.idol_schedule.urls")),
+    # path("api/users/", include("apps.user_schedule.urls")),
     # path("api/", include("apps.notification.urls")),
     # path("api/", include("apps.notification_set.urls")),
     # Swagger
-    path('swagger<format>/', schema_view.without_ui(cache_timeout=0), name='schema-json'),
-    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+    path(
+        "swagger<format>", schema_view.without_ui(cache_timeout=0), name="schema-json"
+    ),
+    path(
+        "swagger",
+        schema_view.with_ui("swagger", cache_timeout=0),
+        name="schema-swagger-ui",
+    ),
+    path("redoc", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
 ]

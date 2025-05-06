@@ -12,6 +12,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from utils.csrf import generate_csrf_token
+from utils.random_nickname import generate_unique_numbered_nickname
 
 User = get_user_model()
 
@@ -22,6 +23,7 @@ NAVER_TOKEN_URL = "https://nid.naver.com/oauth2.0/token"
 NAVER_PROFILE_URL = "https://openapi.naver.com/v1/nid/me"
 
 # [사용자] → [프론트: React] → [네이버 로그인] → [백엔드: Django 콜백 + 토큰 발급] → [프론트: JWT 저장]
+
 
 class NaverLoginRedirectView(RedirectView):
     def get_redirect_url(self, *args, **kwargs):
@@ -58,7 +60,7 @@ def naver_callback(request):
     access_token = get_naver_access_token(code, state)
     profile = get_naver_profile(access_token)
     email = profile.get("email")
-    print("profile123",profile)
+    print("profile123", profile)
 
     if not email:
         return JsonResponse({"message": "이메일을 가져올 수 없습니다."}, status=400)
@@ -66,11 +68,20 @@ def naver_callback(request):
     user = User.objects.filter(email=email).first()
 
     if not user:
-        name = profile.get("name")
-        nickname = profile.get("nickname")
+        random_nickname = generate_unique_numbered_nickname()
+        name = profile.get("name", random_nickname.split("#")[0])
+        nickname = profile.get("nickname", random_nickname)
         # random_pw = User.objects.make_random_password()
         random_pw = "qwer1234!"
-        user = User.objects.create_user(email=email, password=random_pw, name=name, nickname=nickname,is_active=True)
+        try:
+            user = User.objects.create_user(
+                email=email, password=random_pw, name=name, nickname=nickname
+            )
+        except:
+            # print("1111")
+            user = User.objects.create_user(
+                email=email, password=random_pw, name=name, nickname=random_nickname
+            )
 
     # 유저가 활성화 되지 않았으면 활성화
     if not user.is_active:
@@ -157,43 +168,43 @@ def get_naver_profile(access_token):
     return result.get("response")
 
 
-class OAuthSignupView(APIView):
-    def post(self, request):
-        access_token = request.data.get("access_token")
-        nickname = request.data.get("nickname")
-        oauth = request.data.get("oauth")
-
-        if oauth != "naver":
-            return Response({"message": "지원하지 않는 소셜 로그인입니다."}, status=400)
-
-        if not access_token or not nickname:
-            return Response({"message": "필수 값이 누락되었습니다."}, status=400)
-
-        profile = get_naver_profile(access_token)
-        email = profile.get("email")
-
-        if not email or User.objects.filter(email=email).exists():
-            return Response({"message": "이미 가입된 이메일입니다."}, status=400)
-
-        user = User(email=email, nickname=nickname, is_active=True)
-        random_pw = User.objects.make_random_password()
-        user.set_password(random_pw)
-        user.save()
-
-        refresh = RefreshToken.for_user(user)
-        return Response(
-            {
-                "message": "회원가입 성공",
-                "access": str(refresh.access_token),
-                "refresh": str(refresh),
-            },
-            status=201,
-        )
-
+# class OAuthSignupView(APIView):
+#     def post(self, request):
+#         access_token = request.data.get("access_token")
+#         nickname = request.data.get("nickname")
+#         oauth = request.data.get("oauth")
+#
+#         if oauth != "naver":
+#             return Response({"message": "지원하지 않는 소셜 로그인입니다."}, status=400)
+#
+#         if not access_token or not nickname:
+#             return Response({"message": "필수 값이 누락되었습니다."}, status=400)
+#
+#         profile = get_naver_profile(access_token)
+#         email = profile.get("email")
+#
+#         if not email or User.objects.filter(email=email).exists():
+#             return Response({"message": "이미 가입된 이메일입니다."}, status=400)
+#
+#         user = User(email=email, nickname=nickname, is_active=True)
+#         random_pw = User.objects.make_random_password()
+#         user.set_password(random_pw)
+#         user.save()
+#
+#         refresh = RefreshToken.for_user(user)
+#         return Response(
+#             {
+#                 "message": "회원가입 성공",
+#                 "access": str(refresh.access_token),
+#                 "refresh": str(refresh),
+#             },
+#             status=201,
+#         )
 
 
 def naver_login_test_page(request):
     return render(request, "naver_test.html")
+
 
 def oauth_callback_test_page(request):
     return render(request, "oauth_callback_test.html")
