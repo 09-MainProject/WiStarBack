@@ -3,10 +3,13 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from utils.exceptions import CustomAPIException
 from utils.responses.user import (
+    DUPLICATE_EMAIL,
+    DUPLICATE_NICKNAME,
     INVALID_REFRESH_TOKEN,
     SIGNUP_PASSWORD_MISMATCH,
     WEAK_PASSWORD,
@@ -23,6 +26,20 @@ class UsernameSerializer(serializers.ModelSerializer):
 
 class RegisterSerializer(serializers.ModelSerializer):
     password_confirm = serializers.CharField(write_only=True)
+    email = serializers.EmailField(
+        validators=[
+            UniqueValidator(
+                queryset=User.objects.all(), message=DUPLICATE_EMAIL["message"]
+            )
+        ]
+    )
+    nickname = serializers.CharField(
+        validators=[
+            UniqueValidator(
+                queryset=User.objects.all(), message=DUPLICATE_NICKNAME["message"]
+            )
+        ]
+    )
 
     class Meta:
         model = User
