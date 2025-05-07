@@ -128,3 +128,7 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
         if password := validated_data.get("password"):
             validated_data["password"] = make_password(password)
         return super().update(instance, validated_data)
+
+
+class PasswordCheckSerializer(serializers.Serializer):
+    password = serializers.CharField(write_only=True)
