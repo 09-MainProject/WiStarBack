@@ -17,8 +17,8 @@ class LikeViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """좋아요 목록을 반환합니다."""
         content_type = ContentType.objects.get(
-            app_label=self.kwargs.get("app_label", "post"),
-            model=self.kwargs.get("model", "post"),
+            app_label=self.kwargs.get("app_label"),
+            model=self.kwargs.get("app_label"),  # app_label을 model로도 사용
         )
         object_id = self.kwargs.get("object_id")
         return Like.objects.filter(content_type=content_type, object_id=object_id)
