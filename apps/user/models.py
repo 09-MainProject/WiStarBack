@@ -23,6 +23,15 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
+    def make_random_password(
+        self,
+        length=10,
+        allowed_chars="abcdefghjkmnpqrstuvwxyz" "ABCDEFGHJKLMNPQRSTUVWXYZ" "23456789",
+    ):
+        from django.utils.crypto import get_random_string
+
+        return get_random_string(length, allowed_chars)
+
 
 # 암호화는 복호화가 가능함
 # 암호화는 qwer1234 -> aslkfjdslkfj322kj43 -> 복호화 -> qwer1234

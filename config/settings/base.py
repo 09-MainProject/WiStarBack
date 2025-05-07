@@ -73,7 +73,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",  # 보안 관련 HTTP 헤더 자동 설정 (예: X-Content-Type-Options, X-Frame-Options, HTTPS 리다이렉트 등).
     "django.contrib.sessions.middleware.SessionMiddleware",  # Django의 세션 관리를 담당. 서버 기반 세션(Cookie + DB)에 사용. 주로 서버 렌더링 웹사이트에서 로그인 상태 유지 등에 사용됨.
     "django.middleware.common.CommonMiddleware",  # 여러 가지 일반적인 HTTP 처리 기능 제공. URL 끝에 슬래시 자동 추가 (APPEND_SLASH). 잘못된 요청 보완, 간단한 리다이렉트 처리 등.
-    "django.middleware.csrf.CsrfViewMiddleware",  # Django의 기본 CSRF 보호 미들웨어.  서버 렌더링 기반 웹사이트에 최적화.  쿠키 + 폼 기반 CSRF 검증 수행.
+    # "django.middleware.csrf.CsrfViewMiddleware",  # Django의 기본 CSRF 보호 미들웨어.  서버 렌더링 기반 웹사이트에 최적화.  쿠키 + 폼 기반 CSRF 검증 수행.
     # 'utils.middleware.CustomCSRFMiddleware',   # 커스텀 CSRF 보호 미들웨어
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
@@ -93,7 +93,7 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -192,10 +192,11 @@ LOGOUT_REDIRECT_URL = "/api/user/login/"
 REST_FRAMEWORK = {
     # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     # 'PAGE_SIZE': 10,
+    "EXCEPTION_HANDLER": "config.exception_handler.custom_exception_handler",
     "DEFAULT_AUTHENTICATION_CLASSES": [
         # 'rest_framework.authentication.BasicAuthentication',
         "rest_framework_simplejwt.authentication.JWTAuthentication",
-    ]
+    ],
 }
 
 
@@ -209,3 +210,30 @@ SIMPLE_JWT = {
     "TOKEN_OBTAIN_SERIALIZER": "utils.jwt_serializers.WiStarTokenObtainPairSerializer",
     # ...
 }
+
+# # Swagger 설정
+# SWAGGER_SETTINGS = {
+#     'SECURITY_DEFINITIONS': {
+#         'Bearer': {
+#             'type': 'apiKey',
+#             'in': 'header',
+#             'name': 'Authorization',
+#             'description': 'JWT access token: Bearer <your_token>',
+#         },
+#         'X-CSRFToken': {
+#             'type': 'apiKey',
+#             'in': 'header',
+#             'name': 'X-CSRFToken',
+#             'description': 'CSRF token from cookie (name: csrftoken)',
+#         },
+#     },
+#     'USE_SESSION_AUTH': False,  # 세션 로그인 비활성화 (원하는 경우 True로)
+# }
+
+# 소셜로그인에 사용할 url
+# FRONTEND_URL = "/frontend_url"
+# 백엔드에서 임시로 테스트
+FRONTEND_URL = "/api/users"
+
+# 자동 슬래시 붙이는 기능 끄기
+APPEND_SLASH = False

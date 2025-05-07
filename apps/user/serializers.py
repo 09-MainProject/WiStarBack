@@ -4,10 +4,17 @@ from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from utils.exceptions import CustomAPIException
-from utils.responses.user import INVALID_REFRESH_TOKEN
+from utils.responses.user import (
+    DUPLICATE_EMAIL,
+    DUPLICATE_NICKNAME,
+    INVALID_REFRESH_TOKEN,
+    SIGNUP_PASSWORD_MISMATCH,
+    WEAK_PASSWORD,
+)
 
 User = get_user_model()
 
@@ -20,6 +27,20 @@ class UsernameSerializer(serializers.ModelSerializer):
 
 class RegisterSerializer(serializers.ModelSerializer):
     password_confirm = serializers.CharField(write_only=True)
+    email = serializers.EmailField(
+        validators=[
+            UniqueValidator(
+                queryset=User.objects.all(), message=DUPLICATE_EMAIL["message"]
+            )
+        ]
+    )
+    nickname = serializers.CharField(
+        validators=[
+            UniqueValidator(
+                queryset=User.objects.all(), message=DUPLICATE_NICKNAME["message"]
+            )
+        ]
+    )
 
     class Meta:
         model = User
@@ -36,9 +57,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     def validate(self, data):
         # 비밀번호 일치 여부 확인
         if data["password"] != data["password_confirm"]:
-            raise serializers.ValidationError(
-                {"password_confirm": "비밀번호가 일치하지 않습니다."}
-            )
+            raise CustomAPIException(SIGNUP_PASSWORD_MISMATCH)
         data.pop("password_confirm")  # 모델에 없는 필드 제거
 
         user = User(**data)
@@ -54,7 +73,9 @@ class RegisterSerializer(serializers.ModelSerializer):
         #     raise serializers.ValidationError(errors)
 
         except ValidationError as e:
-            raise serializers.ValidationError(list(e.messages))
+            weak_password = WEAK_PASSWORD
+            weak_password["data"] = list(e.messages)
+            raise CustomAPIException(weak_password)
 
         return super().validate(data)
 
@@ -107,3 +128,7 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
         if password := validated_data.get("password"):
             validated_data["password"] = make_password(password)
         return super().update(instance, validated_data)
+
+
+class PasswordCheckSerializer(serializers.Serializer):
+    password = serializers.CharField(write_only=True)
