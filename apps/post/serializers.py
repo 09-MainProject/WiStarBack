@@ -25,6 +25,8 @@ class PostSerializer(serializers.ModelSerializer):
             "likes_count",
             "is_liked",
             "is_deleted",
+            "image",
+            "image_url",
         ]
         read_only_fields = ["author", "created_at", "updated_at", "views"]
 
@@ -45,7 +47,7 @@ class PostCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ["title", "content", "image", "author"]
+        fields = ["title", "content", "image", "image_url", "author"]
         read_only_fields = ["author"]
 
     def create(self, validated_data):

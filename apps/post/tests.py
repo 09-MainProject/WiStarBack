@@ -1,6 +1,11 @@
+import io
+import os
+
 from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.urls import reverse
+from PIL import Image
 from rest_framework import status
 from rest_framework.test import APIClient
 
@@ -35,6 +40,27 @@ class PostTests(TestCase):
 
         # 사용자 인증
         self.client.force_authenticate(user=self.user)
+
+        # 테스트용 이미지 생성
+        self.image = self.create_test_image()
+
+    def create_test_image(self):
+        """테스트용 이미지 파일을 생성합니다."""
+        file = io.BytesIO()
+        image = Image.new("RGB", (100, 100), "white")
+        image.save(file, "png")
+        file.name = "test.png"
+        file.seek(0)
+        return SimpleUploadedFile(
+            name="test.png", content=file.read(), content_type="image/png"
+        )
+
+    def tearDown(self):
+        """테스트 후 정리"""
+        # 테스트 이미지 파일 정리
+        if hasattr(self, "image"):
+            if os.path.exists(self.image.name):
+                os.remove(self.image.name)
 
     def test_create_post(self):
         """게시물 생성 테스트"""
@@ -193,3 +219,77 @@ class PostTests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.post.refresh_from_db()
         self.assertEqual(self.post.views, 1)
+
+    def test_create_post_with_image(self):
+        """이미지가 포함된 게시물 생성 테스트"""
+        url = reverse("post-list")
+        data = {
+            "title": "New Test Post with Image",
+            "content": "This is a new test post with image.",
+            "image": self.image,
+        }
+        response = self.client.post(url, data, format="multipart")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Post.objects.count(), 2)
+        self.assertEqual(response.data["title"], data["title"])
+        self.assertEqual(response.data["content"], data["content"])
+        self.assertIn("image", response.data)
+        self.assertTrue(
+            response.data["image"].endswith(".webp")
+        )  # WebP로 변환되었는지 확인
+
+    def test_create_post_with_image_url(self):
+        """이미지 URL이 포함된 게시물 생성 테스트"""
+        url = reverse("post-list")
+        data = {
+            "title": "New Test Post with Image URL",
+            "content": "This is a new test post with image URL.",
+            "image_url": "https://example.com/test-image.jpg",
+        }
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Post.objects.count(), 2)
+        self.assertEqual(response.data["title"], data["title"])
+        self.assertEqual(response.data["content"], data["content"])
+        self.assertIn("image_url", response.data)
+        self.assertEqual(response.data["image_url"], data["image_url"])
+
+    def test_update_post_image(self):
+        """게시물 이미지 수정 테스트"""
+        url = reverse("post-detail", args=[self.post.id])
+        data = {"image": self.image}
+        response = self.client.patch(url, data, format="multipart")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.post.refresh_from_db()
+        self.assertIsNotNone(self.post.image)
+        self.assertTrue(
+            str(self.post.image).endswith(".webp")
+        )  # WebP로 변환되었는지 확인
+
+    def test_create_post_without_image(self):
+        """이미지 없이 게시물 생성 테스트"""
+        url = reverse("post-list")
+        data = {
+            "title": "New Test Post without Image",
+            "content": "This is a new test post without image.",
+        }
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Post.objects.count(), 2)
+        self.assertEqual(response.data["title"], data["title"])
+        self.assertEqual(response.data["content"], data["content"])
+        self.assertIsNone(response.data.get("image"))
+
+    def test_create_post_with_invalid_image(self):
+        """잘못된 이미지 파일로 게시물 생성 시도 테스트"""
+        url = reverse("post-list")
+        invalid_image = SimpleUploadedFile(
+            name="test.txt", content=b"not an image", content_type="text/plain"
+        )
+        data = {
+            "title": "New Test Post with Invalid Image",
+            "content": "This is a new test post with invalid image.",
+            "image": invalid_image,
+        }
+        response = self.client.post(url, data, format="multipart")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
