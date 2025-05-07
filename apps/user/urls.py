@@ -9,6 +9,7 @@ from .views import (
     CustomTokenObtainPairView,
     CustomTokenRefreshView,
     LogoutAPIView,
+    PasswordCheckView,
     ProfileView,
     RegisterView,
     VerifyEmailView,
@@ -20,6 +21,7 @@ urlpatterns = [
     path("signup", RegisterView.as_view(), name="signup"),
     # path("verify/email", verify_email, name="verify_email"),
     path("verify/email", VerifyEmailView.as_view(), name="verify_email"),
+    path("check/password", PasswordCheckView.as_view(), name="check-password"),
     # POST /api/users/login/ -> 로그인
     # path("login", CustomTokenObtainPairView.as_view(), name="login"),
     # POST /api/users/login/ -> 로그아웃

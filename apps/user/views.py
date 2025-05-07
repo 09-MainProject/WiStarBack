@@ -24,6 +24,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from apps.user.models import User
 from apps.user.serializers import (
     LogoutSerializer,
+    PasswordCheckSerializer,
     ProfileSerializer,
     ProfileUpdateSerializer,
     RegisterSerializer,
@@ -724,6 +725,23 @@ class ProfileView(RetrieveUpdateDestroyAPIView):
         user = self.get_object()
         user.delete()
         return Response(DELETE_SUCCESS, status=status.HTTP_200_OK)
+
+
+class PasswordCheckView(APIView):
+    permission_classes = [IsAuthenticated]  # 인증된 사용자만 데이터 접근 가능
+    authentication_classes = [JWTAuthentication]  # JWT 인증
+
+    def post(self, request):
+        serializer = PasswordCheckSerializer(data=request.data)
+        if serializer.is_valid():
+            password = serializer.validated_data["password"]
+            user = request.user
+
+            if user.check_password(password):
+                return Response({"matched": True}, status=status.HTTP_200_OK)
+            return Response({"matched": False}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 # 토큰 정보 확인
