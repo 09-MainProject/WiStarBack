@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password
+from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from rest_framework import serializers
@@ -10,11 +11,11 @@ from utils.responses.user import INVALID_REFRESH_TOKEN
 
 User = get_user_model()
 
-# class UsernameSerializer(serializers.ModelSerializer):
-#
-#     class Meta:
-#         model = User
-#         fields = ['username']
+
+class UsernameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["nickname", "name"]
 
 
 class RegisterSerializer(serializers.ModelSerializer):
