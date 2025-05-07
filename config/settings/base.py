@@ -161,11 +161,6 @@ USE_TZ = True
 STATIC_URL = "static/"
 STATIC_DIR = BASE_DIR / "static"
 
-
-# STATICFILES_DIRS = [
-#     STATIC_DIR,
-# ]
-
 # 배포할 때 사용하는 경로
 STATIC_ROOT = BASE_DIR / ".static_root"
 

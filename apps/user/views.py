@@ -128,7 +128,18 @@ class RegisterView(CreateAPIView):
         # 2. 서명된 이메일을 직렬화
         signed_code = signing.dumps(signed_email)
 
+        # signed_code = signer.sign(user.email)
+
         verify_url = f"{request.scheme}://{request.get_host()}/api/users/verify/email?code={signed_code}"
+
+        # 이메일 전송 또는 콘솔 출력
+        # if settings.DEBUG:
+        #     print('[3DJBank] 이메일 인증 링크:', verify_url)
+        #     # 응답에 verify_url 포함
+        #     response_data = serializer.data
+        #     response_data["verify_url"] = verify_url
+        #
+        #     return Response(response_data, status=status.HTTP_201_CREATED)
 
         subject = "[WiStar] 이메일 인증을 완료해주세요."
         message = f"아래 링크를 클릭해 인증을 완료해주세요.\n\n{verify_url}"
@@ -153,22 +164,6 @@ class RegisterView(CreateAPIView):
 
 
 # 이메일 인증
-
-
-def verify_email(request):
-    code = request.GET.get("code", "")  # code가 없으면 공백으로 처리
-    signer = TimestampSigner()
-    try:
-        # 3. 직렬화된 데이터를 역직렬화
-        decoded_user_email = signing.loads(code)
-        # 4. 타임스탬프 유효성 검사 포함하여 복호화
-        email = signer.unsign(decoded_user_email, max_age=60 * 5)  # 5분 설정
-    except SignatureExpired:  # 시간 지나서 오류발생하면 오류처리
-        return JsonResponse(SIGNATURE_EXPIRED, HTTP_410_GONE)
-    except Exception:
-        return Response(INVALID_SIGNATURE, HTTP_400_BAD_REQUEST)
-
-
 class VerifyEmailView(APIView):
 
     @swagger_auto_schema(
