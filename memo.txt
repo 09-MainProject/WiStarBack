@@ -934,8 +934,98 @@ class CustomCSRFMiddleware:
 
 
 -----------------------------
-아마존 리눅스 서버에서 배포 설정하기
+Ubuntu 서버에서 CI/CD 사용해 배포 설정하기
 -----------------------------
+ssh -i ~/Downloads/wistar.pem ubuntu@43.203.181.6
+
+mv ~/Downloads/wistar.pem ~/.ssh
+# 만약 ~/.ssh 경로가없다면 .ssh 폴더를 생성해줘야합니다.
+mkdir ~/.ssh
+
+# mv 명령어가 듣지 않는 경우 sudo를 통해서 실행해보세요.
+
+확인
+cd ~/.ssh
+ls -l
+
+chmod 400 wistar.pem   # 읽기 모드 설정 추천 600은 읽기/쓰기
+ls -l
+
+ssh -i ~/.ssh/wistar.pem ubuntu@43.203.181.6
+
+Pyenv 설치 및 설정
+sudo apt-get install -y make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev xz-utils libpq-dev python3-dev python3-setuptools liblzma-dev
+curl https://pyenv.run | bash
+
+- 각 패키지의 역할
+    - **`make`**: 컴파일, 링크 등을 위한 자동화 도구입니다.
+    - **`build-essential`**: C/C++ 컴파일러 및 관련 도구들(gcc, g++, make, libc6-dev 등)을 포함한 메타패키지입니다. 소스 코드로부터 프로그램을 빌드할 때 필요합니다.
+    - **`libssl-dev`**: OpenSSL 라이브러리의 개발 헤더 파일을 포함하며, 보안 통신과 관련된 기능을 제공합니다.
+    - **`zlib1g-dev`**: 압축 관련 기능을 제공하는 zlib 라이브러리의 개발 헤더 파일입니다.
+    - **`libbz2-dev`**: Bzip2 압축 라이브러리의 개발 헤더 파일입니다.
+    - **`libreadline-dev`**: 터미널에서의 텍스트 입력을 편리하게 해주는 readline 라이브러리의 개발 헤더 파일입니다.
+    - **`libsqlite3-dev`**: SQLite 데이터베이스 엔진의 개발 헤더 파일입니다.
+    - **`wget`**: 파일 다운로드를 위한 커맨드라인 도구입니다.
+    - **`curl`**: URL을 통해 데이터를 전송하거나 다운로드하는 도구입니다.
+    - **`llvm`**: Low-Level Virtual Machine의 약자로, 컴파일러 프레임워크입니다. `pyenv`로 Python을 빌드할 때 사용됩니다.
+    - **`libncurses5-dev` 및 `libncursesw5-dev`**: 터미널 UI 개발을 위한 ncurses 라이브러리의 개발 헤더 파일입니다.
+    - **`xz-utils`**: xz 압축 파일을 다루기 위한 유틸리티입니다.
+    - **`libpq-dev`**: PostgreSQL 데이터베이스를 위한 개발 헤더 파일입니다. Python에서 PostgreSQL을 사용하는 프로젝트에 필요합니다.
+    - **`python3-dev`**: Python 3 헤더 파일과 개발 도구를 포함합니다. Python C 확장을 빌드할 때 필요합니다.
+    - `python3-setuptools`
+        - **패키지 설치**: Python 패키지를 설치하고, 종속성을 해결합니다.
+        - **패키지 배포**: Python 패키지를 생성하고, 배포할 수 있도록 도와줍니다.
+        - **`pip`와 함께 사용**: `pip`를 사용하여 패키지를 설치할 때, `setuptools`가 설치되어 있어야 하는 경우가 많습니다. ( 여기서는 Pillow 설치를 위함)
+    - **`liblzma-dev`**: LZMA 압축 라이브러리의 개발 헤더 파일입니다.
+
+- `curl https://pyenv.run | bash` 해석
+    `https://pyenv.run` 으로부터 pyenv 설치 스크립트 파일을 다운받아서 실행합니다.
+    이 스크립트는 `pyenv`, `pyenv-virtualenv`, `pyenv-update` 등의 설치를 자동으로 진행합니다.
+    필요한 초기 설정을 .bashrc나 .zshrc 파일에 추가하여 `pyenv` 명령어를 사용할 수 있도록 환경을 구성합니다.
+
+
+Ubuntu 사용자 계정의 Bash 셸 설정 파일을 편집
+.bashrc 에 pyenv 설정 추가하기
+
+# vi 에디터로 .bashrc 편집하기
+sudo vi ~/.bashrc
+
+# 터미널 재실행
+source ~/.bashrc
+
+yenv에서 사용할 python을 설치해줍니다.
+pyenv install <version>
+pyenv install 3.13.1
+
+Github SSH-Keygen
+터미널에서 아래 명령어를 입력 후 계속 Enter를 눌러 ssh-key를 생성합니다.
+ssh-keygen -t rsa -b 4096 -C "깃허브 이메일"
+ssh-keygen -t rsa -b 4096 -C "xowls0131@naver.com"
+
+아래 명령어를 입력하여 현재 쉘에서 SSH 에이전트를 실행합니다.
+eval "$(ssh-agent -s)"
+
+vi 에디터를 사용하여 .ssh / config 파일을 생성합니다.
+vi ~/.ssh/config
+
+아래 내용 추가 후 저장
+Host github.com
+  AddKeysToAgent yes
+  IdentityFile ~/.ssh/id_rsa
+
+아래의 명령어를 입력하여 ssh-agent에 방금 생성한 SSH-Key를 추가합니다.
+ssh-add -k ~/.ssh/id_rsa
+
+아래의 명령어를 입력하여 id_rsa.pub 파일을 열어 이메일 앞쪽의 키값만 복사합니다.
+sudo vi ~/.ssh/id_rsa.pub
+
+아래의 명령어를 입력하여 작성한 코드를 클론 받습니다.
+git clone --branch develop --single-branch <레포지토리 주소>
+git clone --branch de --single-branch <레포지토리 주소>
+
+------------------------------------------
+아마존 리눅스 서버에서 도커 사용해 배포 설정하기
+------------------------------------------
 
 # docker 이미지 생성 및 테스트
 # docker build : Dockerfile을 기반으로 도커 이미지를 빌드
@@ -955,6 +1045,7 @@ sudo systemctl start docker
 서버를 껐다 켜도 Docker 서비스가 자동으로 다시 시작되게 설정
 sudo systemctl enable docker
 ssh -i ~/Downloads/wistar.pem ec2-user@3.39.10.22
+ssh -i ~/Downloads/wistar.pem ubuntu@43.203.181.6
 
 sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 
@@ -963,13 +1054,14 @@ sudo chmod +x /usr/local/bin/docker-compose
 docker-compose --version
 
 
-mv ~/Downloads/mykey02.pem ~/.ssh
+mv ~/Downloads/wistar.pem ~/.ssh
 ls -l
 
-chmod 400 mykey02.pem   # 읽기 모드 설정
+chmod 400 wistar.pem   # 읽기 모드 설정
 ls -l
 
-ssh -i ~/.ssh/mykey02.pem ec2-user@13.124.181.116
+ssh -i ~/.ssh/wistar.pem ec2-user@13.124.181.116
+ssh -i ~/.ssh/wistar.pem ubuntu@43.203.181.6
 
 
 1. scp&docker-compose

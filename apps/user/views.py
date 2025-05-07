@@ -45,7 +45,7 @@ from utils.responses.user import (
     SIGNUP_SUCCESS,
     TOKEN_REFRESH_RESPONSE,
     VERIFY_EMAIL_SUCCESS,
-    WEAK_PASSWORD,
+    WEAK_PASSWORD, PASSWORD_MATCH_SUCCESS, PASSWORD_NOT_MATCH, PASSWORD_CHECK_INVALID,
 )
 
 
@@ -731,6 +731,26 @@ class PasswordCheckView(APIView):
     permission_classes = [IsAuthenticated]  # 인증된 사용자만 데이터 접근 가능
     authentication_classes = [JWTAuthentication]  # JWT 인증
 
+    @swagger_auto_schema(
+        operation_summary="비밀번호 확인",
+        operation_description="입력한 비밀번호가 현재 사용자 계정의 비밀번호와 일치하는지 확인합니다.",
+        request_body=PasswordCheckSerializer,
+        responses={
+            200: openapi.Response(
+                description="비밀번호 일치",
+                examples={
+                    "application/json": PASSWORD_MATCH_SUCCESS
+                },
+            ),
+            400: openapi.Response(
+                description="비밀번호 불일치 또는 입력값 오류",
+                examples={
+                    "application/json": PASSWORD_NOT_MATCH
+                },
+            ),
+        },
+        security=[{"Bearer": []}],
+    )
     def post(self, request):
         serializer = PasswordCheckSerializer(data=request.data)
         if serializer.is_valid():
@@ -738,10 +758,12 @@ class PasswordCheckView(APIView):
             user = request.user
 
             if user.check_password(password):
-                return Response({"matched": True}, status=status.HTTP_200_OK)
-            return Response({"matched": False}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(PASSWORD_MATCH_SUCCESS, status=status.HTTP_200_OK)
+            return Response(PASSWORD_NOT_MATCH, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        password_check_invalid = PASSWORD_CHECK_INVALID
+        password_check_invalid["data"] = serializer.errors
+        return Response(password_check_invalid, status=status.HTTP_400_BAD_REQUEST)
 
 
 # 토큰 정보 확인
