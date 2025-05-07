@@ -39,6 +39,7 @@ class IdolSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "name",
+            "en_name",
             "debut_date",
             "agency",
             "description",

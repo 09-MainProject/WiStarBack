@@ -7,6 +7,11 @@ app_name = "idols"
 urlpatterns = [
     path("", IdolViewSet.as_view({"get": "list", "post": "create"}), name="idol-list"),
     path(
+        "search/",
+        IdolViewSet.as_view({"get": "search"}),
+        name="idol-search",
+    ),
+    path(
         "<int:pk>/",
         IdolViewSet.as_view(
             {"get": "retrieve", "patch": "partial_update", "delete": "destroy"}
