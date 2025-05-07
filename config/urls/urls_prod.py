@@ -26,8 +26,8 @@ from apps import user_schedule
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/users/", include("apps.user.urls")),
-    # path("api/posts/", include("apps.post.urls")),
-    # path("api/posts/", include("apps.comment.urls")),
+    path("api/posts/", include("apps.post.urls")),
+    path("api/posts/", include("apps.comment.urls")),
     # path("api/", include("apps.like.urls")),
     # path("api/idols/", include("apps.idol.urls")),
     # path("api/idols/", include("apps.idol_schedule.urls")),
