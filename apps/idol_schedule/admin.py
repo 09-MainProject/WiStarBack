@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Schedule, Idol
+
+from .models import Idol, Schedule
 
 
 @admin.register(Schedule)
@@ -8,6 +9,7 @@ class ScheduleAdmin(admin.ModelAdmin):
     list_filter = ["idol", "start_date"]
     search_fields = ["title", "description", "location"]
     autocomplete_fields = ["idol"]  # 아이돌이 많을 경우 유용
+
 
 @admin.register(Idol)
 class IdolAdmin(admin.ModelAdmin):

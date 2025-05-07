@@ -3,9 +3,10 @@ from django.db.models import Q
 from rest_framework import generics, permissions
 from rest_framework.response import Response
 
+from utils.responses import idol_schedule as S  # 응답 메시지 분리
+
 from .models import Idol, Schedule
 from .serializers import ScheduleSerializer
-from utils.responses import idol_schedule as S  # 응답 메시지 분리
 
 
 # 매니저 권한을 가진 사용자만 접근 가능
@@ -57,7 +58,11 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
         serializer = self.get_serializer(queryset, many=True)
         message = S.SCHEDULE_LIST_SUCCESS if queryset else S.SCHEDULE_LIST_EMPTY
         return Response(
-            {"code": message["code"], "message": message["message"], "data": serializer.data}
+            {
+                "code": message["code"],
+                "message": message["message"],
+                "data": serializer.data,
+            }
         )
 
     # 일정 등록
@@ -94,9 +99,9 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
         serializer.save(user=self.request.user, idol=idol)
 
 
-class ScheduleRetrieveUpdateDeleteView(generics.RetrieveAPIView,
-                                       generics.DestroyAPIView,
-                                       generics.UpdateAPIView):
+class ScheduleRetrieveUpdateDeleteView(
+    generics.RetrieveAPIView, generics.DestroyAPIView, generics.UpdateAPIView
+):
     serializer_class = ScheduleSerializer
     permission_classes = [IsIdolManagerOrOwner]
 
@@ -109,11 +114,19 @@ class ScheduleRetrieveUpdateDeleteView(generics.RetrieveAPIView,
             instance = self.get_object()
             serializer = self.get_serializer(instance)
             return Response(
-                {"code": S.SCHEDULE_RETRIEVE_SUCCESS["code"], "message": S.SCHEDULE_RETRIEVE_SUCCESS["message"], "data": {"schedule_view": serializer.data}}
+                {
+                    "code": S.SCHEDULE_RETRIEVE_SUCCESS["code"],
+                    "message": S.SCHEDULE_RETRIEVE_SUCCESS["message"],
+                    "data": {"schedule_view": serializer.data},
+                }
             )
         except ObjectDoesNotExist:
             return Response(
-                {"code": S.SCHEDULE_NOT_FOUND["code"], "message": S.SCHEDULE_NOT_FOUND["message"], "data": None}
+                {
+                    "code": S.SCHEDULE_NOT_FOUND["code"],
+                    "message": S.SCHEDULE_NOT_FOUND["message"],
+                    "data": None,
+                }
             )
 
     # 일정 수정
@@ -121,18 +134,32 @@ class ScheduleRetrieveUpdateDeleteView(generics.RetrieveAPIView,
         partial = True
         try:
             instance = self.get_object()
-            serializer = self.get_serializer(instance, data=request.data, partial=partial)
+            serializer = self.get_serializer(
+                instance, data=request.data, partial=partial
+            )
             if serializer.is_valid():
                 self.perform_update(serializer)
                 return Response(
-                    {"code": S.SCHEDULE_UPDATE_SUCCESS["code"], "message": S.SCHEDULE_UPDATE_SUCCESS["message"], "data": serializer.data}
+                    {
+                        "code": S.SCHEDULE_UPDATE_SUCCESS["code"],
+                        "message": S.SCHEDULE_UPDATE_SUCCESS["message"],
+                        "data": serializer.data,
+                    }
                 )
             return Response(
-                {"code": S.SCHEDULE_UPDATE_FAIL["code"], "message": S.SCHEDULE_UPDATE_FAIL["message"], "data": serializer.errors}
+                {
+                    "code": S.SCHEDULE_UPDATE_FAIL["code"],
+                    "message": S.SCHEDULE_UPDATE_FAIL["message"],
+                    "data": serializer.errors,
+                }
             )
         except PermissionDenied:
             return Response(
-                {"code": S.SCHEDULE_UPDATE_PERMISSION_DENIED["code"], "message": S.SCHEDULE_UPDATE_PERMISSION_DENIED["message"], "data": None}
+                {
+                    "code": S.SCHEDULE_UPDATE_PERMISSION_DENIED["code"],
+                    "message": S.SCHEDULE_UPDATE_PERMISSION_DENIED["message"],
+                    "data": None,
+                }
             )
 
     # 일정 삭제
@@ -141,11 +168,19 @@ class ScheduleRetrieveUpdateDeleteView(generics.RetrieveAPIView,
             instance = self.get_object()
             self.perform_destroy(instance)
             return Response(
-                {"code": S.SCHEDULE_DELETE_SUCCESS["code"], "message": S.SCHEDULE_DELETE_SUCCESS["message"], "data": {"schedule_id": instance.id}}
+                {
+                    "code": S.SCHEDULE_DELETE_SUCCESS["code"],
+                    "message": S.SCHEDULE_DELETE_SUCCESS["message"],
+                    "data": {"schedule_id": instance.id},
+                }
             )
         except PermissionDenied:
             return Response(
-                {"code": S.SCHEDULE_DELETE_PERMISSION_DENIED["code"], "message": S.SCHEDULE_DELETE_PERMISSION_DENIED["message"], "data": None}
+                {
+                    "code": S.SCHEDULE_DELETE_PERMISSION_DENIED["code"],
+                    "message": S.SCHEDULE_DELETE_PERMISSION_DENIED["message"],
+                    "data": None,
+                }
             )
 
     def perform_update(self, serializer):

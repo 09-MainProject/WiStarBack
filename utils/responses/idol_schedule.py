@@ -1,4 +1,3 @@
-
 SCHEDULE_LIST_SUCCESS = {
     "code": 200,
     "message": "일정 목록 조회 성공",

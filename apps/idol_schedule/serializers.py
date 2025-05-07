@@ -10,7 +10,14 @@ class ScheduleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Schedule
         fields = "__all__"
-        read_only_fields = ["id", "user", "idol", "created_at", "updated_at", "idol_name"]
+        read_only_fields = [
+            "id",
+            "user",
+            "idol",
+            "created_at",
+            "updated_at",
+            "idol_name",
+        ]
 
     def validate(self, data):
         """
