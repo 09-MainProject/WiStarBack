@@ -58,6 +58,7 @@ OWN_APPS = [
     "apps.post",
     "apps.comment",
     "apps.schedule",
+    "apps.like",
 ]
 
 THIRD_PARTY_APPS = [
