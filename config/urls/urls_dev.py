@@ -17,28 +17,41 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import include, path
+from drf_yasg import openapi
+from drf_yasg.views import get_schema_view
+from rest_framework import permissions
 
-from config.schema import schema_view
+schema_view = get_schema_view(
+    openapi.Info(
+        title="WiStar API",
+        default_version="v1",
+        description="WiStar API 문서",
+        terms_of_service="https://www.google.com/policies/terms/",
+        contact=openapi.Contact(email="contact@snippets.local"),
+        license=openapi.License(name="BSD License"),
+    ),
+    public=True,
+    permission_classes=(permissions.AllowAny,),
+)
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
-    path("api/users/", include("apps.user.urls", namespace="users")),
-    path("api/idols/", include("apps.idol.urls", namespace="idols")),
-    # path("api/posts/", include("apps.post.urls")),
-    # path("api/posts/", include("apps.comment.urls")),
+    # path("admin/", admin.site.urls),  # 일시적으로 비활성화
+    path("api/users/", include("apps.user.urls")),
+    path("api/posts/", include("apps.post.urls")),
+    path("api/posts/", include("apps.comment.urls")),
+    path("api/idols/", include("apps.idol.urls")),
     # path("api/", include("apps.like.urls")),
     # path("api/idols/", include("apps.idol_schedule.urls")),
     # path("api/users/", include("apps.user_schedule.urls")),
     # path("api/", include("apps.notification.urls")),
     # path("api/", include("apps.notification_set.urls")),
-    # Swagger
     path(
-        "swagger<format>/", schema_view.without_ui(cache_timeout=0), name="schema-json"
+        "swagger<format>", schema_view.without_ui(cache_timeout=0), name="schema-json"
     ),
     path(
-        "swagger/",
+        "swagger",
         schema_view.with_ui("swagger", cache_timeout=0),
         name="schema-swagger-ui",
     ),
-    path("redoc/", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
+    path("redoc", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
 ]

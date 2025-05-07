@@ -16,7 +16,7 @@
 #
 # User = get_user_model()
 #
-# NAVER_CALLBACK_URL = "/users/naver/callback/"  # 애플리케이션 등록할 때 설정한 콜백 url  http://localhost:8000/oauth/naver/callback
+# NAVER_CALLBACK_URL = "/api/users/naver/callback/"  # 애플리케이션 등록할 때 설정한 콜백 url  http://localhost:8000/oauth/naver/callback
 # NAVER_STATE = "naver_login"  # oauth_urls.py/urlpatterns
 # NAVER_LOGIN_URL = "https://nid.naver.com/oauth2.0/authorize"  # doc/api명세/로그은api명세  - 네이버 로그인 인증 요청 url
 # NAVER_TOKEN_URL = "https://nid.naver.com/oauth2.0/token"  # doc/api명세/로그은api명세  - 접근 토큰 발급/갱신/삭제 요청 url
@@ -31,6 +31,7 @@
 #         # self.request.META.get('HTTP_HOST', '') - 브라우저가 접속한 도메인과 포트 - localhost:8000, 127.0.0.1:8000, mydomain.com 이런식의 브라우저 요청의 Host 헤더
 #         domain = self.request.scheme + "://" + self.request.META.get("HTTP_HOST", "")
 #         domain = domain.replace("localhost", "127.0.0.1")
+#         # domain = domain.replace("127.0.0.1", "3.39.10.22")
 #
 #         callback_url = domain + NAVER_CALLBACK_URL
 #         state = signing.dumps(NAVER_STATE)
