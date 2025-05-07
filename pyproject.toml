@@ -40,6 +40,7 @@ ruff = "^0.11.7"
 #line-length = 99
 
 # isort 설정 black 스타일에 맞춰 정렬
+pytest-django = "^4.11.1"
 [tool.isort]
 profile = "black"
 
@@ -48,3 +49,11 @@ ignore_errors = true
 #ignore_missing_imports = true
 #follow_imports = "silent"
 #warn_unused_configs = true
+
+[tool.pytest.ini_options]
+testpaths = ["apps"]
+DJANGO_SETTINGS_MODULE = "config.settings"
+python_files = ["test_*.py", "*_test.py", "tests.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "--cov=apps --cov-report=term-missing"

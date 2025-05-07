@@ -1,6 +1,7 @@
 from io import BytesIO
 
 import requests
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils import timezone
@@ -26,6 +27,7 @@ class Post(models.Model):
         is_deleted (bool): 삭제 여부
         deleted_at (datetime): 삭제 시간
         deleted_by (User): 삭제한 사용자
+        likes (ManyToManyField): 좋아요한 사용자들
     """
 
     title = models.CharField(max_length=200)
@@ -37,6 +39,9 @@ class Post(models.Model):
     views = models.PositiveIntegerField(default=0)
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="posts", null=True, blank=True
+    )
+    likes = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name="liked_posts", blank=True
     )
     is_deleted = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(null=True, blank=True)
@@ -108,4 +113,9 @@ class Post(models.Model):
         self.is_deleted = False
         self.deleted_at = None
         self.deleted_by = None
+        self.save()
+
+    def delete(self, *args, **kwargs):
+        self.is_deleted = True
+        self.deleted_at = timezone.now()
         self.save()

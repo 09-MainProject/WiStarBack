@@ -5,6 +5,7 @@ from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from .models import Post
 from .pagination import PostPagination
@@ -40,6 +41,7 @@ class PostViewSet(viewsets.ModelViewSet):
     ordering_fields = ["created_at", "views"]
     ordering = ["-created_at"]
     pagination_class = PostPagination
+    permission_classes = [IsAuthenticated]
 
     def get_permissions(self):
         """
@@ -53,7 +55,11 @@ class PostViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """게시물 목록을 반환합니다."""
-        queryset = Post.objects.filter(is_deleted=False)
+        if self.action == "retrieve":
+            queryset = Post.objects.all()
+        else:
+            queryset = Post.objects.filter(is_deleted=False)
+
         if self.action == "list":
             # 필터링, 검색, 정렬 적용
             for backend in list(self.filter_backends):
@@ -105,7 +111,10 @@ class PostViewSet(viewsets.ModelViewSet):
     def retrieve(self, request, *args, **kwargs):
         """게시물을 조회하고 조회수를 증가시킵니다."""
         instance = self.get_object()
-        instance.increase_views()
+        if instance.is_deleted:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        instance.views += 1
+        instance.save(update_fields=["views"])
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
@@ -117,3 +126,16 @@ class PostViewSet(viewsets.ModelViewSet):
             raise PermissionDenied("게시물을 복구할 권한이 없습니다.")
         post.restore()
         return Response(PostSerializer(post).data)
+
+
+class PostLikeView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk=None):
+        post = get_object_or_404(Post, pk=pk)
+        if post.likes.filter(id=request.user.id).exists():
+            post.likes.remove(request.user)
+            return Response({"status": "unliked"})
+        else:
+            post.likes.add(request.user)
+            return Response({"status": "liked"})
