@@ -15,11 +15,10 @@ from .views import (
     VerifyEmailView,
 )
 
-app_name = "user"
+app_name = "users"
 
 urlpatterns = [
     path("signup", RegisterView.as_view(), name="signup"),
-    # path("verify/email", verify_email, name="verify_email"),
     path("verify/email", VerifyEmailView.as_view(), name="verify_email"),
     path("check/password", PasswordCheckView.as_view(), name="check-password"),
     # POST /api/users/login/ -> 로그인
@@ -30,8 +29,8 @@ urlpatterns = [
     # PATCH /api/users/me/ -> 내 프로필 수정
     path("profile", ProfileView.as_view(), name="profile"),
     # JWT
-    path("token/login", CustomTokenObtainPairView.as_view(), name="token_login"),
-    path("token/logout", LogoutAPIView.as_view(), name="token_logout"),
+    path("token/login", CustomTokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("token/logout", LogoutAPIView.as_view(), name="logout"),
     path("token/refresh", CustomTokenRefreshView.as_view(), name="token_refresh"),
     # path("token/verify", TokenVerifyView.as_view(), name="token_verify"),
     # oauth naver

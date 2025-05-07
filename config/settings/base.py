@@ -20,6 +20,10 @@ os.environ["SSL_CERT_FILE"] = certifi.where()
 from datetime import timedelta
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -156,6 +160,11 @@ USE_TZ = True
 # 개발 환경에서 사용하는 경로
 STATIC_URL = "static/"
 STATIC_DIR = BASE_DIR / "static"
+
+
+# STATICFILES_DIRS = [
+#     STATIC_DIR,
+# ]
 
 # 배포할 때 사용하는 경로
 STATIC_ROOT = BASE_DIR / ".static_root"
