@@ -1,41 +1,40 @@
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.db.models import Q
-from rest_framework import generics, permissions, status
-from rest_framework.permissions import AllowAny
+from rest_framework import generics, permissions
 from rest_framework.response import Response
 
 from .models import Idol, Schedule
 from .serializers import ScheduleSerializer
+from utils.responses import idol_schedule as S  # 응답 메시지 분리
 
 
+# 매니저 권한을 가진 사용자만 접근 가능
 class IsManager(permissions.BasePermission):
-    """
-    아이돌 매니저(=is_staff=True)만 일정 등록을 할 수 있도록 권한 설정
-    """
     def has_permission(self, request, view):
-        # 스태프 권한을 가진 사용자만 일정 등록을 할 수 있습니다.
         return request.user and request.user.is_authenticated and request.user.is_staff
 
 
+# 아이돌 소유자이거나 관리자일 경우에만 수정/삭제 가능
 class IsIdolManagerOrOwner(permissions.BasePermission):
-    """
-    아이돌 매니저(스태프 권한을 가진 유저)나 일정 소유자만 일정을 수정하거나 삭제할 수 있도록 허용하는 커스텀 권한
-    """
     def has_object_permission(self, request, view, obj):
         if request.user.is_staff:
-            return request.user in obj.idol.managers.all()  # ✅ ManyToManyField 검사
-        return obj.user == request.user  # 본인 소유의 일정인지 확인
+            return request.user in obj.idol.managers.all()
+        return obj.user == request.user
 
 
 class ScheduleListCreateView(generics.ListCreateAPIView):
     serializer_class = ScheduleSerializer
-    permission_classes = [IsManager]  # 아이돌 매니저만 일정 생성 가능
-    # permission_classes = [AllowAny]  # 포스트맨 테스트용
 
+    # 요청 메서드에 따라 권한 분기: GET은 전체 공개, POST는 매니저만 가능
+    def get_permissions(self):
+        if self.request.method == "GET":
+            return [permissions.AllowAny()]
+        return [IsManager()]
+
+    # 필터링 및 검색 기능 포함
     def get_queryset(self):
         idol_id = self.kwargs["idol_id"]
         queryset = Schedule.objects.filter(idol_id=idol_id)
-
         filters = Q()
         params = self.request.query_params
 
@@ -52,45 +51,45 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
 
         return queryset.filter(filters)
 
+    # 일정 목록 조회
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True)
-
+        message = S.SCHEDULE_LIST_SUCCESS if queryset else S.SCHEDULE_LIST_EMPTY
         return Response(
-            {
-                "code": 200,
-                "message": "일정 목록 조회 성공" if queryset else "일정이 없습니다.",
-                "data": serializer.data,
-            },
-            status=status.HTTP_200_OK,
+            {"code": message["code"], "message": message["message"], "data": serializer.data}
         )
 
+    # 일정 등록
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             self.perform_create(serializer)
             return Response(
-                {"code": 201, "message": "일정 등록 성공", "data": serializer.data},
-                status=status.HTTP_201_CREATED,
+                {
+                    "code": S.SCHEDULE_CREATE_SUCCESS["code"],
+                    "message": S.SCHEDULE_CREATE_SUCCESS["message"],
+                    "data": serializer.data,
+                }
             )
-        else:
-            print("Serializer Errors:", serializer.errors)
-            return Response(
-                {"code": 400, "message": "일정 등록에 실패하였습니다.", "data": None},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        return Response(
+            {
+                "code": S.SCHEDULE_CREATE_FAIL["code"],
+                "message": S.SCHEDULE_CREATE_FAIL["message"],
+                "data": serializer.errors,
+            }
+        )
 
-    # 실제 사용
+    # 아이돌 유효성 및 권한 검증
     def perform_create(self, serializer):
         idol_id = self.kwargs["idol_id"]
         try:
             idol = Idol.objects.get(id=idol_id)
         except ObjectDoesNotExist:
-            raise PermissionDenied("해당 아이돌을 찾을 수 없습니다.")
+            raise PermissionDenied(S.SCHEDULE_IDOL_NOT_FOUND["message"])
 
-        # 아이돌 담당 매니저 확인
-        if idol.user != self.request.user:
-            raise PermissionDenied("해당 아이돌에 대한 일정 등록 권한이 없습니다.")
+        if self.request.user not in idol.managers.all():
+            raise PermissionDenied(S.SCHEDULE_PERMISSION_DENIED["message"])
 
         serializer.save(user=self.request.user, idol=idol)
 
@@ -104,24 +103,20 @@ class ScheduleRetrieveUpdateDeleteView(generics.RetrieveAPIView,
     def get_queryset(self):
         return Schedule.objects.filter(idol_id=self.kwargs["idol_id"])
 
+    # 일정 상세 조회
     def retrieve(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
             serializer = self.get_serializer(instance)
             return Response(
-                {
-                    "code": 200,
-                    "message": "일정 조회 성공",
-                    "data": {"schedule_view": serializer.data},
-                },
-                status=status.HTTP_200_OK,
+                {"code": S.SCHEDULE_RETRIEVE_SUCCESS["code"], "message": S.SCHEDULE_RETRIEVE_SUCCESS["message"], "data": {"schedule_view": serializer.data}}
             )
         except ObjectDoesNotExist:
             return Response(
-                {"code": 404, "message": "일정을 찾을 수 없습니다.", "data": None},
-                status=status.HTTP_404_NOT_FOUND,
+                {"code": S.SCHEDULE_NOT_FOUND["code"], "message": S.SCHEDULE_NOT_FOUND["message"], "data": None}
             )
 
+    # 일정 수정
     def patch(self, request, *args, **kwargs):
         partial = True
         try:
@@ -130,31 +125,27 @@ class ScheduleRetrieveUpdateDeleteView(generics.RetrieveAPIView,
             if serializer.is_valid():
                 self.perform_update(serializer)
                 return Response(
-                    {"code": 200, "message": "일정 수정 성공", "data": serializer.data},
-                    status=status.HTTP_200_OK,
+                    {"code": S.SCHEDULE_UPDATE_SUCCESS["code"], "message": S.SCHEDULE_UPDATE_SUCCESS["message"], "data": serializer.data}
                 )
             return Response(
-                {"code": 400, "message": "일정 수정 실패", "data": serializer.errors},
-                status=status.HTTP_400_BAD_REQUEST,
+                {"code": S.SCHEDULE_UPDATE_FAIL["code"], "message": S.SCHEDULE_UPDATE_FAIL["message"], "data": serializer.errors}
             )
         except PermissionDenied:
             return Response(
-                {"code": 403, "message": "수정 권한이 없습니다.", "data": None},
-                status=status.HTTP_403_FORBIDDEN,
+                {"code": S.SCHEDULE_UPDATE_PERMISSION_DENIED["code"], "message": S.SCHEDULE_UPDATE_PERMISSION_DENIED["message"], "data": None}
             )
 
+    # 일정 삭제
     def delete(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
             self.perform_destroy(instance)
             return Response(
-                {"code": 204, "message": "일정 삭제 성공", "data": {"schedule_id": instance.id}},
-                status=status.HTTP_204_NO_CONTENT,
+                {"code": S.SCHEDULE_DELETE_SUCCESS["code"], "message": S.SCHEDULE_DELETE_SUCCESS["message"], "data": {"schedule_id": instance.id}}
             )
         except PermissionDenied:
             return Response(
-                {"code": 403, "message": "삭제 권한이 없습니다.", "data": None},
-                status=status.HTTP_403_FORBIDDEN,
+                {"code": S.SCHEDULE_DELETE_PERMISSION_DENIED["code"], "message": S.SCHEDULE_DELETE_PERMISSION_DENIED["message"], "data": None}
             )
 
     def perform_update(self, serializer):
