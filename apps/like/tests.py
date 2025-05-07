@@ -35,9 +35,9 @@ class LikeTests(APITestCase):
         self.post_content_type = ContentType.objects.get_for_model(Post)
 
         # URL 설정
-        self.like_list_url = f"/api/like/post/post/{self.post.id}/likes"
+        self.like_list_url = f"/api/likes/{self.post_content_type.app_label}/{self.post_content_type.model}/{self.post.id}/likes"
         self.like_detail_url = (
-            lambda pk: f"/api/like/post/post/{self.post.id}/likes/{pk}"
+            lambda pk: f"/api/likes/{self.post_content_type.app_label}/{self.post_content_type.model}/{self.post.id}/likes/{pk}"
         )
 
     def test_create_like(self):
