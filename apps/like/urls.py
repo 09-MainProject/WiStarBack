@@ -25,11 +25,7 @@ urlpatterns = [
         like_status,
         name="like-status",
     ),
-    path(
-        "<str:app_label>/<int:object_id>/likes",
-        like_list,
-        name="like-list"
-    ),
+    path("<str:app_label>/<int:object_id>/likes", like_list, name="like-list"),
     path(
         "<str:app_label>/<int:object_id>/likes/<int:pk>",
         like_detail,
