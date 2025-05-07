@@ -17,7 +17,8 @@ class LikeViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """좋아요 목록을 반환합니다."""
         content_type = ContentType.objects.get(
-            app_label=self.kwargs.get("app_label"), model=self.kwargs.get("model")
+            app_label=self.kwargs.get("app_label", "post"),
+            model=self.kwargs.get("model", "post"),
         )
         object_id = self.kwargs.get("object_id")
         return Like.objects.filter(content_type=content_type, object_id=object_id)
@@ -34,7 +35,8 @@ class LikeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         """좋아요를 생성합니다."""
         content_type = ContentType.objects.get(
-            app_label=self.kwargs.get("app_label"), model=self.kwargs.get("model")
+            app_label=self.kwargs.get("app_label", "post"),
+            model=self.kwargs.get("model", "post"),
         )
         object_id = self.kwargs.get("object_id")
         serializer.save(
@@ -49,3 +51,10 @@ class LikeViewSet(viewsets.ModelViewSet):
             content_type=content_type, object_id=object_id, user=request.user
         ).exists()
         return Response({"liked": exists})
+
+    def destroy(self, request, *args, **kwargs):
+        """좋아요를 삭제합니다."""
+        instance = self.get_object()
+        if instance.user != request.user:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        return super().destroy(request, *args, **kwargs)
