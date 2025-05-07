@@ -36,10 +36,10 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     # path("admin/", admin.site.urls),  # 일시적으로 비활성화
-    path("api/user/", include("apps.user.urls")),
-    path("api/post/", include("apps.post.urls")),
-    path("api/comment/", include("apps.comment.urls")),
-    path("api/like/", include("apps.like.urls")),
+    path("api/users/", include("apps.user.urls")),
+    path("api/posts/", include("apps.post.urls")),
+    path("api/comments/", include("apps.comment.urls")),
+    path("api/likes/", include("apps.like.urls")),
     path(
         "swagger<format>/",
         schema_view.without_ui(cache_timeout=0),
