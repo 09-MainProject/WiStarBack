@@ -1021,7 +1021,24 @@ sudo vi ~/.ssh/id_rsa.pub
 
 아래의 명령어를 입력하여 작성한 코드를 클론 받습니다.
 git clone --branch develop --single-branch <레포지토리 주소>
-git clone --branch de --single-branch <레포지토리 주소>
+git clone --branch prod/test2 --single-branch https://github.com/09-MainProject/WiStarBack.git
+
+프로젝트 경로로 이동
+cd <프로젝트 루트 디렉터리>
+cd WiStarBack
+
+settings.py 심볼릭 링크를 생성합니다.
+ln -sf config/settings/prod.py config/settings/settings.py
+
+envs 폴더를 생성하고 하위에 .env.prod 파일을 생성합니다.
+mkdir envs
+cd envs
+
+# touch 명령어로 빈 파일 생성
+touch .env.prod
+
+# .env.prod를  vi 에디터로 편집합니다.
+vi .env.prod
 
 ------------------------------------------
 아마존 리눅스 서버에서 도커 사용해 배포 설정하기
