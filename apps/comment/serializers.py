@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from apps.user.serializers import UserSerializer
+from apps.user.serializers import UsernameSerializer
 
 from .models import Comment
 
@@ -8,7 +8,7 @@ from .models import Comment
 class CommentSerializer(serializers.ModelSerializer):
     """댓글 시리얼라이저"""
 
-    author = UserSerializer(read_only=True)
+    author = UsernameSerializer(read_only=True)
     likes_count = serializers.IntegerField(read_only=True)
     is_liked = serializers.SerializerMethodField()
 

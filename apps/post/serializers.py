@@ -1,54 +1,56 @@
 from rest_framework import serializers
 
-from apps.user.serializers import UserSerializer
+from apps.user.serializers import UsernameSerializer
 
 from .models import Post
-from django.contrib.auth import get_user_model
 
-User = get_user_model()
-
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['id', 'username', 'email']
 
 class PostSerializer(serializers.ModelSerializer):
     """게시물 시리얼라이저"""
-    """
-    Attributes:
-        title (str): 게시물 제목
-        content (str): 게시물 내용
-        image_url (str): 게시물 이미지 URL
-        created_at (datetime): 생성 시간
-        updated_at (datetime): 수정 시간
-        views (int): 조회수
-        author (User): 작성자
-    """
-    author = UserSerializer(read_only=True)
+
+    author = UsernameSerializer(read_only=True)
+    likes_count = serializers.SerializerMethodField()
+    is_liked = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
         fields = [
             "id",
+            "author",
             "title",
             "content",
-            "image",
-            "image_url",
-            "author",
             "created_at",
             "updated_at",
             "views",
+            "likes_count",
+            "is_liked",
             "is_deleted",
         ]
-        read_only_fields = ["author", "created_at", "updated_at", "views", "is_deleted"]
+        read_only_fields = ["author", "created_at", "updated_at", "views"]
+
+    def get_likes_count(self, obj):
+        return obj.likes.count()
+
+    def get_is_liked(self, obj):
+        request = self.context.get("request")
+        if request and request.user.is_authenticated:
+            return obj.likes.filter(id=request.user.id).exists()
+        return False
 
 
 class PostCreateSerializer(serializers.ModelSerializer):
     """게시물 생성 시리얼라이저"""
 
+    author = UsernameSerializer(read_only=True)
+
     class Meta:
         model = Post
-        fields = ["title", "content", "image"]
+        fields = ["title", "content", "image", "author"]
+        read_only_fields = ["author"]
+
+    def create(self, validated_data):
+        validated_data["author"] = self.context["request"].user
+        return super().create(validated_data)
 
 
 class PostUpdateSerializer(serializers.ModelSerializer):
