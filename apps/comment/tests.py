@@ -39,9 +39,7 @@ class CommentTests(APITestCase):
 
         # URL 설정
         self.comment_list_url = f"/api/posts/{self.post.id}/comments/"
-        self.comment_detail_url = (
-            lambda pk: f"/api/posts/{self.post.id}/comments/{pk}/"
-        )
+        self.comment_detail_url = lambda pk: f"/api/posts/{self.post.id}/comments/{pk}/"
 
     def test_create_comment(self):
         """댓글 생성 테스트"""
