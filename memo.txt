@@ -954,7 +954,9 @@ ls -l
 ssh -i ~/.ssh/wistar.pem ubuntu@43.203.181.6
 
 Pyenv 설치 및 설정
+sudo apt-get update --fix-missing
 sudo apt-get install -y make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev xz-utils libpq-dev python3-dev python3-setuptools liblzma-dev
+
 curl https://pyenv.run | bash
 
 - 각 패키지의 역할
@@ -1039,6 +1041,177 @@ touch .env.prod
 
 # .env.prod를  vi 에디터로 편집합니다.
 vi .env.prod
+
+# pyenv 가상환경 생성
+pyenv virtualenv <python-version> 가상환경이름
+pyenv virtualenv 3.13.1 wistar
+
+# 가상환경 적용
+pyenv local 가상환경이름
+pyenv local wistar
+pyenv local 3.13.1
+
+# 가상환경 적용 확인
+python --version
+
+# poetry 설치
+curl -sSL https://install.python-poetry.org | python3 -
+
+# .bashrc 수정
+vi ~/.bashrc
+
+# 아래의 내용을 .bashrc에 추가해줍니다.
+export PATH="/home/ubuntu/.local/bin:$PATH"
+
+# 터미널 재실행
+source ~/.bashrc
+
+# poetry를 통한 라이브러리 설치
+poetry install
+poetry install --no-root
+
+가상환경 터미널에 활성화 (poetry로 생성된 가상환경 사용시)
+poetry env activate
+
+
+### Gunicorn 설정하기
+아래의 가이드를 따라 Gunicorn 설정을 추가합니다.
+
+# Gunicorn 가상환경 설정
+pyenv virtualenv <python version> gunicorn
+pyenv virtualenv 3.13.1 gunicorn
+
+# 현재 쉘에 gunicorn 가상환경 지정
+pyenv shell gunicorn
+
+# 가상환경에 gunicorn 설치
+pip install gunicorn
+
+# 가상환경에 poetry를 이용하여 라이브러리들을 설치
+poetry install
+poetry install --no-root
+
+# Gunicorn 시스템 설정
+sudo vi /etc/systemd/system/gunicorn.service
+
+# 아래의 내용을 추가후 :wq
+[Unit]
+Description=gunicorn daemon
+After=network.target
+
+[Service]
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/프로젝트 루트 디렉터리
+ExecStart=/home/ubuntu/.pyenv/versions/gunicorn/bin/gunicorn \
+        --access-logfile /var/log/gunicorn/access.log \
+        --error-logfile /var/log/gunicorn/error.log \
+        --log-level info \
+        --workers 3 \
+        --bind unix:/srv/gunicorn/gunicorn.sock config.wsgi:application
+Environment="DJANGO_SETTINGS_MODULE=config.settings.settings"
+[Install]
+WantedBy=multi-user.target
+
+# 시스템설정 daemon-reload
+sudo systemctl daemon-reload
+
+# gunicon.service를 사용가능한 시스템 설정으로 등록
+sudo systemctl enable gunicorn.service
+
+# gunicorn을 사용하기 위해 /srv에 대한 권한 설정
+sudo chmod 777 /srv
+
+# /srv 하위에 gunicorn 디렉터리 생성
+mkdir /srv/gunicorn
+
+# /var/log 하위에 gunicorn 디렉터리 생성(로그파일 생성을 위해)
+sudo mkdir /var/log/gunicorn
+
+# /var/log/gunicorn 권한 설정
+sudo chown -R ubuntu:ubuntu /var/log/gunicorn
+sudo chmod -R 755 /var/log/gunicorn
+
+# gunicorn 서비스 실행
+sudo systemctl start gunicorn.service
+
+# gunicorn 서비스 상태 확인
+sudo systemctl status gunicorn.service
+
+requests 없어서 에러 발생
+가상환경 활성화 상태에서 필수 패키지 설치
+pip install requests
+
+Gunicorn 서비스 재시작
+sudo systemctl daemon-reload
+sudo systemctl restart gunicorn.service
+
+서비스 상태 확인
+sudo systemctl status gunicorn.service
+
+
+### Nginx 설치 및 설정하기
+- 아래의 가이드를 따라 nginx 설정을 추가합니다.
+
+# nginx 패키지 설치
+sudo apt-get install software-properties-common
+sudo apt-get install nginx
+
+# nginx 설정 파일이 위치한 디렉터리로 이동
+cd /etc/nginx/sites-available
+# 기본 설정파일 제거
+sudo rm default
+# 새로운 설정파일 추가
+sudo vi django.conf
+
+# 아래의 내용을 입력 후 :wq
+server {
+        server_name EC2의 퍼블릭 DNS;
+
+        location /static/ {
+				        root /home/ubuntu/프로젝트 루트 디렉터리;
+        }
+
+        location /media/ {
+				        root /home/ubuntu/프로젝트 루트 디렉터리;
+        }
+
+        location / {
+                include proxy_params;
+                proxy_pass http://unix:/srv/gunicorn/gunicorn.sock;
+        }
+        listen 80;
+}
+
+# nginx 설정파일 심볼릭 링크 추가
+sudo ln -sf /etc/nginx/sites-available/django.conf /etc/nginx/sites-enabled/
+
+# 기본 설정 심볼릭 링크 제거
+sudo rm /etc/nginx/sites-enabled/default
+
+# nginx user 설정
+sudo vi /etc/nginx/nginx.conf
+# 상단의 'user www-data'를 'user ubuntu'로 변경 후 :wq
+
+# syetemctl 을 사용하여 nginx 서비스 시작
+sudo systemctl restart nginx.service
+
+# syetemctl 을 사용하여 nginx 서비스 상태확인
+sudo systemctl status nginx.service
+
+Nginx 관련 설정 파일을 수정했을 때
+sudo systemctl daemon-reload
+
+깃에 이렇게 커밋 로그 안남기고 최신 커밋에 합쳤을 때
+git add .
+git commit --amend --no-edit
+git push --force-with-lease origin feature/user
+
+현재 로컬 브랜치(prod/test2)는 그 이전 히스토리를 가지고 있어서
+Git이 병합 방식(merge/rebase/fast-forward)을 명확히 지정해주길 요구
+하지만 그냥 원격 브랜치를 강제 적용
+git fetch origin
+git reset --hard origin/prod/test2
 
 ------------------------------------------
 아마존 리눅스 서버에서 도커 사용해 배포 설정하기
