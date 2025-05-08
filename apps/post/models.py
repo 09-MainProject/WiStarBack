@@ -3,10 +3,13 @@ from io import BytesIO
 import requests
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 from django.utils import timezone
 
 from .utils import process_image
+from apps.like.models import Like
+from apps.user.models import User
 
 User = get_user_model()
 
@@ -30,27 +33,26 @@ class Post(models.Model):
         likes (ManyToManyField): 좋아요한 사용자들
     """
 
-    title = models.CharField(max_length=200)
-    content = models.TextField()
-    image = models.ImageField(upload_to="post_images/%Y/%m/%d/", blank=True, null=True)
-    image_url = models.URLField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    views = models.PositiveIntegerField(default=0)
+    title = models.CharField("제목", max_length=200)
+    content = models.TextField("내용")
+    image = models.ImageField("이미지", upload_to="media/post_images/%Y/%m/%d/", blank=True, null=True)
+    image_url = models.URLField("이미지 URL", max_length=500, blank=True, null=True)
+    created_at = models.DateTimeField("작성일", auto_now_add=True)
+    updated_at = models.DateTimeField("수정일", auto_now=True)
+    views = models.PositiveIntegerField("조회수", default=0)
     author = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="posts", null=True, blank=True
+        User, on_delete=models.CASCADE, related_name="posts", verbose_name="작성자"
     )
-    likes = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, related_name="liked_posts", blank=True
-    )
-    is_deleted = models.BooleanField(default=False)
-    deleted_at = models.DateTimeField(null=True, blank=True)
+    likes = GenericRelation(Like, related_query_name="post")
+    is_deleted = models.BooleanField("삭제 여부", default=False)
+    deleted_at = models.DateTimeField("삭제일", null=True, blank=True)
     deleted_by = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="deleted_posts",
+        verbose_name="삭제자",
     )
 
     def save(self, *args, **kwargs):
@@ -79,13 +81,13 @@ class Post(models.Model):
         super().save(*args, **kwargs)
 
     class Meta:
+        verbose_name = "게시물"
+        verbose_name_plural = "게시물"
         ordering = ["-created_at"]
         indexes = [
             models.Index(fields=["-created_at"]),
             models.Index(fields=["author", "-created_at"]),
         ]
-        verbose_name = "게시물"
-        verbose_name_plural = "게시물들"
 
     def __str__(self):
         """게시물의 문자열 표현을 반환합니다."""

@@ -38,7 +38,7 @@ urlpatterns = [
     # path("admin/", admin.site.urls),  # 일시적으로 비활성화
     path("api/users/", include("apps.user.urls")),
     path("api/posts/", include("apps.post.urls")),
-    path("api/posts/", include("apps.comment.urls")),
+    path("api/posts/<int:post_id>/comments/", include("apps.comment.urls")),
     path("api/", include("apps.like.urls")),
     path("api/idols/", include("apps.idol.urls")),
     # path("api/idols/", include("apps.idol_schedule.urls")),
