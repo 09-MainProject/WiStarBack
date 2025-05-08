@@ -48,7 +48,7 @@ DJANGO_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "django.contrib.admin",  # 일시적으로 비활성화
+    # "django.contrib.admin",  # 일시적으로 비활성화
 ]
 
 OWN_APPS = [

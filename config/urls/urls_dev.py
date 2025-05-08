@@ -35,7 +35,7 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
-    path("admin/", admin.site.urls),  # 일시적으로 비활성화
+    # path("admin/", admin.site.urls),  # 일시적으로 비활성화
     path("api/users/", include("apps.user.urls")),
     path("api/posts/", include("apps.post.urls")),
     path("api/posts/", include("apps.comment.urls")),
