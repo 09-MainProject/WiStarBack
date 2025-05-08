@@ -111,6 +111,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = User
         fields = "__all__"
 
+
 class ProfileUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
