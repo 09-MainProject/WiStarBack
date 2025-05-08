@@ -41,7 +41,7 @@ urlpatterns = [
     path("api/posts/", include("apps.comment.urls")),
     path("api/", include("apps.like.urls")),
     path("api/idols/", include("apps.idol.urls")),
-    # path("api/idols/", include("apps.idol_schedule.urls")),
+    path("api/idols/", include("apps.idol_schedule.urls")),
     # path("api/users/", include("apps.user_schedule.urls")),
     # path("api/", include("apps.notification.urls")),
     # path("api/", include("apps.notification_set.urls")),
