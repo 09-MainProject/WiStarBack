@@ -1,5 +1,5 @@
 from drf_yasg import openapi
-from drf_yasg.utils import swagger_auto_schema
+from drf_yasg.utils import force_real_str, swagger_auto_schema
 
 from utils.responses.idol import (
     IDOL_CREATE_SERVER_ERROR,
@@ -21,9 +21,10 @@ idol_search_docs = swagger_auto_schema(
     operation_summary="아이돌 검색",
     operation_description="아이돌 이름으로 검색합니다.",
     responses={
-        200: IDOL_SEARCH_SUCCESS,
-        400: IDOL_SEARCH_NOT_FOUND,
+        200: force_real_str(IDOL_SEARCH_SUCCESS),
+        400: force_real_str(IDOL_SEARCH_NOT_FOUND),
     },
+    tags=["아이돌/검색"],
 )
 
 # 아이돌 생성
@@ -49,12 +50,12 @@ idol_create_docs = swagger_auto_schema(
         },
     ),
     responses={
-        201: IDOL_CREATE_SUCCESS,
-        400: IDOL_CREATE_VALIDATION_FAIL,
+        201: force_real_str(IDOL_CREATE_SUCCESS),
+        400: force_real_str(IDOL_CREATE_VALIDATION_FAIL),
         401: "인증되지 않은 사용자",
-        500: IDOL_CREATE_SERVER_ERROR,
+        500: force_real_str(IDOL_CREATE_SERVER_ERROR),
     },
-    tags=["아이돌"],
+    tags=["아이돌/관리"],
 )
 
 # 아이돌 목록 조회
@@ -62,9 +63,9 @@ idol_list_docs = swagger_auto_schema(
     operation_summary="아이돌 목록 조회",
     operation_description="모든 아이돌의 목록을 조회합니다.",
     responses={
-        200: IDOL_LIST_SUCCESS,
+        200: force_real_str(IDOL_LIST_SUCCESS),
     },
-    tags=["아이돌"],
+    tags=["아이돌/조회"],
 )
 
 # 아이돌 상세 조회
@@ -72,10 +73,10 @@ idol_retrieve_docs = swagger_auto_schema(
     operation_summary="아이돌 상세 조회",
     operation_description="특정 아이돌의 상세 정보를 조회합니다.",
     responses={
-        200: IDOL_DETAIL_SUCCESS,
+        200: force_real_str(IDOL_DETAIL_SUCCESS),
         404: "아이돌을 찾을 수 없음",
     },
-    tags=["아이돌"],
+    tags=["아이돌/조회"],
 )
 
 # 아이돌 정보 수정
@@ -100,13 +101,13 @@ idol_update_docs = swagger_auto_schema(
         },
     ),
     responses={
-        200: IDOL_UPDATE_SUCCESS,
-        400: IDOL_UPDATE_FAIL,
+        200: force_real_str(IDOL_UPDATE_SUCCESS),
+        400: force_real_str(IDOL_UPDATE_FAIL),
         401: "인증되지 않은 사용자",
         404: "아이돌을 찾을 수 없음",
-        500: IDOL_UPDATE_SERVER_ERROR,
+        500: force_real_str(IDOL_UPDATE_SERVER_ERROR),
     },
-    tags=["아이돌"],
+    tags=["아이돌/관리"],
 )
 
 # 아이돌 삭제
@@ -114,12 +115,12 @@ idol_delete_docs = swagger_auto_schema(
     operation_summary="아이돌 삭제",
     operation_description="특정 아이돌을 삭제합니다.",
     responses={
-        200: IDOL_DELETE_SUCCESS,
-        400: IDOL_DELETE_FAIL,
+        200: force_real_str(IDOL_DELETE_SUCCESS),
+        400: force_real_str(IDOL_DELETE_FAIL),
         401: "인증되지 않은 사용자",
         404: "아이돌을 찾을 수 없음",
     },
-    tags=["아이돌"],
+    tags=["아이돌/관리"],
 )
 
 # # 아이돌 활성화/비활성화 관련 응답 상수
@@ -139,7 +140,7 @@ idol_delete_docs = swagger_auto_schema(
 #     operation_summary="아이돌 활성화",
 #     operation_description="아이돌 정보를 활성화 상태로 변경합니다.",
 #     responses={
-#         200: IDOL_UPDATE_SUCCESS,
+#         200: force_real_str(IDOL_UPDATE_SUCCESS),
 #     },
 # )
 
@@ -148,6 +149,6 @@ idol_delete_docs = swagger_auto_schema(
 #     operation_summary="아이돌 비활성화",
 #     operation_description="아이돌 정보를 비활성화 상태로 변경합니다.",
 #     responses={
-#         200: IDOL_UPDATE_SUCCESS,
+#         200: force_real_str(IDOL_UPDATE_SUCCESS),
 #     },
 # )

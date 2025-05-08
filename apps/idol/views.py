@@ -5,7 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from apps.idol.docs import (
+from apps.idol.docs import (  # idol_activate_docs,; idol_deactivate_docs,
     idol_create_docs,
     idol_delete_docs,
     idol_list_docs,
@@ -117,21 +117,23 @@ class IdolViewSet(ModelViewSet):
         )
 
     @idol_search_docs
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=["get"])
     def search(self, request):
-        name = request.query_params.get('name', '')
+        name = request.query_params.get("name", "")
         idols = self.get_queryset().filter(name__icontains=name)
         serializer = self.get_serializer(idols, many=True)
         return Response(serializer.data)
 
-    @action(detail=True, methods=["post"])
-    def activate(self, request):
-        idol = self.get_object()
-        idol.activate()
-        return Response({"detail": "아이돌 정보가 활성화되었습니다."})
+    # @idol_activate_docs
+    # @action(detail=True, methods=["post"])
+    # def activate(self, request):
+    #     idol = self.get_object()
+    #     idol.activate()
+    #     return Response({"detail": "아이돌 정보가 활성화되었습니다."})
 
-    @action(detail=True, methods=["post"])
-    def deactivate(self, request):
-        idol = self.get_object()
-        idol.deactivate()
-        return Response({"detail": "아이돌 정보가 비활성화되었습니다."})
+    # @idol_deactivate_docs
+    # @action(detail=True, methods=["post"])
+    # def deactivate(self, request):
+    #     idol = self.get_object()
+    #     idol.deactivate()
+    #     return Response({"detail": "아이돌 정보가 비활성화되었습니다."})

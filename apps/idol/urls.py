@@ -18,14 +18,14 @@ urlpatterns = [
         ),
         name="idol-detail",
     ),
-    path(
-        "<int:pk>/activate/",
-        IdolViewSet.as_view({"post": "activate"}),
-        name="idol-activate",
-    ),
-    path(
-        "<int:pk>/deactivate/",
-        IdolViewSet.as_view({"post": "deactivate"}),
-        name="idol-deactivate",
-    ),
+    # path(
+    #     "<int:pk>/activate/",
+    #     IdolViewSet.as_view({"post": "activate"}),
+    #     name="idol-activate",
+    # ),
+    # path(
+    #     "<int:pk>/deactivate/",
+    #     IdolViewSet.as_view({"post": "deactivate"}),
+    #     name="idol-deactivate",
+    # ),
 ]
