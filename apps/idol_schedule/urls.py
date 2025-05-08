@@ -1,6 +1,8 @@
 from django.urls import path
 from .views import ScheduleListCreateView, ScheduleRetrieveUpdateDeleteView
 
+app_name = "idol_schedule"
+
 urlpatterns = [
     # 아이돌 ID를 URL에 포함시켜서 일정 목록을 조회하거나 생성
     path(

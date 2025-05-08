@@ -19,7 +19,7 @@ class IsManager(permissions.BasePermission):
 class IsIdolManagerOrOwner(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.user.is_staff:
-            return request.user in obj.idol.managers.all()
+            return True  # 관리자 권한은 무조건 허용
         return obj.user == request.user
 
 
