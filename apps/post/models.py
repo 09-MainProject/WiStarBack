@@ -7,9 +7,10 @@ from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 from django.utils import timezone
 
-from .utils import process_image
 from apps.like.models import Like
 from apps.user.models import User
+
+from .utils import process_image
 
 User = get_user_model()
 
@@ -35,7 +36,9 @@ class Post(models.Model):
 
     title = models.CharField("제목", max_length=200)
     content = models.TextField("내용")
-    image = models.ImageField("이미지", upload_to="media/post_images/%Y/%m/%d/", blank=True, null=True)
+    image = models.ImageField(
+        "이미지", upload_to="media/post_images/%Y/%m/%d/", blank=True, null=True
+    )
     image_url = models.URLField("이미지 URL", max_length=500, blank=True, null=True)
     created_at = models.DateTimeField("작성일", auto_now_add=True)
     updated_at = models.DateTimeField("수정일", auto_now=True)

@@ -2,14 +2,15 @@ import io
 import os
 
 from django.contrib.auth import get_user_model
+from django.contrib.contenttypes.models import ContentType
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.urls import reverse
 from PIL import Image
 from rest_framework import status
 from rest_framework.test import APIClient
+
 from apps.like.models import Like
-from django.contrib.contenttypes.models import ContentType
 
 from .models import Post
 
@@ -91,12 +92,12 @@ class PostTests(TestCase):
         Like.objects.create(
             content_type=ContentType.objects.get_for_model(Post),
             object_id=self.post.id,
-            user=self.user
+            user=self.user,
         )
         Like.objects.create(
             content_type=ContentType.objects.get_for_model(Post),
             object_id=self.post.id,
-            user=self.other_user
+            user=self.other_user,
         )
         url = reverse("post-detail", args=[self.post.id])
         response = self.client.get(url)
@@ -122,7 +123,7 @@ class PostTests(TestCase):
         Like.objects.create(
             content_type=ContentType.objects.get_for_model(Post),
             object_id=self.post.id,
-            user=self.user
+            user=self.user,
         )
         self.client.force_authenticate(user=self.other_user)
         url = reverse("post-detail", args=[self.post.id])
@@ -196,7 +197,9 @@ class PostTests(TestCase):
         """게시물 좋아요 테스트"""
         url = reverse("post-like", args=[self.post.id])
         response = self.client.post(url)
-        self.assertIn(response.status_code, [status.HTTP_200_OK, status.HTTP_201_CREATED])
+        self.assertIn(
+            response.status_code, [status.HTTP_200_OK, status.HTTP_201_CREATED]
+        )
         self.assertEqual(response.data["status"], "liked")
         self.assertTrue(self.post.likes.filter(user=self.user).exists())
 
@@ -205,11 +208,13 @@ class PostTests(TestCase):
         Like.objects.create(
             content_type=ContentType.objects.get_for_model(Post),
             object_id=self.post.id,
-            user=self.user
+            user=self.user,
         )
         url = reverse("post-like", args=[self.post.id])
         response = self.client.post(url)
-        self.assertIn(response.status_code, [status.HTTP_200_OK, status.HTTP_201_CREATED])
+        self.assertIn(
+            response.status_code, [status.HTTP_200_OK, status.HTTP_201_CREATED]
+        )
         self.assertEqual(response.data["status"], "unliked")
         self.assertFalse(self.post.likes.filter(user=self.user).exists())
 

@@ -1,22 +1,23 @@
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
+from django.db.models import F
 from django.shortcuts import get_object_or_404
 from django_filters import rest_framework as django_filters
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.contrib.contenttypes.models import ContentType
-from django.db.models import F
-from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
+
+from apps.like.models import Like
+from utils.exceptions import CustomAPIException
 
 from .models import Post
 from .pagination import PostPagination
 from .serializers import PostCreateSerializer, PostSerializer, PostUpdateSerializer
 from .utils import process_image
-from apps.like.models import Like
-from utils.exceptions import CustomAPIException
 
 
 class PostFilter(django_filters.FilterSet):
@@ -37,7 +38,7 @@ class PostFilter(django_filters.FilterSet):
 class PostViewSet(viewsets.ModelViewSet):
     """
     게시물 CRUD API
-    
+
     게시물의 생성, 조회, 수정, 삭제를 처리합니다.
     """
 
@@ -61,7 +62,7 @@ class PostViewSet(viewsets.ModelViewSet):
         """
         if self.action in ["list", "retrieve"]:
             return [AllowAny()]
-        
+
         if not self.request.user.is_authenticated:
             message = {
                 "create": "게시물을 작성하려면 로그인이 필요합니다.",
@@ -71,12 +72,8 @@ class PostViewSet(viewsets.ModelViewSet):
                 "like": "게시물에 좋아요를 누르려면 로그인이 필요합니다.",
                 "unlike": "게시물의 좋아요를 취소하려면 로그인이 필요합니다.",
             }.get(self.action, "로그인이 필요한 서비스입니다.")
-            
-            raise CustomAPIException({
-                "code": 401,
-                "message": message,
-                "data": None
-            })
+
+            raise CustomAPIException({"code": 401, "message": message, "data": None})
         return [IsAuthenticated()]
 
     def get_queryset(self):
@@ -153,11 +150,11 @@ class PostViewSet(viewsets.ModelViewSet):
                                 "content": "5월 앨범 다들 뭐 나오나요? 진짜 최고 기대됨",
                                 "thumb_image": "http://example.com/images/five_stage1.jpg",
                                 "like_count": 120,
-                                "comment_count": 8
+                                "comment_count": 8,
                             }
-                        ]
+                        ],
                     }
-                }
+                },
             ),
             400: openapi.Response(
                 description="게시글 정보를 찾을 수 없습니다.",
@@ -165,9 +162,9 @@ class PostViewSet(viewsets.ModelViewSet):
                     "application/json": {
                         "code": 400,
                         "message": "게시글 정보를 찾을 수 없습니다.",
-                        "data": None
+                        "data": None,
                     }
-                }
+                },
             ),
             500: openapi.Response(
                 description="서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
@@ -175,11 +172,11 @@ class PostViewSet(viewsets.ModelViewSet):
                     "application/json": {
                         "code": 500,
                         "message": "서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
-                        "data": None
+                        "data": None,
                     }
-                }
-            )
-        }
+                },
+            ),
+        },
     )
     def list(self, request, *args, **kwargs):
         """게시물 목록을 반환합니다."""
@@ -197,9 +194,9 @@ class PostViewSet(viewsets.ModelViewSet):
                     "application/json": {
                         "code": 201,
                         "message": "게시글이 등록되었습니다.",
-                        "data": {"post_id": 12}
+                        "data": {"post_id": 12},
                     }
-                }
+                },
             ),
             400: openapi.Response(
                 description="게시글 작성이 실패하였습니다.",
@@ -207,9 +204,9 @@ class PostViewSet(viewsets.ModelViewSet):
                     "application/json": {
                         "code": 400,
                         "message": "게시글 작성이 실패하였습니다.",
-                        "data": None
+                        "data": None,
                     }
-                }
+                },
             ),
             500: openapi.Response(
                 description="서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
@@ -217,11 +214,11 @@ class PostViewSet(viewsets.ModelViewSet):
                     "application/json": {
                         "code": 500,
                         "message": "서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
-                        "data": None
+                        "data": None,
                     }
-                }
-            )
-        }
+                },
+            ),
+        },
     )
     def create(self, request, *args, **kwargs):
         """게시물을 생성합니다."""
@@ -232,7 +229,9 @@ class PostViewSet(viewsets.ModelViewSet):
         post = serializer.instance
         response_serializer = PostSerializer(post, context={"request": request})
         headers = self.get_success_headers(serializer.data)
-        return Response(response_serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        return Response(
+            response_serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        )
 
     @swagger_auto_schema(
         operation_summary="게시글 상세",
@@ -255,10 +254,10 @@ class PostViewSet(viewsets.ModelViewSet):
                             "updated_at": "2025-04-23T10:00:00Z",
                             "like_count": 120,
                             "comment_count": 8,
-                            "is_liked": True
-                        }
+                            "is_liked": True,
+                        },
                     }
-                }
+                },
             ),
             400: openapi.Response(
                 description="게시글이 존재하지 않습니다.",
@@ -266,9 +265,9 @@ class PostViewSet(viewsets.ModelViewSet):
                     "application/json": {
                         "code": 400,
                         "message": "게시글이 존재하지 않습니다.",
-                        "data": None
+                        "data": None,
                     }
-                }
+                },
             ),
             500: openapi.Response(
                 description="서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
@@ -276,17 +275,19 @@ class PostViewSet(viewsets.ModelViewSet):
                     "application/json": {
                         "code": 500,
                         "message": "서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
-                        "data": None
+                        "data": None,
                     }
-                }
-            )
-        }
+                },
+            ),
+        },
     )
     def retrieve(self, request, *args, **kwargs):
         """게시물 상세 정보를 반환합니다."""
         post = self.get_object()
         if post.is_deleted:
-            return Response({"detail": "삭제된 게시물입니다."}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"detail": "삭제된 게시물입니다."}, status=status.HTTP_404_NOT_FOUND
+            )
         # 조회수 증가
         post.views += 1
         post.save(update_fields=["views"])
@@ -305,9 +306,9 @@ class PostViewSet(viewsets.ModelViewSet):
                     "application/json": {
                         "code": 200,
                         "message": "게시글이 수정되었습니다.",
-                        "data": {"post_id": 12}
+                        "data": {"post_id": 12},
                     }
-                }
+                },
             ),
             400: openapi.Response(
                 description="수정 권한이 없습니다.",
@@ -315,9 +316,9 @@ class PostViewSet(viewsets.ModelViewSet):
                     "application/json": {
                         "code": 400,
                         "message": "수정 권한이 없습니다.",
-                        "data": None
+                        "data": None,
                     }
-                }
+                },
             ),
             500: openapi.Response(
                 description="서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
@@ -325,24 +326,26 @@ class PostViewSet(viewsets.ModelViewSet):
                     "application/json": {
                         "code": 500,
                         "message": "서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
-                        "data": None
+                        "data": None,
                     }
-                }
-            )
-        }
+                },
+            ),
+        },
     )
     def update(self, request, *args, **kwargs):
         """게시물을 수정합니다."""
-        partial = kwargs.pop('partial', False)
+        partial = kwargs.pop("partial", False)
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
-        return Response({
-            "code": 200,
-            "message": "게시물이 수정되었습니다.",
-            "data": {"post_id": instance.id}
-        })
+        return Response(
+            {
+                "code": 200,
+                "message": "게시물이 수정되었습니다.",
+                "data": {"post_id": instance.id},
+            }
+        )
 
     @swagger_auto_schema(
         operation_summary="게시글 부분 수정",
@@ -356,9 +359,9 @@ class PostViewSet(viewsets.ModelViewSet):
                     "application/json": {
                         "code": 200,
                         "message": "게시글이 수정되었습니다.",
-                        "data": {"post_id": 12}
+                        "data": {"post_id": 12},
                     }
-                }
+                },
             ),
             400: openapi.Response(
                 description="수정 권한이 없습니다.",
@@ -366,9 +369,9 @@ class PostViewSet(viewsets.ModelViewSet):
                     "application/json": {
                         "code": 400,
                         "message": "수정 권한이 없습니다.",
-                        "data": None
+                        "data": None,
                     }
-                }
+                },
             ),
             500: openapi.Response(
                 description="서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
@@ -376,15 +379,15 @@ class PostViewSet(viewsets.ModelViewSet):
                     "application/json": {
                         "code": 500,
                         "message": "서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
-                        "data": None
+                        "data": None,
                     }
-                }
-            )
-        }
+                },
+            ),
+        },
     )
     def partial_update(self, request, *args, **kwargs):
         """게시물을 부분 수정합니다."""
-        kwargs['partial'] = True
+        kwargs["partial"] = True
         return self.update(request, *args, **kwargs)
 
     @swagger_auto_schema(
@@ -398,9 +401,9 @@ class PostViewSet(viewsets.ModelViewSet):
                     "application/json": {
                         "code": 204,
                         "message": "게시글이 삭제되었습니다.",
-                        "data": {"post_id": 12}
+                        "data": {"post_id": 12},
                     }
-                }
+                },
             ),
             400: openapi.Response(
                 description="삭제 권한이 없습니다.",
@@ -408,9 +411,9 @@ class PostViewSet(viewsets.ModelViewSet):
                     "application/json": {
                         "code": 400,
                         "message": "삭제 권한이 없습니다.",
-                        "data": None
+                        "data": None,
                     }
-                }
+                },
             ),
             500: openapi.Response(
                 description="서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
@@ -418,11 +421,11 @@ class PostViewSet(viewsets.ModelViewSet):
                     "application/json": {
                         "code": 500,
                         "message": "서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
-                        "data": None
+                        "data": None,
                     }
-                }
-            )
-        }
+                },
+            ),
+        },
     )
     def destroy(self, request, *args, **kwargs):
         """게시물을 삭제합니다."""
@@ -430,11 +433,14 @@ class PostViewSet(viewsets.ModelViewSet):
         if instance.author != self.request.user and not self.request.user.is_staff:
             raise PermissionDenied("게시물을 삭제할 권한이 없습니다.")
         instance.soft_delete(self.request.user)
-        return Response({
-            "code": 204,
-            "message": "게시글이 삭제되었습니다.",
-            "data": {"post_id": instance.id}
-        }, status=status.HTTP_204_NO_CONTENT)
+        return Response(
+            {
+                "code": 204,
+                "message": "게시글이 삭제되었습니다.",
+                "data": {"post_id": instance.id},
+            },
+            status=status.HTTP_204_NO_CONTENT,
+        )
 
     @swagger_auto_schema(
         operation_summary="게시글 좋아요",
@@ -444,8 +450,8 @@ class PostViewSet(viewsets.ModelViewSet):
             201: "좋아요 추가 성공",
             400: "이미 좋아요를 누른 게시물",
             401: "인증되지 않은 사용자",
-            404: "게시물을 찾을 수 없음"
-        }
+            404: "게시물을 찾을 수 없음",
+        },
     )
     @action(detail=True, methods=["post"])
     def like(self, request, pk=None):
@@ -456,7 +462,9 @@ class PostViewSet(viewsets.ModelViewSet):
             content_type=content_type, object_id=post.id, user=request.user
         ).exists():
             # 이미 좋아요가 있으면 삭제(취소)
-            Like.objects.filter(content_type=content_type, object_id=post.id, user=request.user).delete()
+            Like.objects.filter(
+                content_type=content_type, object_id=post.id, user=request.user
+            ).delete()
             return Response({"status": "unliked"}, status=status.HTTP_200_OK)
         Like.objects.create(
             content_type=content_type, object_id=post.id, user=request.user
@@ -470,8 +478,8 @@ class PostViewSet(viewsets.ModelViewSet):
         responses={
             204: "좋아요 취소 성공",
             401: "인증되지 않은 사용자",
-            404: "게시물을 찾을 수 없음"
-        }
+            404: "게시물을 찾을 수 없음",
+        },
     )
     @action(detail=True, methods=["post"])
     def unlike(self, request, pk=None):
@@ -487,10 +495,7 @@ class PostViewSet(viewsets.ModelViewSet):
         operation_summary="게시글 조회수 증가",
         operation_description="게시글의 조회수를 증가시킵니다.",
         tags=["게시글"],
-        responses={
-            200: "조회수 증가 성공",
-            404: "게시물을 찾을 수 없음"
-        }
+        responses={200: "조회수 증가 성공", 404: "게시물을 찾을 수 없음"},
     )
     @action(detail=True, methods=["post"])
     def increase_views(self, request, pk=None):

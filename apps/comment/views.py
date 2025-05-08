@@ -1,16 +1,16 @@
 from django.shortcuts import get_object_or_404
 from django_filters import rest_framework as django_filters
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from utils.exceptions import CustomAPIException
-from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
 
 from apps.post.models import Post
+from utils.exceptions import CustomAPIException
 
 from .models import Comment
 from .serializers import (
@@ -73,7 +73,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         """
         if self.action in ["list", "retrieve"]:
             return [AllowAny()]
-        
+
         if not self.request.user.is_authenticated:
             message = {
                 "create": "댓글을 작성하려면 로그인이 필요합니다.",
@@ -81,12 +81,8 @@ class CommentViewSet(viewsets.ModelViewSet):
                 "partial_update": "댓글을 수정하려면 로그인이 필요합니다.",
                 "destroy": "댓글을 삭제하려면 로그인이 필요합니다.",
             }.get(self.action, "로그인이 필요한 서비스입니다.")
-            
-            raise CustomAPIException({
-                "code": 401,
-                "message": message,
-                "data": None
-            })
+
+            raise CustomAPIException({"code": 401, "message": message, "data": None})
         return [IsAuthenticated()]
 
     def get_serializer_class(self):
@@ -116,11 +112,21 @@ class CommentViewSet(viewsets.ModelViewSet):
                         "code": 200,
                         "message": "댓글 검색 성공.",
                         "data": [
-                            {"comment_id": 11, "post_id": 123, "user_id": 42, "content": "아이브 정말 응원해요!"},
-                            {"comment_id": 15, "post_id": 123, "user_id": 88, "content": "항상 응원해요!"}
-                        ]
+                            {
+                                "comment_id": 11,
+                                "post_id": 123,
+                                "user_id": 42,
+                                "content": "아이브 정말 응원해요!",
+                            },
+                            {
+                                "comment_id": 15,
+                                "post_id": 123,
+                                "user_id": 88,
+                                "content": "항상 응원해요!",
+                            },
+                        ],
                     }
-                }
+                },
             ),
             400: openapi.Response(
                 description="댓글 정보를 찾을 수 없습니다.",
@@ -128,9 +134,9 @@ class CommentViewSet(viewsets.ModelViewSet):
                     "application/json": {
                         "code": 400,
                         "message": "댓글 정보를 찾을 수 없습니다.",
-                        "data": None
+                        "data": None,
                     }
-                }
+                },
             ),
             500: openapi.Response(
                 description="서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
@@ -138,11 +144,11 @@ class CommentViewSet(viewsets.ModelViewSet):
                     "application/json": {
                         "code": 500,
                         "message": "서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
-                        "data": None
+                        "data": None,
                     }
-                }
-            )
-        }
+                },
+            ),
+        },
     )
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
@@ -158,9 +164,9 @@ class CommentViewSet(viewsets.ModelViewSet):
                     "application/json": {
                         "code": 201,
                         "message": "댓글 작성 성공.",
-                        "data": {"comment_id": 1}
+                        "data": {"comment_id": 1},
                     }
-                }
+                },
             ),
             400: openapi.Response(
                 description="댓글 작성이 실패하였습니다.",
@@ -168,9 +174,9 @@ class CommentViewSet(viewsets.ModelViewSet):
                     "application/json": {
                         "code": 400,
                         "message": "댓글 작성이 실패하였습니다.",
-                        "data": None
+                        "data": None,
                     }
-                }
+                },
             ),
             500: openapi.Response(
                 description="서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
@@ -178,11 +184,11 @@ class CommentViewSet(viewsets.ModelViewSet):
                     "application/json": {
                         "code": 500,
                         "message": "서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
-                        "data": None
+                        "data": None,
                     }
-                }
-            )
-        }
+                },
+            ),
+        },
     )
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -197,7 +203,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     @swagger_auto_schema(
         operation_summary="댓글 상세",
         operation_description="댓글 상세 정보를 조회합니다.",
-        tags=["댓글"]
+        tags=["댓글"],
     )
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
@@ -213,9 +219,9 @@ class CommentViewSet(viewsets.ModelViewSet):
                     "application/json": {
                         "code": 200,
                         "message": "댓글 수정 성공.",
-                        "data": {"comment_id": 1}
+                        "data": {"comment_id": 1},
                     }
-                }
+                },
             ),
             400: openapi.Response(
                 description="수정 권한이 없습니다.",
@@ -223,9 +229,9 @@ class CommentViewSet(viewsets.ModelViewSet):
                     "application/json": {
                         "code": 400,
                         "message": "수정 권한이 없습니다.",
-                        "data": None
+                        "data": None,
                     }
-                }
+                },
             ),
             500: openapi.Response(
                 description="서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
@@ -233,14 +239,14 @@ class CommentViewSet(viewsets.ModelViewSet):
                     "application/json": {
                         "code": 500,
                         "message": "서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
-                        "data": None
+                        "data": None,
                     }
-                }
-            )
-        }
+                },
+            ),
+        },
     )
     def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)
+        partial = kwargs.pop("partial", False)
         instance = self.get_object()
         if instance.author != request.user and not request.user.is_staff:
             raise PermissionDenied("댓글을 수정할 권한이 없습니다.")
@@ -261,9 +267,9 @@ class CommentViewSet(viewsets.ModelViewSet):
                     "application/json": {
                         "code": 200,
                         "message": "댓글 수정 성공.",
-                        "data": {"comment_id": 1}
+                        "data": {"comment_id": 1},
                     }
-                }
+                },
             ),
             400: openapi.Response(
                 description="수정 권한이 없습니다.",
@@ -271,9 +277,9 @@ class CommentViewSet(viewsets.ModelViewSet):
                     "application/json": {
                         "code": 400,
                         "message": "수정 권한이 없습니다.",
-                        "data": None
+                        "data": None,
                     }
-                }
+                },
             ),
             500: openapi.Response(
                 description="서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
@@ -281,14 +287,14 @@ class CommentViewSet(viewsets.ModelViewSet):
                     "application/json": {
                         "code": 500,
                         "message": "서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
-                        "data": None
+                        "data": None,
                     }
-                }
-            )
-        }
+                },
+            ),
+        },
     )
     def partial_update(self, request, *args, **kwargs):
-        kwargs['partial'] = True
+        kwargs["partial"] = True
         return self.update(request, *args, **kwargs)
 
     @swagger_auto_schema(
@@ -302,9 +308,9 @@ class CommentViewSet(viewsets.ModelViewSet):
                     "application/json": {
                         "code": 204,
                         "message": "댓글 삭제 성공.",
-                        "data": None
+                        "data": None,
                     }
-                }
+                },
             ),
             400: openapi.Response(
                 description="삭제 권한이 없습니다.",
@@ -312,9 +318,9 @@ class CommentViewSet(viewsets.ModelViewSet):
                     "application/json": {
                         "code": 400,
                         "message": "삭제 권한이 없습니다.",
-                        "data": None
+                        "data": None,
                     }
-                }
+                },
             ),
             500: openapi.Response(
                 description="서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
@@ -322,19 +328,18 @@ class CommentViewSet(viewsets.ModelViewSet):
                     "application/json": {
                         "code": 500,
                         "message": "서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
-                        "data": None
+                        "data": None,
                     }
-                }
-            )
-        }
+                },
+            ),
+        },
     )
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         if instance.author != self.request.user and not self.request.user.is_staff:
             raise PermissionDenied("댓글을 삭제할 권한이 없습니다.")
         instance.soft_delete(self.request.user)
-        return Response({
-            "code": 204,
-            "message": "댓글 삭제 성공.",
-            "data": None
-        }, status=status.HTTP_204_NO_CONTENT)
+        return Response(
+            {"code": 204, "message": "댓글 삭제 성공.", "data": None},
+            status=status.HTTP_204_NO_CONTENT,
+        )
