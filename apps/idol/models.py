@@ -1,4 +1,7 @@
+from django.contrib.auth import get_user_model
 from django.db import models
+
+User = get_user_model()
 
 
 class Idol(models.Model):
@@ -24,6 +27,7 @@ class Idol(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)  # 생성 시간
     updated_at = models.DateTimeField(auto_now=True)  # 수정 시간
     is_active = models.BooleanField(default=True)  # 활동 상태
+    managers = models.ManyToManyField(User, related_name="managed_idols", blank=True)
 
     class Meta:
         ordering = ["name"]

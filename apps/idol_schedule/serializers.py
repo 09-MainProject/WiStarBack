@@ -2,6 +2,7 @@ from rest_framework import serializers
 
 from .models import Idol, Schedule
 
+
 class ScheduleSerializer(serializers.ModelSerializer):
     idol_name = serializers.CharField(source="idol.name", read_only=True)
 
