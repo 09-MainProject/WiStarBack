@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.password_validation import validate_password
@@ -108,7 +109,31 @@ class LogoutSerializer(serializers.Serializer):
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = "__all__"
+        fields = ["id", "name", "nickname", "email", "profile_image_url", "profile_thumbnail_url"]
+
+    def get_profile_image_url(self, obj):
+        profile_image = obj.profile_images.last()
+        if profile_image and profile_image.image:
+            # image는 ImageField이기 때문에 .url 속성을 호출하면 저장된 파일의 경로가 자동으로 완전한 URL을 반환
+            return profile_image.image.url
+        return settings.DEFAULT_PROFILE_URL
+
+    def get_profile_thumbnail_url(self, obj):
+        profile_image = obj.profile_images.last()
+        if profile_image and profile_image.thumbnail:
+            # image는 ImageField이기 때문에 .url 속성을 호출하면 저장된 파일의 경로가 자동으로 완전한 URL을 반환
+            return profile_image.thumbnail.url
+        return settings.DEFAULT_POST_THUMBNAIL_URL
+
+# 결과 예시
+# {
+#     "id": 1,
+#     "name": "홍길동",
+#     "nickname": "길동이",
+#     "email": "gil@example.com",
+#     "profile_image_url": "https://s3.amazonaws.com/your-bucket/uploads/2025/05/09/profile.webp",
+#     "profile_thumbnail_url": "https://s3.amazonaws.com/your-bucket/uploads/2025/05/09/profile_thumb.webp"
+# }
 
 
 class ProfileUpdateSerializer(serializers.ModelSerializer):

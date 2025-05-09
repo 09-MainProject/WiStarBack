@@ -34,6 +34,17 @@ DATABASES = {
     }
 }
 
+# 기본 이미지 url 설정
+BASE_STATIC_URL = STATIC_URL + "images/"
+# 기본 프로필 이미지 url 설정
+DEFAULT_PROFILE_URL = BASE_STATIC_URL + "default_profile.webp"
+DEFAULT_PROFILE_THUMBNAIL_URL = BASE_STATIC_URL + "default_profile_thumb.webp"
+# 기본 게시글 이미지 url 설정
+DEFAULT_POST_URL = BASE_STATIC_URL + "default_post.webp"
+DEFAULT_POST_THUMBNAIL_URL = BASE_STATIC_URL + "default_post_thumb.webp"
+# 기본 이미지 url 설정
+DEFAULT_THUMBNAIL_URL = BASE_STATIC_URL + "default_thumb.webp"  # 예외 대비
+
 
 # Email
 # from django.core.mail.backends.smtp import EmailBackend
