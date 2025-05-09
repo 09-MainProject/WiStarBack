@@ -1,44 +1,43 @@
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.db.models import Q
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, permissions
 from rest_framework.response import Response
 
-from utils.responses import idol_schedule as S  # 응답 메시지 분리
+from utils.responses import idol_schedule as S
 
 from .models import Idol, Schedule
 from .serializers import ScheduleSerializer
 
 
-# 매니저 권한을 가진 사용자만 접근 가능
 class IsManager(permissions.BasePermission):
     def has_permission(self, request, view):
         return request.user and request.user.is_authenticated and request.user.is_staff
 
 
-# 아이돌 소유자이거나 관리자일 경우에만 수정/삭제 가능
 class IsIdolManagerOrOwner(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.user.is_staff:
-            return True  # 관리자 권한은 무조건 허용
+            return True
         return obj.user == request.user
 
 
 class ScheduleListCreateView(generics.ListCreateAPIView):
     serializer_class = ScheduleSerializer
 
-    # 요청 메서드에 따라 권한 분기: GET은 전체 공개, POST는 매니저만 가능
     def get_permissions(self):
         if self.request.method == "GET":
             return [permissions.AllowAny()]
-        return [IsManager()]
+        return [IsManager()]  # POST 요청은 매니저만 가능
 
-    # 필터링 및 검색 기능 포함
     def get_queryset(self):
         idol_id = self.kwargs["idol_id"]
         queryset = Schedule.objects.filter(idol_id=idol_id)
         filters = Q()
         params = self.request.query_params
 
+        # 필터 조건 동적 구성
         if title := params.get("title"):
             filters &= Q(title__icontains=title)
         if description := params.get("description"):
@@ -52,7 +51,42 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
 
         return queryset.filter(filters)
 
-    # 일정 목록 조회
+    @swagger_auto_schema(
+        operation_summary="아이돌 스케줄 목록 조회",
+        manual_parameters=[
+            openapi.Parameter(
+                "title",
+                openapi.IN_QUERY,
+                description="제목 검색",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "description",
+                openapi.IN_QUERY,
+                description="설명 검색",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "location",
+                openapi.IN_QUERY,
+                description="장소 검색",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "start_date",
+                openapi.IN_QUERY,
+                description="시작일 이후",
+                type=openapi.FORMAT_DATE,
+            ),
+            openapi.Parameter(
+                "end_date",
+                openapi.IN_QUERY,
+                description="종료일 이전",
+                type=openapi.FORMAT_DATE,
+            ),
+        ],
+        responses={200: ScheduleSerializer(many=True)},
+    )
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True)
@@ -65,7 +99,11 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
             }
         )
 
-    # 일정 등록
+    @swagger_auto_schema(
+        operation_summary="아이돌 스케줄 등록",
+        request_body=ScheduleSerializer,
+        responses={201: ScheduleSerializer},
+    )
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
@@ -85,14 +123,15 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
             }
         )
 
-    # 아이돌 유효성 및 권한 검증
     def perform_create(self, serializer):
         idol_id = self.kwargs["idol_id"]
         try:
             idol = Idol.objects.get(id=idol_id)
         except ObjectDoesNotExist:
+            # 존재하지 않는 아이돌 ID로 접근 시 예외 처리
             raise PermissionDenied(S.SCHEDULE_IDOL_NOT_FOUND["message"])
 
+        # 아이돌 담당 매니저 여부 검증
         if self.request.user not in idol.managers.all():
             raise PermissionDenied(S.SCHEDULE_PERMISSION_DENIED["message"])
 
@@ -103,12 +142,19 @@ class ScheduleRetrieveUpdateDeleteView(
     generics.RetrieveAPIView, generics.DestroyAPIView, generics.UpdateAPIView
 ):
     serializer_class = ScheduleSerializer
-    permission_classes = [IsIdolManagerOrOwner]
+
+    def get_permissions(self):
+        # GET은 누구나 접근 가능, 나머지는 관리자 또는 소유자만
+        if self.request.method == "GET":
+            return [permissions.AllowAny()]  # 인증 없이 접근 허용
+        return [IsIdolManagerOrOwner()]  # PATCH, DELETE는 관리자나 소유자만 가능
 
     def get_queryset(self):
         return Schedule.objects.filter(idol_id=self.kwargs["idol_id"])
 
-    # 일정 상세 조회
+    @swagger_auto_schema(
+        operation_summary="아이돌 스케줄 상세 조회", responses={200: ScheduleSerializer}
+    )
     def retrieve(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
@@ -129,7 +175,11 @@ class ScheduleRetrieveUpdateDeleteView(
                 }
             )
 
-    # 일정 수정
+    @swagger_auto_schema(
+        operation_summary="아이돌 스케줄 수정",
+        request_body=ScheduleSerializer,
+        responses={200: ScheduleSerializer},
+    )
     def patch(self, request, *args, **kwargs):
         partial = True
         try:
@@ -162,7 +212,9 @@ class ScheduleRetrieveUpdateDeleteView(
                 }
             )
 
-    # 일정 삭제
+    @swagger_auto_schema(
+        operation_summary="아이돌 스케줄 삭제", responses={204: "삭제 성공"}
+    )
     def delete(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
