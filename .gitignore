@@ -310,3 +310,6 @@ app/.config_secret/
 secret.json
 
 .static_root/
+
+*.webp
+test.*

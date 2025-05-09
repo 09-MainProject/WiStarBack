@@ -56,8 +56,8 @@ OWN_APPS = [
     "apps.idol",
     "apps.notification",
     "apps.post",
+    "apps.idol_schedule",
     "apps.comment",
-    "apps.schedule",
     "apps.like",
     "apps.follow",
 ]
@@ -208,7 +208,6 @@ REST_FRAMEWORK = {
     # 'PAGE_SIZE': 10,
     "EXCEPTION_HANDLER": "config.exception_handler.custom_exception_handler",
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        # 'rest_framework.authentication.BasicAuthentication',
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
 }
@@ -224,25 +223,6 @@ SIMPLE_JWT = {
     "TOKEN_OBTAIN_SERIALIZER": "utils.jwt_serializers.WiStarTokenObtainPairSerializer",
     # ...
 }
-
-# # Swagger 설정
-# SWAGGER_SETTINGS = {
-#     'SECURITY_DEFINITIONS': {
-#         'Bearer': {
-#             'type': 'apiKey',
-#             'in': 'header',
-#             'name': 'Authorization',
-#             'description': 'JWT access token: Bearer <your_token>',
-#         },
-#         'X-CSRFToken': {
-#             'type': 'apiKey',
-#             'in': 'header',
-#             'name': 'X-CSRFToken',
-#             'description': 'CSRF token from cookie (name: csrftoken)',
-#         },
-#     },
-#     'USE_SESSION_AUTH': False,  # 세션 로그인 비활성화 (원하는 경우 True로)
-# }
 
 # 소셜로그인에 사용할 url
 # FRONTEND_URL = "/frontend_url"
