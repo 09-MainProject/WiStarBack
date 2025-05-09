@@ -139,3 +139,10 @@ DELETE_SUCCESS = {
 # PermissionDenied	권한 없음	403
 # NotFound	리소스 없음	404
 # APIException	기본 Exception (상태코드 500)	500
+
+# 인증 관련
+NOT_AUTHENTICATED = {
+    "code": 401,
+    "message": "로그인이 필요한 서비스입니다.",
+    "data": None,
+}
