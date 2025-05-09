@@ -59,6 +59,7 @@ OWN_APPS = [
     "apps.comment",
     "apps.schedule",
     "apps.like",
+    "apps.follow",
 ]
 
 THIRD_PARTY_APPS = [
@@ -170,8 +171,8 @@ STATICFILES_DIRS = [
 STATIC_ROOT = BASE_DIR / ".static_root"
 
 # Media
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

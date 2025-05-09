@@ -8,11 +8,7 @@ DEBUG = True
 ALLOWED_HOSTS: list[str] = []
 
 DEBUG = False
-ALLOWED_HOSTS: list[str] = [
-    "127.0.0.1",
-    "localhost",
-    "43.203.181.6"  # EC2 퍼블릭 IP
-]
+ALLOWED_HOSTS: list[str] = ["127.0.0.1", "localhost", "43.203.181.6"]  # EC2 퍼블릭 IP
 
 
 # dotenv_values 메서드는 env 파일의 경로를 파라미터로 전달 받아 해당 파일을 읽어온 후 Key, Value 형태로 매핑하여 dict로 반환합니다.

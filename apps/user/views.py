@@ -40,12 +40,15 @@ from utils.responses.user import (
     LOGIN_SUCCESS,
     LOGOUT_SUCCESS,
     MISSING_REFRESH_TOKEN,
+    PASSWORD_CHECK_INVALID,
+    PASSWORD_MATCH_SUCCESS,
+    PASSWORD_NOT_MATCH,
     SIGNATURE_EXPIRED,
     SIGNUP_PASSWORD_MISMATCH,
     SIGNUP_SUCCESS,
     TOKEN_REFRESH_RESPONSE,
     VERIFY_EMAIL_SUCCESS,
-    WEAK_PASSWORD, PASSWORD_MATCH_SUCCESS, PASSWORD_NOT_MATCH, PASSWORD_CHECK_INVALID,
+    WEAK_PASSWORD,
 )
 
 
@@ -55,6 +58,7 @@ class RegisterView(CreateAPIView):
     serializer_class = RegisterSerializer  # Serializer
 
     @swagger_auto_schema(
+        tags=["유저"],
         operation_summary="회원가입",
         operation_description="",
         request_body=RegisterSerializer,
@@ -167,6 +171,7 @@ class RegisterView(CreateAPIView):
 class VerifyEmailView(APIView):
 
     @swagger_auto_schema(
+        tags=["유저/인증"],
         operation_summary="이메일 인증 링크 확인",
         manual_parameters=[
             openapi.Parameter(
@@ -254,6 +259,7 @@ class VerifyEmailView(APIView):
 # 로그인
 class CustomTokenObtainPairView(TokenObtainPairView):
     @swagger_auto_schema(
+        tags=["유저"],
         operation_summary="JWT 로그인",
         operation_description="로그인 후 access_token + csrf_token 응답, refresh_token은 HttpOnly 쿠키로 저장됨",
         request_body=openapi.Schema(
@@ -352,6 +358,7 @@ class LogoutAPIView(APIView):
     # permission_classes = []  # 인증 없이 호출 가능
 
     @swagger_auto_schema(
+        tags=["유저"],
         operation_summary="JWT 로그아웃",
         operation_description="HttpOnly 쿠키에서 refresh_token을 삭제하고, 블랙리스트에 등록합니다.",
         request_body=None,
@@ -422,6 +429,7 @@ class LogoutAPIView(APIView):
 # 엑세스 토큰 리프레시
 class CustomTokenRefreshView(APIView):
     @swagger_auto_schema(
+        tags=["유저"],
         operation_summary="액세스 토큰 재발급",
         operation_description="HttpOnly 쿠키에 저장된 리프레시 토큰으로 새로운 액세스 토큰과 CSRF 토큰을 재발급합니다.",
         request_body=None,
@@ -576,6 +584,7 @@ class ProfileView(RetrieveUpdateDestroyAPIView):
         return super().get_serializer_class()
 
     @swagger_auto_schema(
+        tags=["유저/프로필"],
         operation_summary="내 프로필 조회",
         request_body=None,
         manual_parameters=[
@@ -609,6 +618,7 @@ class ProfileView(RetrieveUpdateDestroyAPIView):
         return self.retrieve(request, *args, **kwargs)
 
     @swagger_auto_schema(
+        tags=["유저/프로필"],
         operation_summary="내 프로필 수정",
         request_body=ProfileUpdateSerializer,
         manual_parameters=[
@@ -675,6 +685,7 @@ class ProfileView(RetrieveUpdateDestroyAPIView):
         return self.partial_update(request, *args, **kwargs)
 
     @swagger_auto_schema(
+        tags=["유저/프로필"],
         operation_summary="회원 탈퇴",
         request_body=None,
         manual_parameters=[
@@ -732,21 +743,18 @@ class PasswordCheckView(APIView):
     authentication_classes = [JWTAuthentication]  # JWT 인증
 
     @swagger_auto_schema(
+        tags=["유저/인증"],
         operation_summary="비밀번호 확인",
         operation_description="입력한 비밀번호가 현재 사용자 계정의 비밀번호와 일치하는지 확인합니다.",
         request_body=PasswordCheckSerializer,
         responses={
             200: openapi.Response(
                 description="비밀번호 일치",
-                examples={
-                    "application/json": PASSWORD_MATCH_SUCCESS
-                },
+                examples={"application/json": PASSWORD_MATCH_SUCCESS},
             ),
             400: openapi.Response(
                 description="비밀번호 불일치 또는 입력값 오류",
-                examples={
-                    "application/json": PASSWORD_NOT_MATCH
-                },
+                examples={"application/json": PASSWORD_NOT_MATCH},
             ),
         },
         security=[{"Bearer": []}],

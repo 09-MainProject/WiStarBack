@@ -22,91 +22,82 @@ def create_user(db):
 
 
 @pytest.mark.django_db
-def test_register_user(api_client):
-    url = reverse("user:register")  # URL name이 'users:register'라고 가정합니다.
+def test_signup_user(api_client):
+    url = reverse("user:signup")
     data = {
         "email": "test@example.com",
-        "password": "password123",
+        "password": "qwer1234!",
+        "password_confirm": "qwer1234!",
         "nickname": "testuser",
         "name": "테스트",
     }
-    response = api_client.post(url, data)
+    response = api_client.post(url, data, format="json")
     assert response.status_code == status.HTTP_201_CREATED
-    assert "verify_url" in response.data
+    assert "verify_url" in response.data["data"]
 
 
 @pytest.mark.django_db
 def test_verify_email(api_client, create_user):
-    user = create_user(
-        email="verifytest@example.com", password="password123", is_active=False
-    )
-
+    user = create_user(email="verify@example.com", password="1234", is_active=False)
     signer = TimestampSigner()
     signed_email = signer.sign(user.email)
     signed_code = signing.dumps(signed_email)
+    url = reverse("user:verify_email") + f"?code={signed_code}"
 
-    url = reverse("users:verify_email") + f"?code={signed_code}"
     response = api_client.get(url)
-
     user.refresh_from_db()
     assert response.status_code == status.HTTP_200_OK
     assert user.is_active is True
 
 
 @pytest.mark.django_db
-def test_login_user(api_client, create_user):
-    password = "password123"
-    user = create_user(email="loginuser@example.com", password=password, is_active=True)
-
-    url = reverse("users:token_obtain_pair")
-    data = {"email": user.email, "password": password}
+def test_login(api_client, create_user):
+    user = create_user(email="login@example.com", password="qwer1234!", is_active=True)
+    url = reverse("user:token_login")
+    data = {"email": user.email, "password": "qwer1234!"}
     response = api_client.post(url, data)
 
     assert response.status_code == status.HTTP_200_OK
     assert "access_token" in response.data["data"]
     assert "csrf_token" in response.data["data"]
+    assert "refresh_token" in response.cookies
 
 
 @pytest.mark.django_db
-def test_logout_user(api_client, create_user):
-    password = "password123"
-    user = create_user(email="logout@example.com", password=password, is_active=True)
+def test_token_logout(api_client, create_user):
+    user = create_user(
+        email="token_logout@example.com", password="qwer1234!", is_active=True
+    )
+    login_url = reverse("user:token_login")
+    data = {"email": user.email, "password": "qwer1234!"}
+    login_response = api_client.post(login_url, data)
 
-    # 로그인해서 쿠키 세팅
-    login_url = reverse("users:token_obtain_pair")
-    login_data = {"email": user.email, "password": password}
-    login_response = api_client.post(login_url, login_data)
     refresh_token = login_response.cookies.get("refresh_token").value
-
+    access_token = login_response.data["data"]["access_token"]
+    api_client.credentials(HTTP_AUTHORIZATION=f"Bearer {access_token}")
     api_client.cookies["refresh_token"] = refresh_token
 
-    logout_url = reverse("users:logout")
-    api_client.force_authenticate(user=user)
-    response = api_client.post(logout_url)
+    token_logout_url = reverse("user:token_logout")
+    response = api_client.post(token_logout_url)
 
     assert response.status_code == status.HTTP_200_OK
 
 
 @pytest.mark.django_db
 def test_token_refresh(api_client, create_user):
-    password = "password123"
     user = create_user(
-        email="refreshtest@example.com", password=password, is_active=True
+        email="refresh@example.com", password="qwer1234!", is_active=True
     )
-
-    login_url = reverse("users:token_obtain_pair")
-    login_data = {"email": user.email, "password": password}
-    login_response = api_client.post(login_url, login_data)
+    login_url = reverse("user:token_login")
+    data = {"email": user.email, "password": "qwer1234!"}
+    login_response = api_client.post(login_url, data)
 
     refresh_token = login_response.cookies.get("refresh_token").value
     csrf_token = login_response.data["data"]["csrf_token"]
-
     api_client.cookies["refresh_token"] = refresh_token
 
-    refresh_url = reverse("users:token_refresh")
-    headers = {"HTTP_X_CSRFTOKEN": csrf_token}
-
-    response = api_client.post(refresh_url, **headers)
+    refresh_url = reverse("user:token_refresh")
+    response = api_client.post(refresh_url, **{"HTTP_X_CSRFTOKEN": csrf_token})
 
     assert response.status_code == status.HTTP_200_OK
     assert "access_token" in response.data["data"]
@@ -114,37 +105,59 @@ def test_token_refresh(api_client, create_user):
 
 
 @pytest.mark.django_db
-def test_profile_view_update_delete(api_client, create_user):
-    password = "password123"
+def test_profile_crud(api_client, create_user):
     user = create_user(
         email="profile@example.com",
-        password=password,
-        nickname="OldNickname",
-        name="OldName",
+        password="qwer1234!",
+        name="Old",
+        nickname="OldNick",
         is_active=True,
     )
-
-    login_url = reverse("users:token_obtain_pair")
-    login_data = {"email": user.email, "password": password}
-    login_response = api_client.post(login_url, login_data)
-
+    login_url = reverse("user:token_login")
+    login_response = api_client.post(
+        login_url, {"email": user.email, "password": "qwer1234!"}
+    )
     access_token = login_response.data["data"]["access_token"]
 
     api_client.credentials(HTTP_AUTHORIZATION=f"Bearer {access_token}")
+    url = reverse("user:profile")
 
-    # GET 프로필 조회
-    profile_url = reverse("users:profile")
-    response = api_client.get(profile_url)
-    assert response.status_code == status.HTTP_200_OK
-    assert response.data["nickname"] == "OldNickname"
+    # GET
+    res = api_client.get(url)
+    assert res.status_code == status.HTTP_200_OK
+    assert res.data["nickname"] == "OldNick"
 
-    # PATCH 프로필 수정
-    update_data = {"nickname": "NewNickname"}
-    response = api_client.patch(profile_url, update_data)
-    assert response.status_code == status.HTTP_200_OK
-    assert response.data["nickname"] == "NewNickname"
+    # PATCH
+    res = api_client.patch(url, {"nickname": "NewNick"})
+    assert res.status_code == status.HTTP_200_OK
+    assert res.data["nickname"] == "NewNick"
 
-    # DELETE 회원 탈퇴
-    response = api_client.delete(profile_url)
-    assert response.status_code == status.HTTP_200_OK
+    # DELETE
+    res = api_client.delete(url)
+    assert res.status_code == status.HTTP_200_OK
     assert User.objects.filter(email=user.email).exists() is False
+
+
+@pytest.mark.django_db
+def test_password_check(api_client, create_user):
+    user = create_user(
+        email="passcheck@example.com", password="qwer1234!", is_active=True
+    )
+    login_url = reverse("user:token_login")
+    login_response = api_client.post(
+        login_url, {"email": user.email, "password": "qwer1234!"}
+    )
+    access_token = login_response.data["data"]["access_token"]
+
+    api_client.credentials(HTTP_AUTHORIZATION=f"Bearer {access_token}")
+    url = reverse("user:password_check")
+
+    # 성공
+    res = api_client.post(url, {"password": "qwer1234!"})
+    assert res.status_code == status.HTTP_200_OK
+    assert res.data["code"] == 200
+
+    # 실패
+    res = api_client.post(url, {"password": "wrongpass"})
+    assert res.status_code == status.HTTP_400_BAD_REQUEST
+    assert res.data["code"] == 400
