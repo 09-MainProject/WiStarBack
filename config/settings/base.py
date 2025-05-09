@@ -24,10 +24,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from dotenv import load_dotenv
-
-load_dotenv()
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -36,7 +32,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-k-=4gg*i3t49&!8i14gwzuvnd+wtfsr7ihtbny-s#po8%50y@p"
+# SECRET_KEY = "django-insecure-k-=4gg*i3t49&!8i14gwzuvnd+wtfsr7ihtbny-s#po8%50y@p"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -52,7 +48,7 @@ DJANGO_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "django.contrib.admin",  # 일시적으로 비활성화
+    # "django.contrib.admin",  # 일시적으로 비활성화
 ]
 
 OWN_APPS = [
@@ -60,7 +56,6 @@ OWN_APPS = [
     "apps.idol",
     "apps.notification",
     "apps.post",
-    "apps.user_schedule",
     "apps.idol_schedule",
     "apps.comment",
     "apps.like",
@@ -72,7 +67,6 @@ THIRD_PARTY_APPS = [
     "rest_framework_simplejwt",  # poetry add djangorestframework-simplejwt
     "rest_framework_simplejwt.token_blacklist",
     "storages",
-    "django_filters",
     "corsheaders",
     "drf_yasg",
 ]
@@ -203,8 +197,7 @@ LOGOUT_REDIRECT_URL = "/api/user/login/"
 REST_FRAMEWORK = {
     # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     # 'PAGE_SIZE': 10,
-    # 필터 백엔드 설정 추가
-    "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
+    "EXCEPTION_HANDLER": "config.exception_handler.custom_exception_handler",
     "DEFAULT_AUTHENTICATION_CLASSES": [
         # 'rest_framework.authentication.BasicAuthentication',
         "rest_framework_simplejwt.authentication.JWTAuthentication",

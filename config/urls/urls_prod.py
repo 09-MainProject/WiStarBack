@@ -19,6 +19,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -28,7 +29,7 @@ urlpatterns = [
     # path("api/", include("apps.like.urls")),
     path("api/idols/", include("apps.idol.urls")),
     path("api/idols/", include("apps.idol_schedule.urls")),
-    path("api/users/", include("apps.user_schedule.urls")),
+    # path("api/users/", include("apps.user_schedule.urls")),
     # path("api/", include("apps.notification.urls")),
     # path("api/", include("apps.notification_set.urls")),
 ]
