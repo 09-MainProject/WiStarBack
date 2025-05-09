@@ -149,6 +149,10 @@ chmod +x resources/scripts/setup.sh
 setup.sh 실행
 resources/scripts/setup.sh
 
+ci테스트 실행
+chmod +x ./resources/scripts/test.sh
+./resources/scripts/test.sh
+
 가상환경 없으면 가상환경을 자동생성함. 기본설정 : 전역위치에 가상화경 생성
 혹은 가상환경을 미리 만든 상태에선 가상환경에 라이브러리를 설치
 
