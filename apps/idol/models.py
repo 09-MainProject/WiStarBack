@@ -17,6 +17,7 @@ class Idol(models.Model):
     """
 
     name = models.CharField(max_length=100, db_index=True)  # 아이돌 이름
+    en_name = models.CharField(max_length=255, blank=True)  # 아이돌 영문 이름
     debut_date = models.DateField(null=True, blank=True)  # 데뷔 날짜
     agency = models.CharField(max_length=100, null=True, blank=True)  # 소속사
     description = models.TextField(blank=True)  # 소개글
