@@ -32,7 +32,7 @@ class Post(models.Model):
 
     title = models.CharField(max_length=200)
     content = models.TextField()
-    image = models.ImageField(upload_to="posts/%Y/%m/%d/", blank=True, null=True)
+    image = models.ImageField(upload_to="post_images/%Y/%m/%d/", blank=True, null=True)
     image_url = models.URLField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

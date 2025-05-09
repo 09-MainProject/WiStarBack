@@ -23,7 +23,7 @@ def create_user(db):
 
 @pytest.mark.django_db
 def test_register_user(api_client):
-    url = reverse("users:register")  # URL name이 'users:register'라고 가정합니다.
+    url = reverse("user:register")  # URL name이 'users:register'라고 가정합니다.
     data = {
         "email": "test@example.com",
         "password": "password123",
