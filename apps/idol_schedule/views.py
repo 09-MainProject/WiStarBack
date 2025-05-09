@@ -54,13 +54,38 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
     @swagger_auto_schema(
         operation_summary="아이돌 스케줄 목록 조회",
         manual_parameters=[
-            openapi.Parameter("title", openapi.IN_QUERY, description="제목 검색", type=openapi.TYPE_STRING),
-            openapi.Parameter("description", openapi.IN_QUERY, description="설명 검색", type=openapi.TYPE_STRING),
-            openapi.Parameter("location", openapi.IN_QUERY, description="장소 검색", type=openapi.TYPE_STRING),
-            openapi.Parameter("start_date", openapi.IN_QUERY, description="시작일 이후", type=openapi.FORMAT_DATE),
-            openapi.Parameter("end_date", openapi.IN_QUERY, description="종료일 이전", type=openapi.FORMAT_DATE),
+            openapi.Parameter(
+                "title",
+                openapi.IN_QUERY,
+                description="제목 검색",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "description",
+                openapi.IN_QUERY,
+                description="설명 검색",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "location",
+                openapi.IN_QUERY,
+                description="장소 검색",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "start_date",
+                openapi.IN_QUERY,
+                description="시작일 이후",
+                type=openapi.FORMAT_DATE,
+            ),
+            openapi.Parameter(
+                "end_date",
+                openapi.IN_QUERY,
+                description="종료일 이전",
+                type=openapi.FORMAT_DATE,
+            ),
         ],
-        responses={200: ScheduleSerializer(many=True)}
+        responses={200: ScheduleSerializer(many=True)},
     )
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
@@ -77,7 +102,7 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
     @swagger_auto_schema(
         operation_summary="아이돌 스케줄 등록",
         request_body=ScheduleSerializer,
-        responses={201: ScheduleSerializer}
+        responses={201: ScheduleSerializer},
     )
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -128,8 +153,7 @@ class ScheduleRetrieveUpdateDeleteView(
         return Schedule.objects.filter(idol_id=self.kwargs["idol_id"])
 
     @swagger_auto_schema(
-        operation_summary="아이돌 스케줄 상세 조회",
-        responses={200: ScheduleSerializer}
+        operation_summary="아이돌 스케줄 상세 조회", responses={200: ScheduleSerializer}
     )
     def retrieve(self, request, *args, **kwargs):
         try:
@@ -154,13 +178,15 @@ class ScheduleRetrieveUpdateDeleteView(
     @swagger_auto_schema(
         operation_summary="아이돌 스케줄 수정",
         request_body=ScheduleSerializer,
-        responses={200: ScheduleSerializer}
+        responses={200: ScheduleSerializer},
     )
     def patch(self, request, *args, **kwargs):
         partial = True
         try:
             instance = self.get_object()
-            serializer = self.get_serializer(instance, data=request.data, partial=partial)
+            serializer = self.get_serializer(
+                instance, data=request.data, partial=partial
+            )
             if serializer.is_valid():
                 self.perform_update(serializer)
                 return Response(
@@ -187,8 +213,7 @@ class ScheduleRetrieveUpdateDeleteView(
             )
 
     @swagger_auto_schema(
-        operation_summary="아이돌 스케줄 삭제",
-        responses={204: "삭제 성공"}
+        operation_summary="아이돌 스케줄 삭제", responses={204: "삭제 성공"}
     )
     def delete(self, request, *args, **kwargs):
         try:
