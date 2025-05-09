@@ -35,13 +35,15 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
-    # path("admin/", admin.site.urls),  # 일시적으로 비활성화
+    path("admin/", admin.site.urls),
     path("api/users/", include("apps.user.urls")),
     path("api/posts/", include("apps.post.urls")),
     path("api/posts/", include("apps.comment.urls")),
     path("api/", include("apps.like.urls")),
     path("api/idols/", include("apps.idol.urls")),
     path("api/idols/", include("apps.idol_schedule.urls")),
+    path("api/idols/follows/", include("apps.follow.urls")),
+    # path("api/idols/", include("apps.idol_schedule.urls")),
     # path("api/users/", include("apps.user_schedule.urls")),
     # path("api/", include("apps.notification.urls")),
     # path("api/", include("apps.notification_set.urls")),

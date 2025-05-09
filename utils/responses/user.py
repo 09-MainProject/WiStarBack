@@ -61,6 +61,26 @@ INVALID_SIGNATURE = {
     "data": None,
 }
 
+
+# 비밀번호 확인
+PASSWORD_MATCH_SUCCESS = {
+    "code": 200,
+    "message": "비밀번호가 일치합니다.",
+    "data": {"matched": True},
+}
+
+PASSWORD_NOT_MATCH = {
+    "code": 400,
+    "message": "비밀번호가 일치하지 않습니다.",
+    "data": {"matched": False},
+}
+
+PASSWORD_CHECK_INVALID = {
+    "code": 400,
+    "message": "입력값이 유효하지 않습니다.",
+    "data": None,  # 또는 추후 serializer.errors를 덮어쓸 예정이면 None
+}
+
 # 로그인 로그아웃
 LOGIN_SUCCESS = {
     "code": 200,
