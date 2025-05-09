@@ -5,12 +5,21 @@ SCHEDULE_LIST_SUCCESS = openapi.Schema(
     type=openapi.TYPE_OBJECT,
     properties={
         "code": openapi.Schema(type=openapi.TYPE_INTEGER, example=200),
-        "message": openapi.Schema(type=openapi.TYPE_STRING, example="사용자 + 팔로우 아이돌 일정 목록 조회 성공"),
+        "message": openapi.Schema(
+            type=openapi.TYPE_STRING,
+            example="사용자 + 팔로우 아이돌 일정 목록 조회 성공",
+        ),
         "data": openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                "user_schedules": openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_OBJECT)),
-                "idol_schedules": openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_OBJECT)),
+                "user_schedules": openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Items(type=openapi.TYPE_OBJECT),
+                ),
+                "idol_schedules": openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Items(type=openapi.TYPE_OBJECT),
+                ),
             },
         ),
     },
@@ -21,7 +30,9 @@ SCHEDULE_CREATE_SUCCESS = openapi.Schema(
     type=openapi.TYPE_OBJECT,
     properties={
         "code": openapi.Schema(type=openapi.TYPE_INTEGER, example=201),
-        "message": openapi.Schema(type=openapi.TYPE_STRING, example="사용자 일정 등록 성공"),
+        "message": openapi.Schema(
+            type=openapi.TYPE_STRING, example="사용자 일정 등록 성공"
+        ),
         "data": openapi.Schema(type=openapi.TYPE_OBJECT),
     },
 )
@@ -31,7 +42,9 @@ SCHEDULE_DETAIL_SUCCESS = openapi.Schema(
     type=openapi.TYPE_OBJECT,
     properties={
         "code": openapi.Schema(type=openapi.TYPE_INTEGER, example=200),
-        "message": openapi.Schema(type=openapi.TYPE_STRING, example="사용자 일정 조회 성공"),
+        "message": openapi.Schema(
+            type=openapi.TYPE_STRING, example="사용자 일정 조회 성공"
+        ),
         "data": openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
