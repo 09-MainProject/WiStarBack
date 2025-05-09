@@ -141,6 +141,8 @@ pyenv install 3.13.1
 
 poetry가 생성한 pyproject.toml에 작성된 라이브러리 목록을 기반으로 라이브러리 설치 및 초기화
 전체 패키지 설치 (개발용 포함)
+poetry install
+안될시
 poetry install --no-root
 
 git config 자동 설정
