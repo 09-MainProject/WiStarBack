@@ -59,6 +59,7 @@ class CommentTests(APITestCase):
         response = self.client.post(self.comment_list_url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertIn("id", response.data)
+        self.assertEqual(response.data["author"], self.user.nickname)
 
     def test_create_comment_unauthenticated(self):
         """인증되지 않은 사용자의 댓글 생성 테스트"""
@@ -80,6 +81,7 @@ class CommentTests(APITestCase):
         response = self.client.get(self.comment_detail_url(self.comment.id))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["content"], self.comment_data["content"])
+        self.assertEqual(response.data["author"], self.user.nickname)
 
     def test_update_comment(self):
         """댓글 수정 테스트"""
@@ -140,3 +142,4 @@ class CommentTests(APITestCase):
         for comment in response.data["results"]:
             self.assertIn("replies", comment)  # 각 댓글에 'replies' 필드가 있는지 확인
             self.assertIsInstance(comment["replies"], list)
+            self.assertEqual(comment["author"], self.user.nickname)

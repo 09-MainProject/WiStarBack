@@ -167,7 +167,7 @@ class PostViewSet(viewsets.ModelViewSet):
                         "data": [
                             {
                                 "id": 123,
-                                "author": {"username": "user123"},
+                                "author": "nickname",
                                 "title": "아이브 컴백 너무 기대돼요!",
                                 "content": "5월 컴백 무대 다들 봤나요? 진짜 최고였어요 🥹",
                                 "image": "image_file.jpg",
@@ -231,7 +231,7 @@ class PostViewSet(viewsets.ModelViewSet):
                         "data": [
                             {
                                 "id": 123,
-                                "author": {"username": "user123"},
+                                "author": "nickname",
                                 "title": "아이브 컴백 너무 기대돼요!",
                                 "content": "5월 컴백 무대 다들 봤나요? 진짜 최고였어요 🥹",
                                 "image": "image_file.jpg",
@@ -296,7 +296,7 @@ class PostViewSet(viewsets.ModelViewSet):
                         "message": "게시글이 성공적으로 생성되었습니다.",
                         "data": {
                             "id": 123,
-                            "author": {"username": "user123"},
+                            "author": "nickname",
                             "title": "아이브 컴백 너무 기대돼요!",
                             "content": "5월 컴백 무대 다들 봤나요? 진짜 최고였어요 🥹",
                             "image": "image_file.jpg",
@@ -359,7 +359,7 @@ class PostViewSet(viewsets.ModelViewSet):
                         "message": "게시글 상세 조회 성공",
                         "data": {
                             "id": 123,
-                            "author": {"username": "user123"},
+                            "author": "nickname",
                             "title": "아이브 컴백 너무 기대돼요!",
                             "content": "5월 컴백 무대 다들 봤나요? 진짜 최고였어요 🥹",
                             "image": "image_file.jpg",
@@ -443,7 +443,7 @@ class PostViewSet(viewsets.ModelViewSet):
                         "message": "게시글이 수정되었습니다.",
                         "data": {
                             "id": 123,
-                            "author": {"username": "user123"},
+                            "author": "nickname",
                             "title": "아이브 컴백 너무 기대돼요!",
                             "content": "5월 컴백 무대 다들 봤나요? 진짜 최고였어요 🥹",
                             "image": "image_file.jpg",
@@ -536,3 +536,22 @@ class PostViewSet(viewsets.ModelViewSet):
             },
             status=status.HTTP_204_NO_CONTENT,
         )
+
+    @action(detail=True, methods=["post", "delete"], url_path="likes")
+    def likes(self, request, pk=None):
+        """게시글 좋아요/취소 API (POST: 좋아요, DELETE: 좋아요 취소)"""
+        post = self.get_object()
+        user = request.user
+        if request.method == "POST":
+            # 이미 좋아요가 있으면 아무 변화 없음
+            like, created = Like.objects.get_or_create(post=post, user=user)
+            return Response(
+                {"status": "liked"},
+                status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
+            )
+        elif request.method == "DELETE":
+            deleted, _ = Like.objects.filter(post=post, user=user).delete()
+            return Response(
+                {"status": "unliked"},
+                status=status.HTTP_204_NO_CONTENT if deleted else status.HTTP_200_OK,
+            )

@@ -7,7 +7,7 @@ from apps.user.serializers import UsernameSerializer
 class CommentSerializer(serializers.ModelSerializer):
     """댓글 시리얼라이저"""
 
-    author = serializers.CharField(source="author.name", read_only=True)
+    author = serializers.CharField(source="author.nickname", read_only=True)
     post = serializers.PrimaryKeyRelatedField(read_only=True)
     replies = serializers.SerializerMethodField()
     likes_count = serializers.SerializerMethodField()

@@ -74,10 +74,7 @@ class PostTests(TestCase):
         self.assertEqual(Post.objects.count(), 2)
         self.assertEqual(response.data["title"], data["title"])
         self.assertEqual(response.data["content"], data["content"])
-        if isinstance(response.data.get("author"), dict):
-            self.assertEqual(response.data["author"]["nickname"], self.user.nickname)
-        else:
-            self.assertEqual(response.data["author"], self.user.id)
+        self.assertEqual(response.data["author"], self.user.nickname)
 
     def test_retrieve_post(self):
         """게시물 조회 테스트"""
@@ -97,7 +94,7 @@ class PostTests(TestCase):
         self.assertEqual(response.data["title"], self.post.title)
         self.assertEqual(response.data["content"], self.post.content)
         self.assertIn("author", response.data)
-        self.assertEqual(response.data["author"], self.user.id)
+        self.assertEqual(response.data["author"], self.user.nickname)
         self.assertIn("likes_count", response.data)
         self.assertEqual(response.data["likes_count"], 2)
         self.assertIn("is_liked", response.data)
@@ -220,10 +217,8 @@ class PostTests(TestCase):
         self.assertEqual(Post.objects.count(), 2)
         self.assertEqual(response.data["title"], data["title"])
         self.assertEqual(response.data["content"], data["content"])
-        self.assertIn("image", response.data)
-        self.assertTrue(
-            response.data["image"].endswith(".webp")
-        )  # WebP로 변환되었는지 확인
+        self.assertIn("image_url", response.data)
+        self.assertIsNotNone(response.data["image_url"])
 
     def test_create_post_with_image_url(self):
         """이미지 URL이 포함된 게시물 생성 테스트"""
@@ -248,10 +243,8 @@ class PostTests(TestCase):
         response = self.client.patch(url, data, format="multipart")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.post.refresh_from_db()
-        self.assertIsNotNone(self.post.image)
-        self.assertTrue(
-            str(self.post.image).endswith(".webp")
-        )  # WebP로 변환되었는지 확인
+        self.assertIn("image_url", response.data)
+        self.assertIsNotNone(response.data["image_url"])
 
     def test_create_post_without_image(self):
         """이미지 없이 게시물 생성 테스트"""
@@ -265,7 +258,7 @@ class PostTests(TestCase):
         self.assertEqual(Post.objects.count(), 2)
         self.assertEqual(response.data["title"], data["title"])
         self.assertEqual(response.data["content"], data["content"])
-        self.assertIsNone(response.data.get("image"))
+        self.assertIsNone(response.data.get("image_url"))
 
     def test_create_post_with_invalid_image(self):
         """잘못된 이미지 파일로 게시물 생성 시도 테스트"""

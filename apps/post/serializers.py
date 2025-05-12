@@ -10,10 +10,11 @@ class PostSerializer(serializers.ModelSerializer):
     게시물의 모든 필드를 포함합니다.
     """
 
-    author = serializers.PrimaryKeyRelatedField(read_only=True, source="author.id")
+    author = serializers.CharField(source="author.nickname", read_only=True)
     comments = serializers.SerializerMethodField()
     likes_count = serializers.SerializerMethodField()
     is_liked = serializers.SerializerMethodField()
+    image_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
@@ -62,6 +63,12 @@ class PostSerializer(serializers.ModelSerializer):
             "created_at"
         )
         return CommentSerializer(comments, many=True, context=self.context).data
+
+    def get_image_url(self, obj):
+        post_image = obj.image.first()
+        if post_image and hasattr(post_image, "image_url") and post_image.image_url:
+            return post_image.image_url
+        return None
 
 
 class PostCreateSerializer(serializers.ModelSerializer):
