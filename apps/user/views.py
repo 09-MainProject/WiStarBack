@@ -148,6 +148,12 @@ class RegisterView(CreateAPIView):
         custom_response = SIGNUP_SUCCESS
         custom_response["data"] = response_data
 
+        if settings.DEBUG:
+            # print('[WiStar] 이메일 인증 링크:', verify_url)
+            # 응답에 verify_url 포함
+            response_data["verify_url"] = verify_url
+            custom_response["data"] = response_data
+
         return Response(custom_response, status=status.HTTP_201_CREATED)
 
 

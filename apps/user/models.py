@@ -1,7 +1,11 @@
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
+from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 
-from utils.models import TimestampModel
+from apps.image.models import Image
+
+# from apps.image.models import Image
+from utils.models import CloudinaryImageMixin, TimestampModel
 
 
 # 사용자 지정 메니져
@@ -11,7 +15,7 @@ class UserManager(BaseUserManager):
             raise ValueError("올바른 이메일을 입력하세요.")
         user = self.model(email=self.normalize_email(email), **kwargs)
         user.set_password(password)  # 해시화
-        # user.is_active = True
+        user.is_active = True  # False: 이메일 인증 후 활성화
         user.save(using=self._db)
         return user
 
@@ -44,10 +48,11 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser, TimestampModel):  # 기본 기능은 상속받아서 사용
     email = models.EmailField(
         verbose_name="이메일", max_length=50, unique=True
-    )  # 로그인시 사용
+    )  # 로그인시 유저아이디 대신 사용
     name = models.CharField(verbose_name="이름", max_length=25)
     nickname = models.CharField("닉네임", max_length=25, unique=True)
-    # profile_image = models.ImageField('이미지', upload_to='post/%Y/%m/%d')  # 이미지 경로가 post/년/월/일
+    # profile_images는 실제 필드로 DB에 만들어지지 않음 → 대신 역참조용 헬퍼 역할 (GenericRelation)
+    profile_images = GenericRelation(Image, related_query_name="profile_image")
     last_login = models.DateTimeField(verbose_name="마지막 로그인", null=True)
     is_staff = models.BooleanField(
         verbose_name="스태프 권한", default=False

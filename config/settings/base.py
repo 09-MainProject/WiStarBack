@@ -60,6 +60,7 @@ OWN_APPS = [
     "apps.comment",
     "apps.like",
     "apps.follow",
+    "apps.image",
     "apps.user_schedule",
 ]
 
@@ -71,6 +72,8 @@ THIRD_PARTY_APPS = [
     "storages",
     "corsheaders",
     "drf_yasg",
+    "cloudinary",
+    # "cloudinary_storage",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + OWN_APPS + THIRD_PARTY_APPS

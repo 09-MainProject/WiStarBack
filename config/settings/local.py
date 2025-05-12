@@ -34,6 +34,31 @@ DATABASES = {
     }
 }
 
+import cloudinary
+
+cloudinary.config(
+    cloud_name=ENV.get("CLOUD_NAME", "db"),
+    api_key=ENV.get("API_KEY", "db"),
+    api_secret=ENV.get("API_SECRET", "db"),
+    secure=True,  # https 사용
+    # secure=False  # https 사용
+)
+
+
+# 파일 저장 기본 설정을 Cloudinary로 설정 (선택 사항)
+# DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+# # 기본 이미지 url 설정
+# BASE_STATIC_URL = STATIC_URL + "images/"
+# # 기본 프로필 이미지 url 설정
+# DEFAULT_PROFILE_URL = BASE_STATIC_URL + "default_profile.webp"
+# DEFAULT_PROFILE_THUMBNAIL_URL = BASE_STATIC_URL + "default_profile_thumb.webp"
+# # 기본 게시글 이미지 url 설정
+# DEFAULT_POST_URL = BASE_STATIC_URL + "default_post.webp"
+# DEFAULT_POST_THUMBNAIL_URL = BASE_STATIC_URL + "default_post_thumb.webp"
+# # 기본 이미지 url 설정
+# DEFAULT_THUMBNAIL_URL = BASE_STATIC_URL + "default_thumb.webp"  # 예외 대비
+
 
 # Email
 # from django.core.mail.backends.smtp import EmailBackend

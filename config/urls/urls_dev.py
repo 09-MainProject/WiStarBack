@@ -15,24 +15,12 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
-from drf_yasg import openapi
-from drf_yasg.views import get_schema_view
-from rest_framework import permissions
 
-schema_view = get_schema_view(
-    openapi.Info(
-        title="WiStar API",
-        default_version="v1",
-        description="WiStar API 문서",
-        terms_of_service="https://www.google.com/policies/terms/",
-        contact=openapi.Contact(email="contact@snippets.local"),
-        license=openapi.License(name="BSD License"),
-    ),
-    public=True,
-    permission_classes=(permissions.AllowAny,),
-)
+from config.schema import schema_view  # 스웨거 설정 파일
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -44,6 +32,7 @@ urlpatterns = [
     path("api/", include("apps.like.urls")),
     path("api/idols/", include("apps.idol.urls")),
     path("api/idols/follows/", include("apps.follow.urls")),
+    path("api/images/", include("apps.image.urls")),
     path("api/idols/", include("apps.idol_schedule.urls")),
     path("api/users/", include("apps.user_schedule.urls")),
     # path("api/", include("apps.notification.urls")),
@@ -58,3 +47,7 @@ urlpatterns = [
     ),
     path("redoc", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
 ]
+
+# 개발 서버에서 미디어 파일을 서빙하기 위해 설정
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
