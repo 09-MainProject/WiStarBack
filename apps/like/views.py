@@ -17,7 +17,7 @@ class LikeViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """좋아요 목록을 반환합니다."""
         # Swagger 문서 생성 중일 경우 빈 쿼리셋 반환
-        if getattr(self, 'swagger_fake_view', False):
+        if getattr(self, "swagger_fake_view", False):
             return Like.objects.none()
 
         content_type = ContentType.objects.get(
