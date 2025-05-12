@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.contenttypes.fields import GenericRelation
 
 
 class Idol(models.Model):
@@ -22,6 +23,7 @@ class Idol(models.Model):
     agency = models.CharField(max_length=100, null=True, blank=True)  # 소속사
     description = models.TextField(blank=True)  # 소개글
     profile_image = models.URLField(blank=True, null=True)  # 프로필 이미지 URL
+    images = GenericRelation(Image, related_query_name='profile_image')
     created_at = models.DateTimeField(auto_now_add=True)  # 생성 시간
     updated_at = models.DateTimeField(auto_now=True)  # 수정 시간
     is_active = models.BooleanField(default=True)  # 활동 상태
