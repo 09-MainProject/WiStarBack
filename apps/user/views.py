@@ -124,6 +124,10 @@ class RegisterView(CreateAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
 
+        # 개발 환경에서는 이메일 인증 건너뛰기
+        user.is_active = True
+        user.save()
+
         # 이메일 서명
         signer = TimestampSigner()
 
@@ -141,20 +145,9 @@ class RegisterView(CreateAPIView):
         send_email(subject, message, user.email)
 
         response_data = serializer.data
-
         custom_response = SIGNUP_SUCCESS
         custom_response["data"] = response_data
 
-        if settings.DEBUG:
-            # print('[WiStar] 이메일 인증 링크:', verify_url)
-            # 응답에 verify_url 포함
-            response_data["verify_url"] = verify_url
-            custom_response["data"] = response_data
-            return Response(custom_response, status=status.HTTP_201_CREATED)
-
-        # 실제로 배포할 땐 빼기
-        response_data["verify_url"] = verify_url
-        custom_response["data"] = response_data
         return Response(custom_response, status=status.HTTP_201_CREATED)
 
 

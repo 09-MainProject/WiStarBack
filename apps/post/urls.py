@@ -1,7 +1,7 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from .views import PostLikeView, PostViewSet
+from .views import PostViewSet
 
 # 1. router 만들기
 router = DefaultRouter()
@@ -14,5 +14,9 @@ router.register(r"", PostViewSet, basename="post")
 urlpatterns = [
     # 게시물 관련 엔드포인트
     path("", include(router.urls)),
-    path("<int:pk>/like/", PostLikeView.as_view(), name="post-like"),
+    path(
+        "search/",
+        PostViewSet.as_view({"get": "posts_search"}),
+        name="post-posts_search",
+    ),
 ]

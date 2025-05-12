@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("contenttypes", "0002_remove_content_type_name"),
+        ("post", "0003_alter_post_options_remove_post_likes_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -27,13 +27,17 @@ class Migration(migrations.Migration):
                         verbose_name="ID",
                     ),
                 ),
-                ("object_id", models.PositiveIntegerField()),
-                ("created_at", models.DateTimeField(auto_now_add=True)),
                 (
-                    "content_type",
+                    "created_at",
+                    models.DateTimeField(auto_now_add=True, verbose_name="생성일"),
+                ),
+                (
+                    "post",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
-                        to="contenttypes.contenttype",
+                        related_name="likes",
+                        to="post.post",
+                        verbose_name="게시글",
                     ),
                 ),
                 (
@@ -42,23 +46,13 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="likes",
                         to=settings.AUTH_USER_MODEL,
+                        verbose_name="사용자",
                     ),
                 ),
             ],
             options={
                 "verbose_name": "좋아요",
-                "verbose_name_plural": "좋아요들",
-                "indexes": [
-                    models.Index(
-                        fields=["content_type", "object_id"],
-                        name="like_like_content_07edaa_idx",
-                    ),
-                    models.Index(
-                        fields=["user", "content_type", "object_id"],
-                        name="like_like_user_id_c1c775_idx",
-                    ),
-                ],
-                "unique_together": {("content_type", "object_id", "user")},
+                "verbose_name_plural": "좋아요",
             },
         ),
     ]
