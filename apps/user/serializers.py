@@ -20,6 +20,8 @@ User = get_user_model()
 
 
 class UsernameSerializer(serializers.ModelSerializer):
+    """사용자 이름 시리얼라이저"""
+
     class Meta:
         model = User
         fields = ["id", "username"]

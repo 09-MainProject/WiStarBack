@@ -124,6 +124,10 @@ class RegisterView(CreateAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
 
+        # 개발 환경에서는 이메일 인증 건너뛰기
+        user.is_active = True
+        user.save()
+
         # 이메일 서명
         signer = TimestampSigner()
 
@@ -141,7 +145,6 @@ class RegisterView(CreateAPIView):
         send_email(subject, message, user.email)
 
         response_data = serializer.data
-
         custom_response = SIGNUP_SUCCESS
         custom_response["data"] = response_data
 

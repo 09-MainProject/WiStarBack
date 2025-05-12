@@ -63,7 +63,7 @@ cloudinary.config(
 # Email
 # from django.core.mail.backends.smtp import EmailBackend
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'# 개발/테스트용
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"  # 개발/테스트용
 EMAIL_HOST = "smtp.naver.com"  # 네이버 환결설정에서 볼 수 있음.
 EMAIL_USE_TLS = True  # 보안연결
 EMAIL_PORT = 587  # 네이버 메일 환경설정에서 확인 가능

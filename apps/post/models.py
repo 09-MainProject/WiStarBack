@@ -3,10 +3,18 @@ from io import BytesIO
 import requests
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+
+from apps.like.models import Like
+from apps.user.models import User
 
 from .utils import process_image
+
+## from utils.models import Image  # 임시 주석처리: image 앱 도입 전까지
+
 
 User = get_user_model()
 
@@ -30,20 +38,25 @@ class Post(models.Model):
         likes (ManyToManyField): 좋아요한 사용자들
     """
 
-    title = models.CharField(max_length=200)
-    content = models.TextField()
-    image = models.ImageField(upload_to="post_images/%Y/%m/%d/", blank=True, null=True)
-    image_url = models.URLField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    views = models.PositiveIntegerField(default=0)
     author = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="posts", null=True, blank=True
+        User,
+        on_delete=models.CASCADE,
+        related_name="posts",
+        verbose_name=_("작성자"),
     )
-    likes = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, related_name="liked_posts", blank=True
+    title = models.CharField(max_length=200, verbose_name=_("제목"))
+    content = models.TextField(verbose_name=_("내용"))
+    # image = GenericRelation(Image, related_query_name="post_image")  # 임시 주석처리
+    image_url = models.URLField(
+        max_length=500, null=True, blank=True, verbose_name=_("이미지 URL")
     )
-    is_deleted = models.BooleanField(default=False)
+    image_public_id = models.CharField(
+        max_length=500, null=True, blank=True, verbose_name=_("이미지 Public ID")
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("생성일"))
+    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("수정일"))
+    views = models.PositiveIntegerField(default=0, verbose_name=_("조회수"))
+    is_deleted = models.BooleanField(default=False, verbose_name=_("삭제여부"))
     deleted_at = models.DateTimeField(null=True, blank=True)
     deleted_by = models.ForeignKey(
         User,
@@ -51,6 +64,9 @@ class Post(models.Model):
         null=True,
         blank=True,
         related_name="deleted_posts",
+    )
+    likes = models.ManyToManyField(
+        User, through=Like, related_name="liked_posts", verbose_name="좋아요"
     )
 
     def save(self, *args, **kwargs):
@@ -79,17 +95,17 @@ class Post(models.Model):
         super().save(*args, **kwargs)
 
     class Meta:
+        verbose_name = _("게시물")
+        verbose_name_plural = _("게시물")
         ordering = ["-created_at"]
         indexes = [
             models.Index(fields=["-created_at"]),
             models.Index(fields=["author", "-created_at"]),
         ]
-        verbose_name = "게시물"
-        verbose_name_plural = "게시물들"
 
     def __str__(self):
         """게시물의 문자열 표현을 반환합니다."""
-        return self.title
+        return f"{self.author.nickname}의 게시물: {self.title}"
 
     def increase_views(self):
         """조회수를 1 증가시킵니다."""

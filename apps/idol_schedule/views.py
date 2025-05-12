@@ -53,6 +53,7 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
 
     @swagger_auto_schema(
         operation_summary="아이돌 스케줄 목록 조회",
+        tags=["아이돌 스케줄/ 조회"],
         manual_parameters=[
             openapi.Parameter(
                 "title",
@@ -101,6 +102,7 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
 
     @swagger_auto_schema(
         operation_summary="아이돌 스케줄 등록",
+        tags=["아이돌 스케줄/등록"],
         request_body=ScheduleSerializer,
         responses={201: ScheduleSerializer},
     )
@@ -150,10 +152,14 @@ class ScheduleRetrieveUpdateDeleteView(
         return [IsIdolManagerOrOwner()]  # PATCH, DELETE는 관리자나 소유자만 가능
 
     def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            return Schedule.objects.none()  # Swagger용 빈 쿼리셋 반환
         return Schedule.objects.filter(idol_id=self.kwargs["idol_id"])
 
     @swagger_auto_schema(
-        operation_summary="아이돌 스케줄 상세 조회", responses={200: ScheduleSerializer}
+        operation_summary="아이돌 스케줄 상세 조회",
+        tags=["아이돌 스케줄/조회"],
+        responses={200: ScheduleSerializer},
     )
     def retrieve(self, request, *args, **kwargs):
         try:
@@ -177,6 +183,7 @@ class ScheduleRetrieveUpdateDeleteView(
 
     @swagger_auto_schema(
         operation_summary="아이돌 스케줄 수정",
+        tags=["아이돌 스케줄/수정"],
         request_body=ScheduleSerializer,
         responses={200: ScheduleSerializer},
     )
@@ -213,7 +220,9 @@ class ScheduleRetrieveUpdateDeleteView(
             )
 
     @swagger_auto_schema(
-        operation_summary="아이돌 스케줄 삭제", responses={204: "삭제 성공"}
+        operation_summary="아이돌 스케줄 삭제",
+        tags=["아이돌 스케줄/삭제"],
+        responses={204: "삭제 성공"},
     )
     def delete(self, request, *args, **kwargs):
         try:

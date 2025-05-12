@@ -26,14 +26,15 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/users/", include("apps.user.urls")),
     path("api/posts/", include("apps.post.urls")),
-    path("api/posts/", include("apps.comment.urls")),
+    path(
+        "api/posts/<int:post_id>/comments/", include("apps.comment.urls")
+    ),  # comment 앱의 URL
     path("api/", include("apps.like.urls")),
     path("api/idols/", include("apps.idol.urls")),
-    path("api/idols/", include("apps.idol_schedule.urls")),
     path("api/idols/follows/", include("apps.follow.urls")),
     path("api/images/", include("apps.image.urls")),
-    # path("api/idols/", include("apps.idol_schedule.urls")),
-    # path("api/users/", include("apps.user_schedule.urls")),
+    path("api/idols/", include("apps.idol_schedule.urls")),
+    path("api/users/", include("apps.user_schedule.urls")),
     # path("api/", include("apps.notification.urls")),
     # path("api/", include("apps.notification_set.urls")),
     path(

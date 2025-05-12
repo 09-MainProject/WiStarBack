@@ -4,7 +4,9 @@ from .models import Like
 
 
 class LikeSerializer(serializers.ModelSerializer):
+    """좋아요 Serializer"""
+
     class Meta:
         model = Like
-        fields = ["id", "content_type", "object_id", "user", "created_at"]
-        read_only_fields = ["id", "user", "created_at"]
+        fields = ["id", "user", "post", "created_at"]
+        read_only_fields = ["user", "created_at"]
