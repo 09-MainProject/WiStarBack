@@ -1,8 +1,6 @@
 from rest_framework import serializers
 
-from apps.user.serializers import UsernameSerializer
-
-from .models import Post
+from apps.post.models import Post
 
 
 class PostSerializer(serializers.ModelSerializer):
@@ -12,7 +10,8 @@ class PostSerializer(serializers.ModelSerializer):
     게시물의 모든 필드를 포함합니다.
     """
 
-    author = UsernameSerializer(read_only=True)
+    author = serializers.PrimaryKeyRelatedField(read_only=True, source="author.id")
+    comments = serializers.SerializerMethodField()
     likes_count = serializers.SerializerMethodField()
     is_liked = serializers.SerializerMethodField()
 
@@ -28,6 +27,7 @@ class PostSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
             "views",
+            "comments",
             "likes_count",
             "is_liked",
             "is_deleted",
@@ -51,8 +51,17 @@ class PostSerializer(serializers.ModelSerializer):
         """현재 사용자가 좋아요를 눌렀는지 여부를 반환합니다."""
         request = self.context.get("request")
         if request and request.user.is_authenticated:
-            return obj.likes.filter(user=request.user).exists()
+            return obj.post_likes.filter(user=request.user).exists()
         return False
+
+    def get_comments(self, obj):
+        """댓글 목록을 반환합니다."""
+        from apps.comment.serializers import CommentSerializer
+
+        comments = obj.comments.filter(parent=None, is_deleted=False).order_by(
+            "created_at"
+        )
+        return CommentSerializer(comments, many=True, context=self.context).data
 
 
 class PostCreateSerializer(serializers.ModelSerializer):

@@ -46,7 +46,9 @@ class Post(models.Model):
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="posts", verbose_name="작성자"
     )
-    likes = GenericRelation(Like, related_query_name="post")
+    likes = models.ManyToManyField(
+        User, through=Like, related_name="liked_posts", verbose_name="좋아요"
+    )
     is_deleted = models.BooleanField("삭제 여부", default=False)
     deleted_at = models.DateTimeField("삭제일", null=True, blank=True)
     deleted_by = models.ForeignKey(

@@ -8,6 +8,7 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from apps.post.models import Post
 from utils.exceptions import CustomAPIException
@@ -36,15 +37,17 @@ class CommentFilter(django_filters.FilterSet):
     created_at_end = django_filters.DateTimeFilter(
         field_name="created_at", lookup_expr="lte"
     )
+    parent = django_filters.NumberFilter(field_name="parent", lookup_expr="isnull")
 
     class Meta:
         model = Comment
-        fields = ["content", "created_at", "created_at_end"]
+        fields = ["content", "created_at", "created_at_end", "parent"]
 
 
 class CommentViewSet(viewsets.ModelViewSet):
-    """댓글 뷰셋"""
+    """댓글 뷰셋 (댓글/대댓글 통합)"""
 
+    http_method_names = ["get", "post", "patch", "delete"]
     queryset = Comment.objects.filter(is_deleted=False)
     filter_backends = [
         django_filters.DjangoFilterBackend,
@@ -56,34 +59,22 @@ class CommentViewSet(viewsets.ModelViewSet):
     ordering_fields = ["created_at"]
     ordering = ["-created_at"]
     pagination_class = CommentPagination
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         """post_id에 해당하는 게시물의 댓글만 필터링합니다."""
         queryset = super().get_queryset()
         post_id = self.kwargs.get("post_id")
         if post_id:
-            queryset = queryset.filter(post_id=post_id)
+            queryset = queryset.filter(post_id=post_id, parent=None)
         return queryset
 
-    def get_permissions(self):
-        """
-        액션에 따라 권한을 설정합니다.
-        - 조회(GET): 모든 사용자 가능
-        - 생성(POST), 수정(PATCH), 삭제(DELETE): 인증된 사용자만 가능
-        """
-        if self.action in ["list", "retrieve"]:
-            return [AllowAny()]
-
-        if not self.request.user.is_authenticated:
-            message = {
-                "create": "댓글을 작성하려면 로그인이 필요합니다.",
-                "update": "댓글을 수정하려면 로그인이 필요합니다.",
-                "partial_update": "댓글을 수정하려면 로그인이 필요합니다.",
-                "destroy": "댓글을 삭제하려면 로그인이 필요합니다.",
-            }.get(self.action, "로그인이 필요한 서비스입니다.")
-
-            raise CustomAPIException({"code": 401, "message": message, "data": None})
-        return [IsAuthenticated()]
+    def get_serializer_context(self):
+        """시리얼라이저 컨텍스트에 post_id를 추가합니다."""
+        context = super().get_serializer_context()
+        context["post_id"] = self.kwargs.get("post_id")
+        return context
 
     def get_serializer_class(self):
         """액션에 따라 적절한 시리얼라이저를 반환합니다."""
@@ -97,66 +88,57 @@ class CommentViewSet(viewsets.ModelViewSet):
         """댓글을 생성합니다."""
         post_id = self.kwargs.get("post_id")
         post = get_object_or_404(Post, id=post_id)
-        comment = serializer.save(author=self.request.user, post=post)
+
+        # 대댓글인 경우 부모 댓글 확인
+        parent_id = self.request.data.get("parent")
+        if parent_id:
+            parent = get_object_or_404(Comment, id=parent_id, post=post)
+            if parent.parent is not None:
+                raise CustomAPIException(
+                    {
+                        "code": 400,
+                        "message": "대댓글에는 답글을 달 수 없습니다.",
+                        "data": None,
+                    }
+                )
+            comment = serializer.save(
+                author=self.request.user, post=post, parent=parent
+            )
+        else:
+            comment = serializer.save(author=self.request.user, post=post)
         return comment
 
-    @swagger_auto_schema(
-        operation_summary="댓글 검색",
-        operation_description="댓글을 검색합니다.",
-        tags=["댓글"],
-        responses={
-            200: openapi.Response(
-                description="댓글 검색 성공",
-                examples={
-                    "application/json": {
-                        "code": 200,
-                        "message": "댓글 검색 성공.",
-                        "data": [
-                            {
-                                "comment_id": 11,
-                                "post_id": 123,
-                                "user_id": 42,
-                                "content": "아이브 정말 응원해요!",
-                            },
-                            {
-                                "comment_id": 15,
-                                "post_id": 123,
-                                "user_id": 88,
-                                "content": "항상 응원해요!",
-                            },
-                        ],
-                    }
-                },
-            ),
-            400: openapi.Response(
-                description="댓글 정보를 찾을 수 없습니다.",
-                examples={
-                    "application/json": {
-                        "code": 400,
-                        "message": "댓글 정보를 찾을 수 없습니다.",
-                        "data": None,
-                    }
-                },
-            ),
-            500: openapi.Response(
-                description="서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
-                examples={
-                    "application/json": {
-                        "code": 500,
-                        "message": "서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
-                        "data": None,
-                    }
-                },
-            ),
-        },
-    )
     def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
+        """댓글 목록을 반환합니다."""
+        try:
+            queryset = self.filter_queryset(self.get_queryset())
+            page = self.paginate_queryset(queryset)
+            if page is not None:
+                serializer = self.get_serializer(
+                    page, many=True, context={"request": request}
+                )
+                return self.get_paginated_response(serializer.data)
+
+            serializer = self.get_serializer(
+                queryset, many=True, context={"request": request}
+            )
+            return Response(serializer.data)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    def retrieve(self, request, *args, **kwargs):
+        """댓글을 반환합니다."""
+        try:
+            instance = self.get_object()
+            serializer = self.get_serializer(instance)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     @swagger_auto_schema(
         operation_summary="댓글 생성",
-        operation_description="댓글을 생성합니다.",
-        tags=["댓글"],
+        operation_description="새로운 댓글을 생성합니다.",
+        tags=["comments"],
         responses={
             201: openapi.Response(
                 description="댓글 작성 성공.",
@@ -191,75 +173,27 @@ class CommentViewSet(viewsets.ModelViewSet):
         },
     )
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        comment = self.perform_create(serializer)
-        response_serializer = CommentSerializer(comment)
-        headers = self.get_success_headers(serializer.data)
-        return Response(
-            response_serializer.data, status=status.HTTP_201_CREATED, headers=headers
-        )
-
-    @swagger_auto_schema(
-        operation_summary="댓글 상세",
-        operation_description="댓글 상세 정보를 조회합니다.",
-        tags=["댓글"],
-    )
-    def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
-
-    @swagger_auto_schema(
-        operation_summary="댓글 수정",
-        operation_description="댓글을 수정합니다.",
-        tags=["댓글"],
-        responses={
-            200: openapi.Response(
-                description="댓글 수정 성공.",
-                examples={
-                    "application/json": {
-                        "code": 200,
-                        "message": "댓글 수정 성공.",
-                        "data": {"comment_id": 1},
-                    }
-                },
-            ),
-            400: openapi.Response(
-                description="수정 권한이 없습니다.",
-                examples={
-                    "application/json": {
-                        "code": 400,
-                        "message": "수정 권한이 없습니다.",
-                        "data": None,
-                    }
-                },
-            ),
-            500: openapi.Response(
-                description="서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
-                examples={
-                    "application/json": {
-                        "code": 500,
-                        "message": "서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
-                        "data": None,
-                    }
-                },
-            ),
-        },
-    )
-    def update(self, request, *args, **kwargs):
-        partial = kwargs.pop("partial", False)
-        instance = self.get_object()
-        if instance.author != request.user and not request.user.is_staff:
-            raise PermissionDenied("댓글을 수정할 권한이 없습니다.")
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-        response_serializer = CommentSerializer(instance)
-        return Response(response_serializer.data)
+        """댓글을 생성합니다."""
+        try:
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            comment = self.perform_create(serializer)
+            response_serializer = CommentSerializer(
+                comment, context={"request": request}
+            )
+            headers = self.get_success_headers(serializer.data)
+            return Response(
+                response_serializer.data,
+                status=status.HTTP_201_CREATED,
+                headers=headers,
+            )
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     @swagger_auto_schema(
         operation_summary="댓글 부분 수정",
-        operation_description="댓글을 부분 수정합니다.",
-        tags=["댓글"],
+        operation_description="댓글의 일부 정보를 수정합니다.",
+        tags=["comments"],
         responses={
             200: openapi.Response(
                 description="댓글 수정 성공.",
@@ -294,13 +228,16 @@ class CommentViewSet(viewsets.ModelViewSet):
         },
     )
     def partial_update(self, request, *args, **kwargs):
-        kwargs["partial"] = True
-        return self.update(request, *args, **kwargs)
+        """댓글을 부분 수정합니다."""
+        instance = self.get_object()
+        if instance.author != request.user:
+            raise PermissionDenied("댓글을 수정할 권한이 없습니다.")
+        return super().partial_update(request, *args, **kwargs)
 
     @swagger_auto_schema(
         operation_summary="댓글 삭제",
         operation_description="댓글을 삭제합니다.",
-        tags=["댓글"],
+        tags=["comments"],
         responses={
             204: openapi.Response(
                 description="댓글 삭제 성공.",
@@ -335,11 +272,99 @@ class CommentViewSet(viewsets.ModelViewSet):
         },
     )
     def destroy(self, request, *args, **kwargs):
+        """댓글을 삭제합니다."""
         instance = self.get_object()
-        if instance.author != self.request.user and not self.request.user.is_staff:
+        if instance.author != request.user:
             raise PermissionDenied("댓글을 삭제할 권한이 없습니다.")
-        instance.soft_delete(self.request.user)
-        return Response(
-            {"code": 204, "message": "댓글 삭제 성공.", "data": None},
-            status=status.HTTP_204_NO_CONTENT,
+        return super().destroy(request, *args, **kwargs)
+
+
+class CommentView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        tags=["comments"],
+        operation_description="특정 게시물의 댓글 목록을 조회합니다.",
+        responses={
+            200: CommentSerializer(many=True),
+            401: "인증되지 않은 사용자",
+            404: "게시물을 찾을 수 없음",
+        },
+    )
+    def get(self, request, post_id):
+        comments = Comment.objects.filter(
+            post_id=post_id, parent=None, is_deleted=False
+        ).order_by("created_at")
+        serializer = CommentSerializer(
+            comments, many=True, context={"request": request}
         )
+        return Response(serializer.data)
+
+    @swagger_auto_schema(
+        tags=["comments"],
+        operation_description="새로운 댓글을 생성합니다.",
+        request_body=CommentCreateSerializer,
+        responses={
+            201: CommentSerializer,
+            400: "잘못된 요청",
+            401: "인증되지 않은 사용자",
+            404: "게시물을 찾을 수 없음",
+        },
+    )
+    def post(self, request, post_id):
+        serializer = CommentCreateSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(author=request.user, post_id=post_id)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CommentDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self, comment_id):
+        return get_object_or_404(Comment, id=comment_id, is_deleted=False)
+
+    @swagger_auto_schema(
+        tags=["comments"],
+        operation_description="특정 댓글을 수정합니다.",
+        request_body=CommentUpdateSerializer,
+        responses={
+            200: CommentSerializer,
+            400: "잘못된 요청",
+            401: "인증되지 않은 사용자",
+            403: "권한 없음",
+            404: "댓글을 찾을 수 없음",
+        },
+    )
+    def put(self, request, comment_id):
+        comment = self.get_object(comment_id)
+        if comment.author != request.user:
+            return Response(
+                {"detail": "권한이 없습니다."}, status=status.HTTP_403_FORBIDDEN
+            )
+        serializer = CommentUpdateSerializer(comment, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @swagger_auto_schema(
+        tags=["comments"],
+        operation_description="특정 댓글을 삭제합니다.",
+        responses={
+            204: "댓글 삭제 성공",
+            401: "인증되지 않은 사용자",
+            403: "권한 없음",
+            404: "댓글을 찾을 수 없음",
+        },
+    )
+    def delete(self, request, comment_id):
+        comment = self.get_object(comment_id)
+        if comment.author != request.user:
+            return Response(
+                {"detail": "권한이 없습니다."}, status=status.HTTP_403_FORBIDDEN
+            )
+        comment.is_deleted = True
+        comment.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
