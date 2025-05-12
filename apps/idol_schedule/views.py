@@ -150,6 +150,8 @@ class ScheduleRetrieveUpdateDeleteView(
         return [IsIdolManagerOrOwner()]  # PATCH, DELETE는 관리자나 소유자만 가능
 
     def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False):
+            return Schedule.objects.none()
         return Schedule.objects.filter(idol_id=self.kwargs["idol_id"])
 
     @swagger_auto_schema(

@@ -16,9 +16,13 @@ class LikeViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """좋아요 목록을 반환합니다."""
+        # Swagger 문서 생성 중일 경우 빈 쿼리셋 반환
+        if getattr(self, 'swagger_fake_view', False):
+            return Like.objects.none()
+
         content_type = ContentType.objects.get(
             app_label=self.kwargs.get("app_label"),
-            model=self.kwargs.get("app_label"),  # app_label을 model로도 사용
+            model=self.kwargs.get("model"),
         )
         object_id = self.kwargs.get("object_id")
         return Like.objects.filter(content_type=content_type, object_id=object_id)
@@ -35,8 +39,8 @@ class LikeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         """좋아요를 생성합니다."""
         content_type = ContentType.objects.get(
-            app_label=self.kwargs.get("app_label", "post"),
-            model=self.kwargs.get("model", "post"),
+            app_label=self.kwargs.get("app_label"),
+            model=self.kwargs.get("model"),
         )
         object_id = self.kwargs.get("object_id")
         serializer.save(
