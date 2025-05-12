@@ -11,6 +11,7 @@ from django.utils.translation import gettext_lazy as _
 from apps.like.models import Like
 from apps.user.models import User
 
+from ..image.models import Image
 from .utils import process_image
 
 ## from utils.models import Image  # 임시 주석처리: image 앱 도입 전까지
@@ -46,13 +47,13 @@ class Post(models.Model):
     )
     title = models.CharField(max_length=200, verbose_name=_("제목"))
     content = models.TextField(verbose_name=_("내용"))
-    # image = GenericRelation(Image, related_query_name="post_image")  # 임시 주석처리
-    image_url = models.URLField(
-        max_length=500, null=True, blank=True, verbose_name=_("이미지 URL")
-    )
-    image_public_id = models.CharField(
-        max_length=500, null=True, blank=True, verbose_name=_("이미지 Public ID")
-    )
+    image = GenericRelation(Image, related_query_name="post_image")  # 임시 주석처리
+    # image_url = models.URLField(
+    #     max_length=500, null=True, blank=True, verbose_name=_("이미지 URL")
+    # )
+    # image_public_id = models.CharField(
+    #     max_length=500, null=True, blank=True, verbose_name=_("이미지 Public ID")
+    # )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("생성일"))
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_("수정일"))
     views = models.PositiveIntegerField(default=0, verbose_name=_("조회수"))

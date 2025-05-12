@@ -1445,3 +1445,32 @@ git rebase origin/develop  # 또는 git merge origin/develop
 📌 3. 이후 정상적으로 PR 보내기
 git push origin feature/my-task
 # 그리고 PR 보내기
+
+
+마이그레이션 꼬였을 때
+# 모든 마이그레이션 삭제 (주의!)
+find . -path "*/migrations/*.py" -not -name "__init__.py" -delete
+find . -path "*/migrations/*.pyc"  -delete
+
+# 새로 마이그레이션 생성
+python manage.py makemigrations
+
+# 마이그레이션 적용
+python manage.py migrate
+
+
+swagger.json 호출을 수동으로 디버깅해보기
+Python 콘솔에서 직접 Swagger 스키마 생성해보면, 에러 지점을 확인할 수 있습니다.
+
+터미널에 입력
+python manage.py shell
+
+from rest_framework.test import APIRequestFactory
+from drf_yasg.generators import OpenAPISchemaGenerator
+
+factory = APIRequestFactory()
+request = factory.get("/swagger.json")
+
+generator = OpenAPISchemaGenerator(info=None)
+schema = generator.get_schema(request=request, public=True)
+→ 이때 예외가 발생한 라인에서 정확한 오류 메시지를 볼 수 있습니다.

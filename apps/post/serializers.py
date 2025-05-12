@@ -23,7 +23,6 @@ class PostSerializer(serializers.ModelSerializer):
             "author",
             "title",
             "content",
-            "image",
             "image_url",
             "created_at",
             "updated_at",
@@ -80,7 +79,7 @@ class PostCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ["title", "content", "image", "image_url"]
+        fields = ["title", "content"]
 
 
 class PostUpdateSerializer(serializers.ModelSerializer):
@@ -92,4 +91,4 @@ class PostUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ["title", "content", "image", "image_url"]
+        fields = ["title", "content"]
