@@ -1,255 +1,135 @@
-from django_filters.rest_framework import DjangoFilterBackend
-from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import filters, generics, status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import generics, status
+from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.response import Response
+
+from utils.responses import user_schedule as R
 
 from .models import UserSchedule
 from .serializers import UserScheduleSerializer
 
-# Idol 관련 모듈은 선택적 import
-try:
-    from .models import Follow, IdolSchedule
-    from .serializers import IdolScheduleSerializer
 
-    IDOL_MODELS_AVAILABLE = True
-except ImportError:
-    IDOL_MODELS_AVAILABLE = False
-
-from utils.responses.user_schedule import (
-    SCHEDULE_CREATE_SUCCESS,
-    SCHEDULE_DELETE_SUCCESS,
-    SCHEDULE_DETAIL_SUCCESS,
-    SCHEDULE_ERROR_RESPONSE,
-    SCHEDULE_LIST_SUCCESS,
-    SCHEDULE_UPDATE_SUCCESS,
-)
-
-
-class UserScheduleBaseView:
+# 일정 목록 조회 및 생성
+class UserScheduleListCreateView(generics.ListCreateAPIView):
     serializer_class = UserScheduleSerializer
-    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         return UserSchedule.objects.filter(user=self.request.user)
 
-
-class UserScheduleListCreateView(UserScheduleBaseView, generics.ListCreateAPIView):
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    filterset_fields = ["title", "description", "location", "start_date", "end_date"]
-    search_fields = ["title", "description", "location"]
-
     @swagger_auto_schema(
-        operation_summary="내 일정 + 팔로우 아이돌 일정 통합 조회",
-        tags=["사용자 일정 / 목록"],
-        manual_parameters=[
-            openapi.Parameter(
-                name="Authorization",
-                in_=openapi.IN_HEADER,
-                type=openapi.TYPE_STRING,
-                description="Bearer 액세스 토큰",
-                required=True,
-                example="Bearer <access_token>",
-            ),
-            openapi.Parameter(
-                name="title",
-                in_=openapi.IN_QUERY,
-                type=openapi.TYPE_STRING,
-                description="일정 제목 필터",
-                required=False,
-            ),
-            openapi.Parameter(
-                name="start_date",
-                in_=openapi.IN_QUERY,
-                type=openapi.TYPE_STRING,
-                format="date",
-                description="시작일 필터 (예: 2025-05-01)",
-                required=False,
-            ),
-        ],
-        responses={
-            200: SCHEDULE_LIST_SUCCESS,
-            401: openapi.Response(
-                description="JWT 인증 실패",
-                schema=openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        "code": openapi.Schema(type=openapi.TYPE_INTEGER, example=401),
-                        "message": openapi.Schema(
-                            type=openapi.TYPE_STRING, example="인증 정보가 없습니다."
-                        ),
-                        "data": openapi.Schema(type=openapi.TYPE_OBJECT, nullable=True),
-                    },
-                ),
-            ),
-        },
+        operation_summary="내 일정 목록 조회",
+        tags=["사용자 일정"],
+        responses={200: R.SCHEDULE_LIST_SUCCESS},
     )
-    def list(self, request, *args, **kwargs):
-        user = request.user
-        user_schedules = self.filter_queryset(self.get_queryset())
-        user_schedule_data = self.get_serializer(user_schedules, many=True).data
-
-        idol_schedule_data = []
-        if IDOL_MODELS_AVAILABLE:
-            followed_idols = Follow.objects.filter(user=user).values_list(
-                "idol", flat=True
-            )
-            idol_schedules = IdolSchedule.objects.filter(idol__in=followed_idols)
-            idol_schedule_data = IdolScheduleSerializer(idol_schedules, many=True).data
-
+    def get(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
         return Response(
             {
-                "code": 200,
-                "message": "사용자 + 팔로우 아이돌 일정 목록 조회 성공",
-                "data": {
-                    "user_schedules": user_schedule_data,
-                    "idol_schedules": idol_schedule_data,
-                },
-            }
+                "code": R.SCHEDULE_LIST_SUCCESS["code"],
+                "message": R.SCHEDULE_LIST_SUCCESS["message"],
+                "data": serializer.data,
+            },
+            status=R.SCHEDULE_LIST_SUCCESS["status"],
         )
 
     @swagger_auto_schema(
         operation_summary="내 일정 등록",
-        tags=["사용자 일정 / 생성"],
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            required=["title", "start_date", "end_date"],
-            properties={
-                "title": openapi.Schema(type=openapi.TYPE_STRING, example="치과 예약"),
-                "description": openapi.Schema(
-                    type=openapi.TYPE_STRING, example="강남역 치과 방문"
-                ),
-                "location": openapi.Schema(
-                    type=openapi.TYPE_STRING, example="강남구 강남대로 123"
-                ),
-                "start_date": openapi.Schema(
-                    type=openapi.TYPE_STRING, format="date", example="2025-05-09"
-                ),
-                "end_date": openapi.Schema(
-                    type=openapi.TYPE_STRING, format="date", example="2025-05-09"
-                ),
-            },
-        ),
-        responses={201: SCHEDULE_CREATE_SUCCESS},
+        tags=["사용자 일정"],
+        responses={201: R.SCHEDULE_CREATE_SUCCESS},
     )
-    def create(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        schedule = serializer.save(user=request.user)
-
+        # 요청한 사용자 정보를 모델에 직접 할당
+        serializer.save(user=request.user)
         return Response(
             {
-                "code": 201,
-                "message": "사용자 일정 등록 성공",
-                "data": self.get_serializer(schedule).data,
+                "code": R.SCHEDULE_CREATE_SUCCESS["code"],
+                "message": R.SCHEDULE_CREATE_SUCCESS["message"],
+                "data": serializer.data,
             },
-            status=status.HTTP_201_CREATED,
+            status=R.SCHEDULE_CREATE_SUCCESS["status"],
         )
 
 
-class UserScheduleDetailView(
-    UserScheduleBaseView, generics.RetrieveUpdateDestroyAPIView
-):
+# 일정 상세 조회, 수정, 삭제
+class UserScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = UserScheduleSerializer
+    queryset = UserSchedule.objects.all()
 
-    def _check_ownership(self, instance, request):
-        if instance.user != request.user:
-            return Response(
-                {"code": 400, "message": "권한이 없습니다.", "data": None},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        return None
+    def get_object(self):
+        try:
+            obj = super().get_object()
+        except Exception:
+            raise NotFound(R.SCHEDULE_NOT_FOUND["message"])
+
+        # 로그인한 사용자의 일정만 접근 가능
+        if obj.user != self.request.user:
+            raise PermissionDenied(R.SCHEDULE_NO_PERMISSION["message"])
+
+        return obj
 
     @swagger_auto_schema(
         operation_summary="내 일정 상세 조회",
-        tags=["사용자 일정 / 단건 조회"],
+        tags=["사용자 일정"],
         responses={
-            200: SCHEDULE_DETAIL_SUCCESS,
-            400: SCHEDULE_ERROR_RESPONSE,
+            200: R.SCHEDULE_DETAIL_SUCCESS,
+            403: R.SCHEDULE_NO_PERMISSION,
+            404: R.SCHEDULE_NOT_FOUND,
         },
     )
-    def retrieve(self, request, *args, **kwargs):
-        try:
-            instance = self.get_object()
-        except:
-            return Response(
-                {"code": 400, "message": "일정이 존재하지 않습니다.", "data": None},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        data = self.get_serializer(instance).data
+    def get(self, request, *args, **kwargs):
+        schedule = self.get_object()
+        serializer = self.get_serializer(schedule)
         return Response(
             {
-                "code": 200,
-                "message": "사용자 일정 조회 성공",
-                "data": {"uschedule_view": data},
-            }
+                "code": R.SCHEDULE_DETAIL_SUCCESS["code"],
+                "message": R.SCHEDULE_DETAIL_SUCCESS["message"],
+                "data": serializer.data,
+            },
+            status=R.SCHEDULE_DETAIL_SUCCESS["status"],
         )
 
     @swagger_auto_schema(
         operation_summary="내 일정 수정",
-        tags=["사용자 일정 / 수정"],
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                "title": openapi.Schema(
-                    type=openapi.TYPE_STRING, example="수정된 일정 제목"
-                ),
-                "description": openapi.Schema(
-                    type=openapi.TYPE_STRING, example="수정된 설명"
-                ),
-                "location": openapi.Schema(
-                    type=openapi.TYPE_STRING, example="수정된 장소"
-                ),
-                "start_date": openapi.Schema(
-                    type=openapi.TYPE_STRING, format="date", example="2025-05-10"
-                ),
-                "end_date": openapi.Schema(
-                    type=openapi.TYPE_STRING, format="date", example="2025-05-10"
-                ),
-            },
-        ),
+        tags=["사용자 일정"],
         responses={
-            200: SCHEDULE_UPDATE_SUCCESS,
-            400: SCHEDULE_ERROR_RESPONSE,
+            200: R.SCHEDULE_UPDATE_SUCCESS,
+            403: R.SCHEDULE_NO_PERMISSION,
+            404: R.SCHEDULE_NOT_FOUND,
         },
     )
-    def update(self, request, *args, **kwargs):
-        instance = self.get_object()
-        permission_error = self._check_ownership(instance, request)
-        if permission_error:
-            return permission_error
-
-        serializer = self.get_serializer(instance, data=request.data, partial=True)
+    def put(self, request, *args, **kwargs):
+        schedule = self.get_object()
+        serializer = self.get_serializer(schedule, data=request.data)
         serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-
+        serializer.save()
         return Response(
-            {"code": 200, "message": "일정 수정 성공", "data": serializer.data}
+            {
+                "code": R.SCHEDULE_UPDATE_SUCCESS["code"],
+                "message": R.SCHEDULE_UPDATE_SUCCESS["message"],
+                "data": serializer.data,
+            },
+            status=R.SCHEDULE_UPDATE_SUCCESS["status"],
         )
 
     @swagger_auto_schema(
         operation_summary="내 일정 삭제",
-        tags=["사용자 일정 / 삭제"],
+        tags=["사용자 일정"],
         responses={
-            204: SCHEDULE_DELETE_SUCCESS,
-            400: SCHEDULE_ERROR_RESPONSE,
+            204: R.SCHEDULE_DELETE_SUCCESS,
+            403: R.SCHEDULE_NO_PERMISSION,
+            404: R.SCHEDULE_NOT_FOUND,
         },
     )
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        permission_error = self._check_ownership(instance, request)
-        if permission_error:
-            return permission_error
-
-        schedule_id = instance.id
-        self.perform_destroy(instance)
-
+    def delete(self, request, *args, **kwargs):
+        schedule = self.get_object()
+        schedule.delete()
         return Response(
             {
-                "code": 204,
-                "message": "일정 삭제 성공",
-                "data": {"schedule_id": schedule_id},
+                "code": R.SCHEDULE_DELETE_SUCCESS["code"],
+                "message": R.SCHEDULE_DELETE_SUCCESS["message"],
             },
-            status=status.HTTP_204_NO_CONTENT,
+            status=R.SCHEDULE_DELETE_SUCCESS["status"],
         )

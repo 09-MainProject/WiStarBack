@@ -4,7 +4,9 @@ from django.db import models
 
 class UserSchedule(models.Model):
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="schedules"
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="user_schedules",
     )
     title = models.CharField(max_length=25)
     description = models.TextField()
