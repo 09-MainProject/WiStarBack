@@ -235,17 +235,3 @@ FRONTEND_URL = "/api/users"
 
 # 자동 슬래시 붙이는 기능 끄기
 APPEND_SLASH = False
-
-
-# 스웨거 설정
-SWAGGER_SETTINGS = {
-    # "DEFAULT_INFO": "config.urls.schema",  # ← 실제 사용 중인 경로로 수정
-    "VALIDATOR_URL": None,
-    "USE_SESSION_AUTH": False,
-    "DEFAULT_GENERATOR_CLASS": "drf_yasg.generators.OpenAPISchemaGenerator",
-    "DEFAULT_FIELD_INSPECTORS": [
-        "drf_yasg.inspectors.CamelCaseJSONFilter",
-        "drf_yasg.inspectors.CoreAPICompatInspector",
-        "drf_yasg.inspectors.FieldInspector",
-    ],
-}
