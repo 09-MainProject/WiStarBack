@@ -148,7 +148,8 @@ ENV/
 env.bak/
 venv.bak/
 
-media/
+media/*
+post_images/*
 
 # Spyder project settings
 .spyderproject

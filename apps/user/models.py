@@ -15,7 +15,7 @@ class UserManager(BaseUserManager):
             raise ValueError("올바른 이메일을 입력하세요.")
         user = self.model(email=self.normalize_email(email), **kwargs)
         user.set_password(password)  # 해시화
-        user.is_active = True # False: 이메일 인증 후 활성화
+        user.is_active = True  # False: 이메일 인증 후 활성화
         user.save(using=self._db)
         return user
 

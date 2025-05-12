@@ -150,11 +150,7 @@ class RegisterView(CreateAPIView):
             # 응답에 verify_url 포함
             response_data["verify_url"] = verify_url
             custom_response["data"] = response_data
-            return Response(custom_response, status=status.HTTP_201_CREATED)
 
-        # 실제로 배포할 땐 빼기
-        response_data["verify_url"] = verify_url
-        custom_response["data"] = response_data
         return Response(custom_response, status=status.HTTP_201_CREATED)
 
 
