@@ -154,7 +154,6 @@ class ScheduleRetrieveUpdateDeleteView(
     def get_queryset(self):
         if getattr(self, "swagger_fake_view", False):
             return Schedule.objects.none()  # Swagger용 빈 쿼리셋 반환
-
         return Schedule.objects.filter(idol_id=self.kwargs["idol_id"])
 
     @swagger_auto_schema(
