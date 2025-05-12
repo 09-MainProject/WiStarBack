@@ -107,23 +107,17 @@ class LogoutSerializer(serializers.Serializer):
 
 
 class ProfileSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
     class Meta:
         model = User
-        fields = ["id", "name", "nickname", "email", "profile_image_url", "profile_thumbnail_url"]
+        fields = ["id", "name", "nickname", "email", "image_url"]
 
-    def get_profile_image_url(self, obj):
-        profile_image = obj.profile_images.last()
-        if profile_image and profile_image.image:
+    def get_image_url(self, obj):
+        profile_image = obj.profile_images.first()
+        if profile_image and profile_image.image_url:
             # image는 ImageField이기 때문에 .url 속성을 호출하면 저장된 파일의 경로가 자동으로 완전한 URL을 반환
-            return profile_image.image.url
-        return settings.DEFAULT_PROFILE_URL
-
-    def get_profile_thumbnail_url(self, obj):
-        profile_image = obj.profile_images.last()
-        if profile_image and profile_image.thumbnail:
-            # image는 ImageField이기 때문에 .url 속성을 호출하면 저장된 파일의 경로가 자동으로 완전한 URL을 반환
-            return profile_image.thumbnail.url
-        return settings.DEFAULT_POST_THUMBNAIL_URL
+            return profile_image.image_url
+        return None
 
 # 결과 예시
 # {
@@ -151,6 +145,8 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         if password := validated_data.get("password"):
             validated_data["password"] = make_password(password)
+
+        image_file = validated_data.pop("image", None)
         return super().update(instance, validated_data)
 
 

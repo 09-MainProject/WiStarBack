@@ -71,6 +71,8 @@ THIRD_PARTY_APPS = [
     "storages",
     "corsheaders",
     "drf_yasg",
+    "cloudinary",
+    # "cloudinary_storage",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + OWN_APPS + THIRD_PARTY_APPS
@@ -232,3 +234,4 @@ FRONTEND_URL = "/api/users"
 
 # 자동 슬래시 붙이는 기능 끄기
 APPEND_SLASH = False
+
