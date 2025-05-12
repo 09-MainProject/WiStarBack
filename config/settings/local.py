@@ -37,10 +37,10 @@ DATABASES = {
 import cloudinary
 
 cloudinary.config(
-    cloud_name= ENV.get("CLOUD_NAME", "db"),
-    api_key= ENV.get("API_KEY", "db"),
-    api_secret= ENV.get("API_SECRET", "db"),
-    secure=True  # https 사용
+    cloud_name=ENV.get("CLOUD_NAME", "db"),
+    api_key=ENV.get("API_KEY", "db"),
+    api_secret=ENV.get("API_SECRET", "db"),
+    secure=True,  # https 사용
     # secure=False  # https 사용
 )
 

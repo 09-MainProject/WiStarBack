@@ -15,10 +15,7 @@ def upload_to_cloudinary(file, folder="uploads"):
     """
     try:
         result = cloudinary.uploader.upload(
-            file,
-            folder=folder,
-            format="webp",
-            resource_type="image"
+            file, folder=folder, format="webp", resource_type="image"
         )
         return result["secure_url"], result["public_id"]
 
@@ -42,10 +39,7 @@ def generate_thumbnail_url(original_url, width=300, height=300, crop="fill"):
     if not original_url or "/upload/" not in original_url:
         return original_url  # fallback
 
-    return original_url.replace(
-        "/upload/",
-        f"/upload/w_{width},h_{height},c_{crop}/"
-    )
+    return original_url.replace("/upload/", f"/upload/w_{width},h_{height},c_{crop}/")
 
 
 def delete_from_cloudinary(public_id):
@@ -66,7 +60,6 @@ def delete_from_cloudinary(public_id):
         return result
     except CloudinaryError as e:
         raise RuntimeError(f"Cloudinary 삭제 실패: {str(e)}")
-
 
 
 # # 업로드 시

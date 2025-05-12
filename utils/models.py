@@ -8,9 +8,12 @@ class TimestampModel(models.Model):
     class Meta:
         abstract = True
 
+
 class CloudinaryImageMixin(models.Model):
     image_url = models.URLField("이미지 URL", blank=True, null=True)
-    image_public_id = models.CharField("Cloudinary public ID", max_length=255, blank=True, null=True)
+    image_public_id = models.CharField(
+        "Cloudinary public ID", max_length=255, blank=True, null=True
+    )
 
     class Meta:
         abstract = True

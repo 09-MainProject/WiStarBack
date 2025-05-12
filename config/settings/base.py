@@ -234,4 +234,3 @@ FRONTEND_URL = "/api/users"
 
 # 자동 슬래시 붙이는 기능 끄기
 APPEND_SLASH = False
-

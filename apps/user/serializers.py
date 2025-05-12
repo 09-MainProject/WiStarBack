@@ -108,6 +108,7 @@ class LogoutSerializer(serializers.Serializer):
 
 class ProfileSerializer(serializers.ModelSerializer):
     image_url = serializers.SerializerMethodField()
+
     class Meta:
         model = User
         fields = ["id", "name", "nickname", "email", "image_url"]
@@ -118,6 +119,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             # image는 ImageField이기 때문에 .url 속성을 호출하면 저장된 파일의 경로가 자동으로 완전한 URL을 반환
             return profile_image.image_url
         return None
+
 
 # 결과 예시
 # {

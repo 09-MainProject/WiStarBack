@@ -3,8 +3,9 @@ from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 
 from apps.image.models import Image
+
 # from apps.image.models import Image
-from utils.models import TimestampModel, CloudinaryImageMixin
+from utils.models import CloudinaryImageMixin, TimestampModel
 
 
 # 사용자 지정 메니져
@@ -51,7 +52,7 @@ class User(AbstractBaseUser, TimestampModel):  # 기본 기능은 상속받아�
     name = models.CharField(verbose_name="이름", max_length=25)
     nickname = models.CharField("닉네임", max_length=25, unique=True)
     # profile_images는 실제 필드로 DB에 만들어지지 않음 → 대신 역참조용 헬퍼 역할 (GenericRelation)
-    profile_images = GenericRelation(Image, related_query_name='profile_image')
+    profile_images = GenericRelation(Image, related_query_name="profile_image")
     last_login = models.DateTimeField(verbose_name="마지막 로그인", null=True)
     is_staff = models.BooleanField(
         verbose_name="스태프 권한", default=False
