@@ -32,6 +32,7 @@ class IdolFilter(django_filters.FilterSet):
 
 
 class IdolSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
     """아이돌 정보 시리얼라이저"""
 
     class Meta:
@@ -49,3 +50,9 @@ class IdolSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
         read_only_fields = ["id", "created_at", "updated_at"]
+
+    def get_image_url(self, obj):
+        image = obj.images.first()
+        if image and image.image_url:
+            return image.image_url
+        return None
