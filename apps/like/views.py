@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
+from rest_framework.generics import ListCreateAPIView, RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -14,93 +15,43 @@ from .models import Like
 from .serializers import LikeSerializer
 
 
-class LikeView(APIView):
-    """좋아요 View"""
-
+class LikeView(ListCreateAPIView):
     permission_classes = [IsAuthenticated]
-    allowed_methods = ["GET", "POST", "DELETE"]
+    serializer_class = LikeSerializer
 
-    @swagger_auto_schema(
-        tags=["likes"],
-        operation_summary="좋아요 생성",
-        operation_description="게시물에 좋아요를 추가합니다.",
-        responses={
-            201: "좋아요 생성 성공",
-            401: "인증되지 않은 사용자",
-            404: "게시물을 찾을 수 없음",
-        },
-    )
-    def post(self, request, post_id):
-        """좋아요를 생성합니다."""
-        post = get_object_or_404(Post, id=post_id)
+    def get_queryset(self):
+        type = self.kwargs.get('type')
+        id = self.kwargs.get('id')
+        content_type = ContentType.objects.get(model=type)
+        return Like.objects.filter(content_type=content_type, object_id=id)
 
-        try:
-            like, created = Like.objects.get_or_create(post=post, user=request.user)
+    def perform_create(self, serializer):
+        type = self.kwargs.get('type')
+        id = self.kwargs.get('id')
+        content_type = ContentType.objects.get(model=type)
+        serializer.save(user=self.request.user, content_type=content_type, object_id=id)
 
-            if not created:
-                like.delete()
-                return Response(status=status.HTTP_204_NO_CONTENT)
 
-            return Response(status=status.HTTP_201_CREATED)
+class LikeStatusView(RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = LikeSerializer
 
-        except Exception as e:
-            raise CustomAPIException(
-                {
-                    "code": 500,
-                    "message": "An error occurred while processing the like.",
-                    "data": None,
-                }
-            )
-
-    @swagger_auto_schema(
-        tags=["likes"],
-        operation_summary="좋아요 목록 조회",
-        operation_description="게시물의 좋아요 목록을 조회합니다.",
-        responses={
-            200: "좋아요 목록 조회 성공",
-            401: "인증되지 않은 사용자",
-            404: "게시물을 찾을 수 없음",
-        },
-    )
-    def get(self, request, post_id):
-        """좋아요 목록을 조회합니다."""
-        post = get_object_or_404(Post, id=post_id)
-        likes = Like.objects.filter(post=post)
-        serializer = LikeSerializer(likes, many=True)
-        return Response(
-            {
-                "code": 200,
-                "message": "Likes list retrieved successfully",
-                "data": serializer.data,
-            }
-        )
-
-    @swagger_auto_schema(
-        tags=["likes"],
-        operation_summary="좋아요 삭제",
-        operation_description="게시물의 좋아요를 삭제합니다.",
-        responses={
-            200: "좋아요 삭제 성공",
-            401: "인증되지 않은 사용자",
-            404: "게시물 또는 좋아요를 찾을 수 없음",
-        },
-    )
-    def delete(self, request, post_id):
-        """게시글의 좋아요를 취소합니다."""
-        post = get_object_or_404(Post, id=post_id)
-        like = get_object_or_404(Like, post=post, user=request.user)
-        like.delete()
-
-        return Response(
-            {"code": 200, "message": "Like deleted successfully", "data": None}
-        )
+    def get_object(self):
+        type = self.kwargs.get('type')
+        id = self.kwargs.get('id')
+        content_type = ContentType.objects.get(model=type)
+        return Like.objects.filter(
+            user=self.request.user,
+            content_type=content_type,
+            object_id=id
+        ).first()
 
 
 class LikeStatusView(APIView):
     """좋아요 상태 조회 View"""
 
     permission_classes = [IsAuthenticated]
-    allowed_methods = ["GET"]
+    http_method_names = ["get"]
 
     @swagger_auto_schema(
         tags=["likes"],

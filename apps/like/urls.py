@@ -4,12 +4,12 @@ from .views import LikeStatusView, LikeView
 
 urlpatterns = [
     path(
-        "posts/<int:post_id>/likes/",
+        "",
         LikeView.as_view(),
         name="post-likes",
     ),
     path(
-        "posts/<int:post_id>/likes/status/",
+        "status/",
         LikeStatusView.as_view(),
         name="post-likes-status",
     ),

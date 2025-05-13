@@ -1,8 +1,10 @@
 from django.contrib.auth import get_user_model
+from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from apps.like.models import Like
 from apps.post.models import Post
 from apps.user.models import User
 
@@ -20,6 +22,7 @@ class Comment(models.Model):
         on_delete=models.CASCADE,
         related_name="comments",
         verbose_name=_("게시글"),
+        null=False,
     )
     author = models.ForeignKey(
         User,
@@ -47,11 +50,7 @@ class Comment(models.Model):
         blank=True,
         related_name="deleted_comments",
     )
-    likes = models.ManyToManyField(
-        User,
-        related_name="liked_comments",
-        blank=True,
-    )
+    # likes = GenericRelation(Like, related_query_name="comment_likes", verbose_name="좋아요")
 
     class Meta:
         verbose_name = _("댓글")

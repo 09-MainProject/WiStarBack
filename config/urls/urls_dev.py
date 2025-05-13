@@ -29,7 +29,9 @@ urlpatterns = [
     path(
         "api/posts/<int:post_id>/comments/", include("apps.comment.urls")
     ),  # comment 앱의 URL
-    path("api/", include("apps.like.urls")),
+    path(
+        "api/<str:type>/<int:id>/likes/", include("apps.like.urls")
+    ),  # like 앱의 URL - API 명세서에 맞게 수정
     path("api/idols/", include("apps.idol.urls")),
     path("api/idols/follows/", include("apps.follow.urls")),
     path("api/images/", include("apps.image.urls")),
