@@ -24,9 +24,13 @@ class ImageUploadSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         try:
-            data["content_type"] = ContentType.objects.get(model=data["object_type"].lower())
+            data["content_type"] = ContentType.objects.get(
+                model=data["object_type"].lower()
+            )
         except ContentType.DoesNotExist:
-            raise serializers.ValidationError({"object_type": "유효하지 않은 모델입니다."})
+            raise serializers.ValidationError(
+                {"object_type": "유효하지 않은 모델입니다."}
+            )
         return data
 
     def create(self, validated_data):

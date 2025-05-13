@@ -15,13 +15,17 @@ from rest_framework.views import exception_handler
 
 logger = logging.getLogger(__name__)
 
+
 def _format_response(code, message, data=None):
     return Response({"code": code, "message": message, "data": data}, status=code)
+
 
 def custom_exception_handler(exc, context):
     # 🔥 콘솔에 예외 전체 Traceback 출력
     logger.exception("예외 발생:", exc_info=exc)  # 로그 기록
-    traceback.print_exception(type(exc), exc, exc.__traceback__, file=sys.stderr)  # 터미널 직접 출력
+    traceback.print_exception(
+        type(exc), exc, exc.__traceback__, file=sys.stderr
+    )  # 터미널 직접 출력
 
     # DRF 기본 핸들러 호출
     response = exception_handler(exc, context)

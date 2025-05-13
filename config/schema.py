@@ -1,8 +1,8 @@
+from django.conf import settings
 from drf_yasg import openapi
+from drf_yasg.generators import OpenAPISchemaGenerator
 from drf_yasg.views import get_schema_view
 from rest_framework import permissions
-from django.conf import settings
-from drf_yasg.generators import OpenAPISchemaGenerator
 
 
 class ExcludeAppsSchemaGenerator(OpenAPISchemaGenerator):
@@ -12,7 +12,9 @@ class ExcludeAppsSchemaGenerator(OpenAPISchemaGenerator):
         endpoints = super().get_endpoints(request)
         filtered = {}
         for path, (view_cls, method_map) in endpoints.items():
-            if not any(view_cls.__module__.startswith(app) for app in self.EXCLUDED_APPS):
+            if not any(
+                view_cls.__module__.startswith(app) for app in self.EXCLUDED_APPS
+            ):
                 filtered[path] = (view_cls, method_map)
         return filtered
 
@@ -35,14 +37,12 @@ schema_view = get_schema_view(
 )
 
 
-
 # 자동 swagger 문서화 패키지
 # https://drf-yasg.readthedocs.io/en/stable/
 # https://drf-yasg.readthedocs.io/en/stable/readme.html
 #
 # 설치
 # poetry add drf-yasg
-
 
 
 # 특정 앱 스웨거 비활성화 설정하는 클래스
