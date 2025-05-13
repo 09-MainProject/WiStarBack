@@ -11,9 +11,9 @@ class ExcludeAppsSchemaGenerator(OpenAPISchemaGenerator):
     def get_endpoints(self, request):
         endpoints = super().get_endpoints(request)
         filtered = {}
-        for path, (view_cls, path_regex, method_map) in endpoints.items():
+        for path, (view_cls, method_map) in endpoints.items():
             if not any(view_cls.__module__.startswith(app) for app in self.EXCLUDED_APPS):
-                filtered[path] = (view_cls, path_regex, method_map)
+                filtered[path] = (view_cls, method_map)
         return filtered
 
 

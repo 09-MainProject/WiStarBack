@@ -240,13 +240,13 @@ APPEND_SLASH = False
 # config.schema.py에서 설정
 SWAGGER_EXCLUDED_APPS = [
     # "apps.user.views",
-    "apps.idol.views",
-    "apps.notification.views",
-    "apps.post.views",
-    "apps.comment.views",
-    "apps.like.views",
-    "apps.follow.views",
-    "apps.image.views",
-    "apps.idol_schedule.views",
+    # "apps.idol.views",
+    # "apps.notification.views",
+    # "apps.post.views",
+    # "apps.comment.views",
+    # "apps.like.views",
+    # "apps.follow.views",
+    # "apps.image.views",
+    # "apps.idol_schedule.views",
     "apps.user_schedule.views",
 ]  # 제외할 앱 이름

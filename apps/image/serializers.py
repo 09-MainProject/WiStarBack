@@ -6,7 +6,7 @@ from apps.image.utils import delete_from_cloudinary, upload_to_cloudinary
 
 
 class ImageUploadSerializer(serializers.ModelSerializer):
-    model = serializers.CharField(write_only=True)
+    object_type = serializers.CharField(write_only=True)
     object_id = serializers.IntegerField(write_only=True)
     image = serializers.ImageField(write_only=True, required=False)
 
@@ -16,7 +16,7 @@ class ImageUploadSerializer(serializers.ModelSerializer):
             "image_url",
             "public_id",
             "uploaded_at",
-            "model",
+            "object_type",
             "object_id",
             "image",
         ]
@@ -24,9 +24,9 @@ class ImageUploadSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         try:
-            data["content_type"] = ContentType.objects.get(model=data["model"].lower())
+            data["content_type"] = ContentType.objects.get(model=data["object_type"].lower())
         except ContentType.DoesNotExist:
-            raise serializers.ValidationError({"model": "유효하지 않은 모델입니다."})
+            raise serializers.ValidationError({"object_type": "유효하지 않은 모델입니다."})
         return data
 
     def create(self, validated_data):
@@ -35,7 +35,7 @@ class ImageUploadSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"image": "이미지 파일이 필요합니다."})
 
         image_url, public_id = upload_to_cloudinary(
-            image_file, folder=validated_data["model"]
+            image_file, folder=validated_data["object_type"]
         )
 
         return Image.objects.create(
