@@ -6,8 +6,8 @@ class WiStarTokenObtainPairSerializer(TokenObtainPairSerializer):
     def get_token(cls, user):
         token = super().get_token(user)
 
-        # Add custom claims
-        token["email"] = user.email  # 토큰에 유저 정보를을 함께 담아서 보냄
+        # 토큰에 유저 정보를을 함께 담아서 보냄
+        token["email"] = user.email
         token["nickname"] = user.nickname
         token["is_staff"] = user.is_staff
         token["is_superuser"] = user.is_superuser

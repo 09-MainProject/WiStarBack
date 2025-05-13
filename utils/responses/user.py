@@ -44,6 +44,7 @@ DUPLICATE_NICKNAME = {
 #     "data": None
 # }
 
+
 # 이메일 인증
 VERIFY_EMAIL_SUCCESS = {
     "code": 200,
@@ -85,7 +86,6 @@ PASSWORD_CHECK_INVALID = {
 LOGIN_SUCCESS = {
     "code": 200,
     "message": "로그인을 성공했습니다.",
-    "data": None,
 }
 LOGIN_FAILED = {
     "code": 401,

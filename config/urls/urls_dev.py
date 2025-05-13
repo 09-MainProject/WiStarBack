@@ -31,7 +31,7 @@ urlpatterns = [
     ),  # comment 앱의 URL
     path("api/", include("apps.like.urls")),
     path("api/idols/", include("apps.idol.urls")),
-    path("api/idols/follows/", include("apps.follow.urls")),
+    path("api/idols/", include("apps.follow.urls")),
     path("api/images/", include("apps.image.urls")),
     path("api/idols/", include("apps.idol_schedule.urls")),
     path("api/users/", include("apps.user_schedule.urls")),
