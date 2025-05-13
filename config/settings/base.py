@@ -248,5 +248,5 @@ SWAGGER_EXCLUDED_APPS = [
     # "apps.follow.views",
     # "apps.image.views",
     # "apps.idol_schedule.views",
-    "apps.user_schedule.views",
+    # "apps.user_schedule.views",
 ]  # 제외할 앱 이름
