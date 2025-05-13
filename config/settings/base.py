@@ -235,3 +235,18 @@ FRONTEND_URL = "/api/users"
 
 # 자동 슬래시 붙이는 기능 끄기
 APPEND_SLASH = False
+
+# 특정앱 스웨거에서 임시로 비활성화
+# config.schema.py에서 설정
+SWAGGER_EXCLUDED_APPS = [
+    # "apps.user.views",
+    # "apps.idol.views",
+    # "apps.notification.views",
+    # "apps.post.views",
+    # "apps.comment.views",
+    # "apps.like.views",
+    # "apps.follow.views",
+    # "apps.image.views",
+    # "apps.idol_schedule.views",
+    "apps.user_schedule.views",
+]  # 제외할 앱 이름
