@@ -4,6 +4,7 @@ from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.response import Response
 
 from utils.responses import user_schedule as R
+
 from .models import UserSchedule
 from .serializers import UserScheduleSerializer
 
@@ -20,7 +21,7 @@ class UserScheduleListCreateView(generics.ListCreateAPIView):
         tags=["사용자 일정"],
         responses={
             200: UserScheduleSerializer(many=True),  # ✅ 수정됨
-        }
+        },
     )
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()
@@ -40,7 +41,7 @@ class UserScheduleListCreateView(generics.ListCreateAPIView):
         request_body=UserScheduleSerializer,  # ✅ 추가됨
         responses={
             201: UserScheduleSerializer(),  # ✅ 수정됨
-        }
+        },
     )
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -82,7 +83,7 @@ class UserScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
             200: UserScheduleSerializer(),  # ✅ 수정됨
             403: "접근 권한이 없습니다.",
             404: "일정을 찾을 수 없습니다.",
-        }
+        },
     )
     def get(self, request, *args, **kwargs):
         schedule = self.get_object()
@@ -104,11 +105,13 @@ class UserScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
             200: UserScheduleSerializer(),  # ✅ 수정됨
             403: "접근 권한이 없습니다.",
             404: "일정을 찾을 수 없습니다.",
-        }
+        },
     )
     def patch(self, request, *args, **kwargs):  # ✅ put → patch
         schedule = self.get_object()
-        serializer = self.get_serializer(schedule, data=request.data, partial=True)  # ✅ partial=True
+        serializer = self.get_serializer(
+            schedule, data=request.data, partial=True
+        )  # ✅ partial=True
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(
@@ -127,7 +130,7 @@ class UserScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
             204: "일정 삭제 성공",  # ✅ 설명만 넣음 (직렬화 필요 없음)
             403: "접근 권한이 없습니다.",
             404: "일정을 찾을 수 없습니다.",
-        }
+        },
     )
     def delete(self, request, *args, **kwargs):
         schedule = self.get_object()
