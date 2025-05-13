@@ -20,7 +20,7 @@ class UserScheduleListCreateView(generics.ListCreateAPIView):
         operation_summary="내 일정 목록 조회",
         tags=["사용자 일정"],
         responses={
-            200: UserScheduleSerializer(many=True),  # ✅ 수정됨
+            200: UserScheduleSerializer(many=True),
         },
     )
     def get(self, request, *args, **kwargs):
@@ -38,9 +38,9 @@ class UserScheduleListCreateView(generics.ListCreateAPIView):
     @swagger_auto_schema(
         operation_summary="내 일정 등록",
         tags=["사용자 일정"],
-        request_body=UserScheduleSerializer,  # ✅ 추가됨
+        request_body=UserScheduleSerializer,
         responses={
-            201: UserScheduleSerializer(),  # ✅ 수정됨
+            201: UserScheduleSerializer(),
         },
     )
     def post(self, request, *args, **kwargs):
@@ -80,7 +80,7 @@ class UserScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
         operation_summary="내 일정 상세 조회",
         tags=["사용자 일정"],
         responses={
-            200: UserScheduleSerializer(),  # ✅ 수정됨
+            200: UserScheduleSerializer(),
             403: "접근 권한이 없습니다.",
             404: "일정을 찾을 수 없습니다.",
         },
@@ -100,18 +100,18 @@ class UserScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
     @swagger_auto_schema(
         operation_summary="내 일정 수정",
         tags=["사용자 일정"],
-        request_body=UserScheduleSerializer,  # ✅ 추가됨
+        request_body=UserScheduleSerializer,
         responses={
-            200: UserScheduleSerializer(),  # ✅ 수정됨
+            200: UserScheduleSerializer(),
             403: "접근 권한이 없습니다.",
             404: "일정을 찾을 수 없습니다.",
         },
     )
-    def patch(self, request, *args, **kwargs):  # ✅ put → patch
+    def patch(self, request, *args, **kwargs):
         schedule = self.get_object()
         serializer = self.get_serializer(
             schedule, data=request.data, partial=True
-        )  # ✅ partial=True
+        )
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(
@@ -127,7 +127,7 @@ class UserScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
         operation_summary="내 일정 삭제",
         tags=["사용자 일정"],
         responses={
-            204: "일정 삭제 성공",  # ✅ 설명만 넣음 (직렬화 필요 없음)
+            204: "일정 삭제 성공",
             403: "접근 권한이 없습니다.",
             404: "일정을 찾을 수 없습니다.",
         },
