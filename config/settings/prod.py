@@ -20,16 +20,16 @@ SECRET_KEY: str = ENV.get(
     "".join(random.choices("abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()?", k=50)),
 )
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "HOST": ENV.get("POSTGRES_HOST", "db"),
-        "USER": ENV.get("POSTGRES_USER", "postgres"),
-        "PASSWORD": ENV.get("POSTGRES_PASSWORD", "postgres"),
-        "NAME": ENV.get("POSTGRES_DB", "oz_collabo"),
-        "PORT": ENV.get("POSTGRES_PORT", 5432),
-    }
-}
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.postgresql",
+#         "HOST": ENV.get("POSTGRES_HOST", "db"),
+#         "USER": ENV.get("POSTGRES_USER", "postgres"),
+#         "PASSWORD": ENV.get("POSTGRES_PASSWORD", "postgres"),
+#         "NAME": ENV.get("POSTGRES_DB", "oz_collabo"),
+#         "PORT": ENV.get("POSTGRES_PORT", 5432),
+#     }
+# }
 
 import cloudinary
 
