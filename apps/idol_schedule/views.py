@@ -6,16 +6,17 @@ from rest_framework import generics, permissions
 from rest_framework.response import Response
 
 from utils.responses import idol_schedule as S
-
 from .models import Idol, Schedule
 from .serializers import ScheduleSerializer
 
 
+# 관리자 여부 확인용 커스텀 권한 클래스
 class IsManager(permissions.BasePermission):
     def has_permission(self, request, view):
         return request.user and request.user.is_authenticated and request.user.is_staff
 
 
+# 소유자 또는 관리자 여부 확인용 권한 클래스
 class IsIdolManagerOrOwner(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.user.is_staff:
@@ -23,6 +24,7 @@ class IsIdolManagerOrOwner(permissions.BasePermission):
         return obj.user == request.user
 
 
+# 일정 목록 조회 및 등록 (아이돌 단위)
 class ScheduleListCreateView(generics.ListCreateAPIView):
     serializer_class = ScheduleSerializer
 
@@ -52,43 +54,18 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
         return queryset.filter(filters)
 
     @swagger_auto_schema(
-        operation_summary="아이돌 스케줄 목록 조회",
-        tags=["아이돌 스케줄/ 조회"],
+        operation_summary="아이돌 일정 목록 조회",
+        tags=["아이돌 일정"],
         manual_parameters=[
-            openapi.Parameter(
-                "title",
-                openapi.IN_QUERY,
-                description="제목 검색",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "description",
-                openapi.IN_QUERY,
-                description="설명 검색",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "location",
-                openapi.IN_QUERY,
-                description="장소 검색",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "start_date",
-                openapi.IN_QUERY,
-                description="시작일 이후",
-                type=openapi.FORMAT_DATE,
-            ),
-            openapi.Parameter(
-                "end_date",
-                openapi.IN_QUERY,
-                description="종료일 이전",
-                type=openapi.FORMAT_DATE,
-            ),
+            openapi.Parameter("title", openapi.IN_QUERY, description="제목 검색", type=openapi.TYPE_STRING),
+            openapi.Parameter("description", openapi.IN_QUERY, description="설명 검색", type=openapi.TYPE_STRING),
+            openapi.Parameter("location", openapi.IN_QUERY, description="장소 검색", type=openapi.TYPE_STRING),
+            openapi.Parameter("start_date", openapi.IN_QUERY, description="시작일 이후", type=openapi.FORMAT_DATE),
+            openapi.Parameter("end_date", openapi.IN_QUERY, description="종료일 이전", type=openapi.FORMAT_DATE),
         ],
         responses={200: ScheduleSerializer(many=True)},
     )
-    def list(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True)
         message = S.SCHEDULE_LIST_SUCCESS if queryset else S.SCHEDULE_LIST_EMPTY
@@ -101,12 +78,14 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
         )
 
     @swagger_auto_schema(
-        operation_summary="아이돌 스케줄 등록",
-        tags=["아이돌 스케줄/등록"],
+        operation_summary="아이돌 일정 등록",
+        tags=["아이돌 일정"],
         request_body=ScheduleSerializer,
-        responses={201: ScheduleSerializer},
+        responses={
+            201: ScheduleSerializer()
+        },
     )
-    def create(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             self.perform_create(serializer)
@@ -140,6 +119,7 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
         serializer.save(user=self.request.user, idol=idol)
 
 
+# 일정 상세 조회, 수정, 삭제 (아이돌 단위)
 class ScheduleRetrieveUpdateDeleteView(
     generics.RetrieveAPIView, generics.DestroyAPIView, generics.UpdateAPIView
 ):
@@ -157,11 +137,11 @@ class ScheduleRetrieveUpdateDeleteView(
         return Schedule.objects.filter(idol_id=self.kwargs["idol_id"])
 
     @swagger_auto_schema(
-        operation_summary="아이돌 스케줄 상세 조회",
-        tags=["아이돌 스케줄/조회"],
+        operation_summary="아이돌 일정 상세 조회",
+        tags=["아이돌 일정"],
         responses={200: ScheduleSerializer},
     )
-    def retrieve(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
             serializer = self.get_serializer(instance)
@@ -182,8 +162,8 @@ class ScheduleRetrieveUpdateDeleteView(
             )
 
     @swagger_auto_schema(
-        operation_summary="아이돌 스케줄 수정",
-        tags=["아이돌 스케줄/수정"],
+        operation_summary="아이돌 일정 수정",
+        tags=["아이돌 일정"],
         request_body=ScheduleSerializer,
         responses={200: ScheduleSerializer},
     )
@@ -191,9 +171,7 @@ class ScheduleRetrieveUpdateDeleteView(
         partial = True
         try:
             instance = self.get_object()
-            serializer = self.get_serializer(
-                instance, data=request.data, partial=partial
-            )
+            serializer = self.get_serializer(instance, data=request.data, partial=partial)
             if serializer.is_valid():
                 self.perform_update(serializer)
                 return Response(
@@ -220,8 +198,8 @@ class ScheduleRetrieveUpdateDeleteView(
             )
 
     @swagger_auto_schema(
-        operation_summary="아이돌 스케줄 삭제",
-        tags=["아이돌 스케줄/삭제"],
+        operation_summary="아이돌 일정 삭제",
+        tags=["아이돌 일정"],
         responses={204: "삭제 성공"},
     )
     def delete(self, request, *args, **kwargs):
@@ -243,6 +221,10 @@ class ScheduleRetrieveUpdateDeleteView(
                     "data": None,
                 }
             )
+
+    @swagger_auto_schema(auto_schema=None)  # Swagger 문서에서 PUT 제거
+    def put(self, request, *args, **kwargs):
+        pass  # PUT 비활성화
 
     def perform_update(self, serializer):
         serializer.save()

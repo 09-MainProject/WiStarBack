@@ -2,6 +2,7 @@ from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 
 from apps.image.models import Image
+from apps.user.models import User
 
 
 class Idol(models.Model):
@@ -29,7 +30,7 @@ class Idol(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)  # 생성 시간
     updated_at = models.DateTimeField(auto_now=True)  # 수정 시간
     is_active = models.BooleanField(default=True)  # 활동 상태
-    # managers = models.ManyToManyField(User, related_name="managed_idols", blank=True)
+    managers = models.ManyToManyField(User, related_name="managed_idols", blank=True)
     # 아이돌이랑 매니저 다대다 관계 설정
 
     class Meta:
