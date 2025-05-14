@@ -50,7 +50,7 @@ class Comment(models.Model):
         blank=True,
         related_name="deleted_comments",
     )
-    # likes = GenericRelation(Like, related_query_name="comment_likes", verbose_name="좋아요")
+    likes = GenericRelation(Like, related_query_name="comment_likes", verbose_name="좋아요")
 
     class Meta:
         verbose_name = _("댓글")

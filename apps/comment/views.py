@@ -9,6 +9,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.contrib.contenttypes.models import ContentType
 
 from apps.post.models import Post
 from utils.exceptions import CustomAPIException
@@ -19,6 +20,7 @@ from .serializers import (
     CommentSerializer,
     CommentUpdateSerializer,
 )
+from apps.like.models import Like
 
 
 class CommentPagination(PageNumberPagination):
@@ -237,6 +239,60 @@ class CommentViewSet(viewsets.ModelViewSet):
         if instance.author != request.user:
             raise PermissionDenied("댓글을 삭제할 권한이 없습니다.")
         return super().destroy(request, *args, **kwargs)
+
+    @action(detail=True, methods=["post", "delete"], url_path="likes")
+    def likes(self, request, pk=None):
+        """댓글 좋아요/취소 API (POST: 좋아요, DELETE: 좋아요 취소)"""
+        comment = self.get_object()
+        user = request.user
+        content_type = ContentType.objects.get_for_model(comment)
+        
+        if request.method == "POST":
+            # 이미 좋아요가 있으면 아무 변화 없음
+            like, created = Like.objects.get_or_create(
+                content_type=content_type,
+                object_id=comment.id,
+                user=user
+            )
+            return Response(
+                {"status": "liked"},
+                status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
+            )
+        elif request.method == "DELETE":
+            deleted, _ = Like.objects.filter(
+                content_type=content_type,
+                object_id=comment.id,
+                user=user
+            ).delete()
+            return Response(
+                {"status": "unliked"},
+                status=status.HTTP_204_NO_CONTENT if deleted else status.HTTP_200_OK,
+            )
+
+    @action(detail=True, methods=["get"], url_path="like-status")
+    def like_status(self, request, pk=None):
+        """댓글 좋아요 상태 조회 API"""
+        comment = self.get_object()
+        user = request.user
+        content_type = ContentType.objects.get_for_model(comment)
+        
+        is_liked = Like.objects.filter(
+            content_type=content_type,
+            object_id=comment.id,
+            user=user
+        ).exists()
+        
+        # 좋아요한 사용자 목록
+        liked_users = Like.objects.filter(
+            content_type=content_type,
+            object_id=comment.id
+        ).select_related('user').values_list('user__nickname', flat=True)
+        
+        return Response({
+            "is_liked": is_liked,
+            "likes_count": comment.likes.count(),
+            "liked_users": list(liked_users)
+        })
 
 
 class CommentView(APIView):
