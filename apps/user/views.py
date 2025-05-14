@@ -33,7 +33,6 @@ from utils.csrf import generate_csrf_token, validate_csrf_token
 from utils.email import send_email
 from utils.responses.user import (
     CSRF_INVALID_TOKEN,
-    DELETE_SUCCESS,
     INVALID_REFRESH_TOKEN,
     INVALID_SIGNATURE,
     LOGIN_FAILED,
@@ -48,7 +47,7 @@ from utils.responses.user import (
     SIGNUP_SUCCESS,
     TOKEN_REFRESH_RESPONSE,
     VERIFY_EMAIL_SUCCESS,
-    WEAK_PASSWORD,
+    WEAK_PASSWORD, PROFILE_RETRIEVE_RESPONSE, PROFILE_UPDATE_RESPONSE, PROFILE_DELETE_RESPONSE,
 )
 
 
@@ -602,6 +601,14 @@ class ProfileView(RetrieveUpdateDestroyAPIView):
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
 
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response({
+            **PROFILE_RETRIEVE_RESPONSE,
+            "data": serializer.data
+        })
+
     @swagger_auto_schema(
         tags=["유저/프로필"],
         operation_summary="내 프로필 수정",
@@ -669,6 +676,23 @@ class ProfileView(RetrieveUpdateDestroyAPIView):
     def patch(self, request, *args, **kwargs):
         return self.partial_update(request, *args, **kwargs)
 
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
+            instance._prefetched_objects_cache = {}
+
+        return Response({
+            **PROFILE_UPDATE_RESPONSE,
+            "data": serializer.data,
+        })
+
     @swagger_auto_schema(
         tags=["유저/프로필"],
         operation_summary="회원 탈퇴",
@@ -720,7 +744,7 @@ class ProfileView(RetrieveUpdateDestroyAPIView):
 
         user = self.get_object()
         user.delete()
-        return Response(DELETE_SUCCESS, status=status.HTTP_200_OK)
+        return Response(PROFILE_DELETE_RESPONSE, status=status.HTTP_200_OK)
 
 
 class PasswordCheckView(APIView):

@@ -127,18 +127,34 @@ TOKEN_REFRESH_RESPONSE = {
     "data": None,
 }
 
-# 회원 삭제
-DELETE_SUCCESS = {
+# 프로필 조회
+PROFILE_RETRIEVE_RESPONSE = {
     "code": 200,
-    "message": "유저 삭제를 성공했습니다.",
+    "message": "프로필 정보를 불러왔습니다.",
+}
+# 프로필 수정 성공
+PROFILE_UPDATE_RESPONSE = {
+    "code": 200,
+    "message": "회원정보가 수정되었습니다.",
+}
+# 프로필 수정 실패
+INVALID_PROFILE_UPDATE = {
+    "code": 400,
+    "message": "유효하지 않은 입력입니다.",
+}
+# 회원 탈퇴 성공
+PROFILE_DELETE_RESPONSE = {
+    "code": 200,
+    "message": "회원 탈퇴가 완료되었습니다.",
     "data": None,
 }
 
-# ValidationError	유효성 검증 실패	400
-# NotAuthenticated	인증 안 됨	401
-# PermissionDenied	권한 없음	403
-# NotFound	리소스 없음	404
-# APIException	기본 Exception (상태코드 500)	500
+# 인증 실패
+UNAUTHORIZED_RESPONSE = {
+    "code": 401,
+    "message": "인증 정보가 없습니다.",
+    "data": None,
+}
 
 # 인증 관련
 NOT_AUTHENTICATED = {
@@ -146,3 +162,10 @@ NOT_AUTHENTICATED = {
     "message": "로그인이 필요한 서비스입니다.",
     "data": None,
 }
+
+
+# ValidationError	유효성 검증 실패	400
+# NotAuthenticated	인증 안 됨	401
+# PermissionDenied	권한 없음	403
+# NotFound	리소스 없음	404
+# APIException	기본 Exception (상태코드 500)	500
