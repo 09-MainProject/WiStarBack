@@ -5,6 +5,7 @@ from .models import Idol, Schedule
 
 User = get_user_model()
 
+
 @admin.register(Schedule)
 class ScheduleAdmin(admin.ModelAdmin):
     list_display = ["idol", "title", "location", "start_date", "end_date", "created_at"]
