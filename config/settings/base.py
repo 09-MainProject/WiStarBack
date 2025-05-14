@@ -167,9 +167,9 @@ USE_TZ = True
 STATIC_URL = "static/"
 STATIC_DIR = BASE_DIR / "static"
 
-# STATICFILES_DIRS = [
-#     STATIC_DIR,
-# ]
+STATICFILES_DIRS = [
+    STATIC_DIR,
+]
 
 # 배포할 때 사용하는 경로
 STATIC_ROOT = BASE_DIR / ".static_root"
@@ -248,5 +248,5 @@ SWAGGER_EXCLUDED_APPS = [
     # "apps.follow.views",
     # "apps.image.views",
     # "apps.idol_schedule.views",
-    "apps.user_schedule.views",
+    # "apps.user_schedule.views",
 ]  # 제외할 앱 이름

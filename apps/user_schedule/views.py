@@ -19,7 +19,9 @@ class UserScheduleListCreateView(generics.ListCreateAPIView):
     @swagger_auto_schema(
         operation_summary="내 일정 목록 조회",
         tags=["사용자 일정"],
-        responses={200: R.SCHEDULE_LIST_SUCCESS},
+        responses={
+            200: UserScheduleSerializer(many=True),
+        },
     )
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()
@@ -36,7 +38,10 @@ class UserScheduleListCreateView(generics.ListCreateAPIView):
     @swagger_auto_schema(
         operation_summary="내 일정 등록",
         tags=["사용자 일정"],
-        responses={201: R.SCHEDULE_CREATE_SUCCESS},
+        request_body=UserScheduleSerializer,
+        responses={
+            201: UserScheduleSerializer(),
+        },
     )
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -55,6 +60,7 @@ class UserScheduleListCreateView(generics.ListCreateAPIView):
 
 # 일정 상세 조회, 수정, 삭제
 class UserScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
+    http_method_names = ["get", "patch", "delete"]
     serializer_class = UserScheduleSerializer
     queryset = UserSchedule.objects.all()
 
@@ -74,9 +80,9 @@ class UserScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
         operation_summary="내 일정 상세 조회",
         tags=["사용자 일정"],
         responses={
-            200: R.SCHEDULE_DETAIL_SUCCESS,
-            403: R.SCHEDULE_NO_PERMISSION,
-            404: R.SCHEDULE_NOT_FOUND,
+            200: UserScheduleSerializer(),
+            403: "접근 권한이 없습니다.",
+            404: "일정을 찾을 수 없습니다.",
         },
     )
     def get(self, request, *args, **kwargs):
@@ -94,15 +100,16 @@ class UserScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
     @swagger_auto_schema(
         operation_summary="내 일정 수정",
         tags=["사용자 일정"],
+        request_body=UserScheduleSerializer,
         responses={
-            200: R.SCHEDULE_UPDATE_SUCCESS,
-            403: R.SCHEDULE_NO_PERMISSION,
-            404: R.SCHEDULE_NOT_FOUND,
+            200: UserScheduleSerializer(),
+            403: "접근 권한이 없습니다.",
+            404: "일정을 찾을 수 없습니다.",
         },
     )
-    def put(self, request, *args, **kwargs):
+    def patch(self, request, *args, **kwargs):
         schedule = self.get_object()
-        serializer = self.get_serializer(schedule, data=request.data)
+        serializer = self.get_serializer(schedule, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(
@@ -118,9 +125,9 @@ class UserScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
         operation_summary="내 일정 삭제",
         tags=["사용자 일정"],
         responses={
-            204: R.SCHEDULE_DELETE_SUCCESS,
-            403: R.SCHEDULE_NO_PERMISSION,
-            404: R.SCHEDULE_NOT_FOUND,
+            204: "일정 삭제 성공",
+            403: "접근 권한이 없습니다.",
+            404: "일정을 찾을 수 없습니다.",
         },
     )
     def delete(self, request, *args, **kwargs):
