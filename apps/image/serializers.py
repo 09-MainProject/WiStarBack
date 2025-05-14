@@ -70,10 +70,14 @@ class ImageUploadSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        image_urls = self.context["request"].data.getlist("image_url")  # URL로 온 이미지 주소
+        image_urls = self.context["request"].data.getlist(
+            "image_url"
+        )  # URL로 온 이미지 주소
         image_files = self.context["request"].FILES.getlist("image")
         if not image_files and not image_urls:
-            raise serializers.ValidationError({"image": "이미지 파일 또는 url이 필요합니다."})
+            raise serializers.ValidationError(
+                {"image": "이미지 파일 또는 url이 필요합니다."}
+            )
 
         images = []
 
@@ -82,21 +86,27 @@ class ImageUploadSerializer(serializers.ModelSerializer):
             image_url, public_id = upload_to_cloudinary(
                 image_url, folder=validated_data["object_type"]
             )
-            images.append(Image(
-                image_url=image_url,
-                public_id=public_id,
-                content_type=validated_data["content_type"],
-                object_id=validated_data["object_id"],
-            ))
+            images.append(
+                Image(
+                    image_url=image_url,
+                    public_id=public_id,
+                    content_type=validated_data["content_type"],
+                    object_id=validated_data["object_id"],
+                )
+            )
 
         for image_file in image_files:
-            image_url, public_id = upload_to_cloudinary(image_file, folder=validated_data["object_type"])
-            images.append(Image(
-                image_url=image_url,
-                public_id=public_id,
-                content_type=validated_data["content_type"],
-                object_id=validated_data["object_id"]
-            ))
+            image_url, public_id = upload_to_cloudinary(
+                image_file, folder=validated_data["object_type"]
+            )
+            images.append(
+                Image(
+                    image_url=image_url,
+                    public_id=public_id,
+                    content_type=validated_data["content_type"],
+                    object_id=validated_data["object_id"],
+                )
+            )
 
         # bulk_create
         return Image.objects.bulk_create(images)
