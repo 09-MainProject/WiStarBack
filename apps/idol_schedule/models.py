@@ -1,17 +1,9 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 
+from apps.idol.models import Idol
+
 User = get_user_model()
-
-
-class Idol(models.Model):
-    name = models.CharField(max_length=100)
-    managers = models.ManyToManyField(
-        User, related_name="idols"
-    )  # 매니저 다대다 관계 추가
-
-    def __str__(self):
-        return self.name
 
 
 class Schedule(models.Model):
