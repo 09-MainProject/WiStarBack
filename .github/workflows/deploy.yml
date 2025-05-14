@@ -1,25 +1,14 @@
-name: Django EC2 Deployment
-
-on:
-  workflow_dispatch:  # 수동 실행만 가능하게 설정 (사실상 비활성화)
-
-jobs:
-  skip:
-    runs-on: ubuntu-latest
-    steps:
-      - name: This workflow is temporarily disabled
-        run: echo "This workflow is disabled for now."
-
+#name: Django EC2 Deployment
+#
 #on:
-#  workflow_run:
-#    workflows: ["Django Project CI"]
-#    types:
-#      - completed
+#  push:
+#    branches:
+#      - main
 #
 #jobs:
 #  deploy:
 #    runs-on: ubuntu-latest
-#    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+#    needs: ci
 #    steps:
 #      - name: EC2 ssh connection and deploy
 #        uses: appleboy/ssh-action@master
@@ -29,7 +18,7 @@ jobs:
 #          password: ${{ secrets.SSH_PASSWORD }}  # pem 파일 내용
 #          command_timeout: 5m	 #timeout 시간 설정
 #          script: |
-#		          cd /your_project_path
+#		          cd /home/ubuntu/WiStarBack
 #		          git pull origin main
 #		          sudo systemctl restart uwsgi
 #		          sudo systemctl reload nginx
