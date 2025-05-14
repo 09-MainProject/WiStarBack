@@ -17,6 +17,7 @@ class ImageUploadSerializer(serializers.ModelSerializer):
     object_type = serializers.CharField(write_only=True)
     object_id = serializers.IntegerField(write_only=True)
     image = serializers.ImageField(write_only=True, required=False)
+    image_url = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         model = Image
@@ -28,7 +29,7 @@ class ImageUploadSerializer(serializers.ModelSerializer):
             "object_id",
             "image",
         ]
-        read_only_fields = ["image_url", "public_id", "uploaded_at"]
+        read_only_fields = ["public_id", "uploaded_at"]
 
     def validate(self, data):
 
@@ -69,20 +70,46 @@ class ImageUploadSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        image_file = self.context["request"].FILES.get("image")
-        if not image_file:
-            raise serializers.ValidationError({"image": "이미지 파일이 필요합니다."})
+        image_urls = self.context["request"].data.getlist(
+            "image_url"
+        )  # URL로 온 이미지 주소
+        image_files = self.context["request"].FILES.getlist("image")
+        if not image_files and not image_urls:
+            raise serializers.ValidationError(
+                {"image": "이미지 파일 또는 url이 필요합니다."}
+            )
 
-        image_url, public_id = upload_to_cloudinary(
-            image_file, folder=validated_data["object_type"]
-        )
+        images = []
 
-        return Image.objects.create(
-            image_url=image_url,
-            public_id=public_id,
-            content_type=validated_data["content_type"],
-            object_id=validated_data["object_id"],
-        )
+        # URL 업로드 처리
+        for image_url in image_urls:
+            image_url, public_id = upload_to_cloudinary(
+                image_url, folder=validated_data["object_type"]
+            )
+            images.append(
+                Image(
+                    image_url=image_url,
+                    public_id=public_id,
+                    content_type=validated_data["content_type"],
+                    object_id=validated_data["object_id"],
+                )
+            )
+
+        for image_file in image_files:
+            image_url, public_id = upload_to_cloudinary(
+                image_file, folder=validated_data["object_type"]
+            )
+            images.append(
+                Image(
+                    image_url=image_url,
+                    public_id=public_id,
+                    content_type=validated_data["content_type"],
+                    object_id=validated_data["object_id"],
+                )
+            )
+
+        # bulk_create
+        return Image.objects.bulk_create(images)
 
     def update(self, instance, validated_data):
         """
@@ -101,40 +128,6 @@ class ImageUploadSerializer(serializers.ModelSerializer):
 
         # 새로 업로드
         return self.create(validated_data)
-
-    # def update(self, instance, validated_data):
-    #     """
-    #     기존 이미지와 비교해서 diff 업데이트 수행
-    #     - 유지: 요청에 포함된 기존 이미지
-    #     - 삭제: 요청에서 빠진 기존 이미지
-    #     - 추가: 요청에 새로 포함된 이미지
-    #     """
-    #     content_type = validated_data["content_type"]
-    #     object_id = validated_data["object_id"]
-    #     new_images_data = validated_data["images"]  # [{image, public_id, ...}, ...]
-    #
-    #     new_public_ids = {img["public_id"] for img in new_images_data}
-    #     existing_images = Image.objects.filter(content_type=content_type, object_id=object_id)
-    #
-    #     # 삭제 대상: 기존에는 있었지만 요청에는 없는 public_id
-    #     for image in existing_images:
-    #         if image.public_id not in new_public_ids:
-    #             delete_from_cloudinary(image.public_id)
-    #             image.delete()
-    #
-    #     # 추가 대상: 요청에는 있지만 기존에는 없는 public_id
-    #     existing_public_ids = {img.public_id for img in existing_images}
-    #     for image_data in new_images_data:
-    #         if image_data["public_id"] not in existing_public_ids:
-    #             Image.objects.create(
-    #                 image=image_data["image"],  # 또는 image_url 등
-    #                 public_id=image_data["public_id"],
-    #                 content_type=content_type,
-    #                 object_id=object_id,
-    #             )
-    #
-    #     # 최종 결과: object에 연결된 최신 이미지들 중 하나 리턴 (대표 이미지 등)
-    #     return Image.objects.filter(content_type=content_type, object_id=object_id).first()
 
     def delete(self):
         """
