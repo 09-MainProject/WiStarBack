@@ -10,8 +10,8 @@ from PIL import Image
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from apps.like.models import Like
 from apps.image.models import Image as ImageModel
+from apps.like.models import Like
 
 from .models import Post
 
@@ -47,6 +47,9 @@ class PostTests(TestCase):
 
         # 테스트용 이미지 생성
         self.image = self.create_test_image()
+
+        # ContentType 설정
+        self.post_content_type = ContentType.objects.get_for_model(Post)
 
     def create_test_image(self):
         """테스트용 이미지 파일을 생성합니다."""
@@ -87,8 +90,15 @@ class PostTests(TestCase):
 
     def test_retrieve_post_detail(self):
         """게시물 상세 조회 테스트"""
-        Like.objects.create(post=self.post, user=self.user)
-        Like.objects.create(post=self.post, user=self.other_user)
+        # GenericForeignKey를 사용하여 Like 생성
+        Like.objects.create(
+            content_type=self.post_content_type, object_id=self.post.id, user=self.user
+        )
+        Like.objects.create(
+            content_type=self.post_content_type,
+            object_id=self.post.id,
+            user=self.other_user,
+        )
         url = reverse("post-detail", kwargs={"pk": self.post.id})
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -109,7 +119,9 @@ class PostTests(TestCase):
 
     def test_retrieve_post_detail_other_user(self):
         """다른 사용자의 게시물 상세 조회 테스트"""
-        Like.objects.create(post=self.post, user=self.user)
+        Like.objects.create(
+            content_type=self.post_content_type, object_id=self.post.id, user=self.user
+        )
         self.client.force_authenticate(user=self.other_user)
         url = reverse("post-detail", kwargs={"pk": self.post.id})
         response = self.client.get(url)
@@ -178,7 +190,7 @@ class PostTests(TestCase):
 
     def test_like_post(self):
         """게시물 좋아요 테스트"""
-        url = reverse("post-likes", kwargs={"post_id": self.post.id})
+        url = reverse("post-likes", kwargs={"pk": self.post.id})
         response = self.client.post(url)
         self.assertIn(
             response.status_code, [status.HTTP_200_OK, status.HTTP_201_CREATED]
@@ -188,12 +200,14 @@ class PostTests(TestCase):
 
     def test_unlike_post(self):
         """게시물 좋아요 취소 테스트"""
-        Like.objects.create(post=self.post, user=self.user)
-        url = reverse("post-likes", kwargs={"post_id": self.post.id})
-        response = self.client.post(url)
+        Like.objects.create(
+            content_type=self.post_content_type, object_id=self.post.id, user=self.user
+        )
+        url = reverse("post-likes", kwargs={"pk": self.post.id})
+        response = self.client.delete(url)
         self.assertIn(
             response.status_code,
-            [status.HTTP_200_OK, status.HTTP_201_CREATED, status.HTTP_204_NO_CONTENT],
+            [status.HTTP_200_OK, status.HTTP_204_NO_CONTENT],
         )
         if response.data:
             self.assertIn("status", response.data)

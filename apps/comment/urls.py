@@ -8,5 +8,9 @@ router.register(r"", CommentViewSet, basename="comment")
 
 urlpatterns = [
     path("", include(router.urls)),
-    path("<int:pk>/like-status/", CommentViewSet.as_view({"get": "like_status"}), name="comment-like-status"),
+    path(
+        "<int:pk>/like-status/",
+        CommentViewSet.as_view({"get": "like_status"}),
+        name="comment-like-status",
+    ),
 ]

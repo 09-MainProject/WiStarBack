@@ -3,11 +3,12 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from apps.comment.models import Comment
 from apps.like.models import Like
 from apps.post.models import Post
-from apps.comment.models import Comment
 
 User = get_user_model()
+
 
 class LikeTests(APITestCase):
     def setUp(self):

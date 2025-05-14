@@ -1,3 +1,4 @@
+from django.contrib.contenttypes.models import ContentType
 from django.shortcuts import get_object_or_404
 from django_filters import rest_framework as django_filters
 from drf_yasg import openapi
@@ -9,8 +10,8 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.contrib.contenttypes.models import ContentType
 
+from apps.like.models import Like
 from apps.post.models import Post
 from utils.exceptions import CustomAPIException
 
@@ -20,7 +21,6 @@ from .serializers import (
     CommentSerializer,
     CommentUpdateSerializer,
 )
-from apps.like.models import Like
 
 
 class CommentPagination(PageNumberPagination):
@@ -121,11 +121,7 @@ class CommentViewSet(viewsets.ModelViewSet):
             ),
             400: openapi.Response(
                 description="잘못된 요청",
-                examples={
-                    "application/json": {
-                        "detail": "잘못된 요청입니다."
-                    }
-                },
+                examples={"application/json": {"detail": "잘못된 요청입니다."}},
             ),
         },
     )
@@ -158,11 +154,7 @@ class CommentViewSet(viewsets.ModelViewSet):
             ),
             400: openapi.Response(
                 description="댓글 작성 실패",
-                examples={
-                    "application/json": {
-                        "detail": "댓글 작성에 실패했습니다."
-                    }
-                },
+                examples={"application/json": {"detail": "댓글 작성에 실패했습니다."}},
             ),
         },
     )
@@ -196,9 +188,7 @@ class CommentViewSet(viewsets.ModelViewSet):
             400: openapi.Response(
                 description="수정 권한 없음",
                 examples={
-                    "application/json": {
-                        "detail": "댓글을 수정할 권한이 없습니다."
-                    }
+                    "application/json": {"detail": "댓글을 수정할 권한이 없습니다."}
                 },
             ),
         },
@@ -217,18 +207,12 @@ class CommentViewSet(viewsets.ModelViewSet):
         responses={
             204: openapi.Response(
                 description="댓글 삭제 성공",
-                examples={
-                    "application/json": {
-                        "detail": "댓글이 삭제되었습니다."
-                    }
-                },
+                examples={"application/json": {"detail": "댓글이 삭제되었습니다."}},
             ),
             400: openapi.Response(
                 description="삭제 권한 없음",
                 examples={
-                    "application/json": {
-                        "detail": "댓글을 삭제할 권한이 없습니다."
-                    }
+                    "application/json": {"detail": "댓글을 삭제할 권한이 없습니다."}
                 },
             ),
         },
@@ -246,13 +230,11 @@ class CommentViewSet(viewsets.ModelViewSet):
         comment = self.get_object()
         user = request.user
         content_type = ContentType.objects.get_for_model(comment)
-        
+
         if request.method == "POST":
             # 이미 좋아요가 있으면 아무 변화 없음
             like, created = Like.objects.get_or_create(
-                content_type=content_type,
-                object_id=comment.id,
-                user=user
+                content_type=content_type, object_id=comment.id, user=user
             )
             return Response(
                 {"status": "liked"},
@@ -260,9 +242,7 @@ class CommentViewSet(viewsets.ModelViewSet):
             )
         elif request.method == "DELETE":
             deleted, _ = Like.objects.filter(
-                content_type=content_type,
-                object_id=comment.id,
-                user=user
+                content_type=content_type, object_id=comment.id, user=user
             ).delete()
             return Response(
                 {"status": "unliked"},
@@ -275,24 +255,25 @@ class CommentViewSet(viewsets.ModelViewSet):
         comment = self.get_object()
         user = request.user
         content_type = ContentType.objects.get_for_model(comment)
-        
+
         is_liked = Like.objects.filter(
-            content_type=content_type,
-            object_id=comment.id,
-            user=user
+            content_type=content_type, object_id=comment.id, user=user
         ).exists()
-        
+
         # 좋아요한 사용자 목록
-        liked_users = Like.objects.filter(
-            content_type=content_type,
-            object_id=comment.id
-        ).select_related('user').values_list('user__nickname', flat=True)
-        
-        return Response({
-            "is_liked": is_liked,
-            "likes_count": comment.likes.count(),
-            "liked_users": list(liked_users)
-        })
+        liked_users = (
+            Like.objects.filter(content_type=content_type, object_id=comment.id)
+            .select_related("user")
+            .values_list("user__nickname", flat=True)
+        )
+
+        return Response(
+            {
+                "is_liked": is_liked,
+                "likes_count": comment.likes.count(),
+                "liked_users": list(liked_users),
+            }
+        )
 
 
 class CommentView(APIView):
@@ -316,11 +297,7 @@ class CommentView(APIView):
             ),
             404: openapi.Response(
                 description="게시물을 찾을 수 없음",
-                examples={
-                    "application/json": {
-                        "detail": "Not found."
-                    }
-                },
+                examples={"application/json": {"detail": "Not found."}},
             ),
         },
     )
@@ -344,11 +321,7 @@ class CommentView(APIView):
             ),
             400: openapi.Response(
                 description="잘못된 요청",
-                examples={
-                    "application/json": {
-                        "detail": "잘못된 요청입니다."
-                    }
-                },
+                examples={"application/json": {"detail": "잘못된 요청입니다."}},
             ),
             401: openapi.Response(
                 description="인증되지 않은 사용자",
@@ -360,11 +333,7 @@ class CommentView(APIView):
             ),
             404: openapi.Response(
                 description="게시물을 찾을 수 없음",
-                examples={
-                    "application/json": {
-                        "detail": "Not found."
-                    }
-                },
+                examples={"application/json": {"detail": "Not found."}},
             ),
         },
     )
@@ -393,11 +362,7 @@ class CommentDetailView(APIView):
             ),
             400: openapi.Response(
                 description="잘못된 요청",
-                examples={
-                    "application/json": {
-                        "detail": "잘못된 요청입니다."
-                    }
-                },
+                examples={"application/json": {"detail": "잘못된 요청입니다."}},
             ),
             401: openapi.Response(
                 description="인증되지 않은 사용자",
@@ -409,19 +374,11 @@ class CommentDetailView(APIView):
             ),
             403: openapi.Response(
                 description="권한 없음",
-                examples={
-                    "application/json": {
-                        "detail": "권한이 없습니다."
-                    }
-                },
+                examples={"application/json": {"detail": "권한이 없습니다."}},
             ),
             404: openapi.Response(
                 description="댓글을 찾을 수 없음",
-                examples={
-                    "application/json": {
-                        "detail": "Not found."
-                    }
-                },
+                examples={"application/json": {"detail": "Not found."}},
             ),
         },
     )
@@ -443,11 +400,7 @@ class CommentDetailView(APIView):
         responses={
             204: openapi.Response(
                 description="댓글 삭제 성공",
-                examples={
-                    "application/json": {
-                        "detail": "댓글이 삭제되었습니다."
-                    }
-                },
+                examples={"application/json": {"detail": "댓글이 삭제되었습니다."}},
             ),
             401: openapi.Response(
                 description="인증되지 않은 사용자",
@@ -459,19 +412,11 @@ class CommentDetailView(APIView):
             ),
             403: openapi.Response(
                 description="권한 없음",
-                examples={
-                    "application/json": {
-                        "detail": "권한이 없습니다."
-                    }
-                },
+                examples={"application/json": {"detail": "권한이 없습니다."}},
             ),
             404: openapi.Response(
                 description="댓글을 찾을 수 없음",
-                examples={
-                    "application/json": {
-                        "detail": "Not found."
-                    }
-                },
+                examples={"application/json": {"detail": "Not found."}},
             ),
         },
     )
