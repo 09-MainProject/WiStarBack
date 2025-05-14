@@ -41,7 +41,6 @@ cloudinary.config(
     api_key=ENV.get("API_KEY", "db"),
     api_secret=ENV.get("API_SECRET", "db"),
     secure=True,  # https 사용
-    # secure=False  # https 사용
 )
 
 
@@ -62,7 +61,7 @@ cloudinary.config(
 
 # Email
 # from django.core.mail.backends.smtp import EmailBackend
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"  # 개발/테스트용
 EMAIL_HOST = "smtp.naver.com"  # 네이버 환결설정에서 볼 수 있음.
 EMAIL_USE_TLS = True  # 보안연결
