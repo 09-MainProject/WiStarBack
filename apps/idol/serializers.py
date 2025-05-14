@@ -48,6 +48,7 @@ class IdolSerializer(serializers.ModelSerializer):
             "is_active",
             "created_at",
             "updated_at",
+            "image_url",
         ]
         read_only_fields = ["id", "created_at", "updated_at"]
 
