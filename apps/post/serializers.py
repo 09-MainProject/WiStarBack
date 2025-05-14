@@ -51,7 +51,7 @@ class PostSerializer(serializers.ModelSerializer):
         """현재 사용자가 좋아요를 눌렀는지 여부를 반환합니다."""
         request = self.context.get("request")
         if request and request.user.is_authenticated:
-            return obj.post_likes.filter(user=request.user).exists()
+            return obj.likes.filter(user=request.user).exists()
         return False
 
     def get_comments(self, obj):

@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.post.models import Post
+from apps.comment.models import Comment
 from utils.exceptions import CustomAPIException
 
 from .models import Like
@@ -16,120 +17,76 @@ from .serializers import LikeSerializer
 
 class LikeView(APIView):
     """좋아요 View"""
-
     permission_classes = [IsAuthenticated]
-    allowed_methods = ["GET", "POST", "DELETE"]
+    http_method_names = ["post", "delete"]
 
     @swagger_auto_schema(
-        tags=["likes"],
+        tags=["좋아요"],
         operation_summary="좋아요 생성",
-        operation_description="게시물에 좋아요를 추가합니다.",
+        operation_description="게시글/댓글에 좋아요를 추가합니다.",
         responses={
             201: "좋아요 생성 성공",
             401: "인증되지 않은 사용자",
-            404: "게시물을 찾을 수 없음",
+            404: "게시글/댓글을 찾을 수 없음",
         },
     )
-    def post(self, request, post_id):
+    def post(self, request, id):
         """좋아요를 생성합니다."""
-        post = get_object_or_404(Post, id=post_id)
+        # posts 또는 comments 구분
+        if "posts" in request.path:
+            target = get_object_or_404(Post, id=id)
+            content_type = ContentType.objects.get_for_model(Post)
+        elif "comments" in request.path:
+            target = get_object_or_404(Comment, id=id)
+            content_type = ContentType.objects.get_for_model(Comment)
+        else:
+            return Response({"code": 400, "message": "잘못된 요청입니다.", "data": None}, status=400)
 
-        try:
-            like, created = Like.objects.get_or_create(post=post, user=request.user)
-
-            if not created:
-                like.delete()
-                return Response(status=status.HTTP_204_NO_CONTENT)
-
-            return Response(status=status.HTTP_201_CREATED)
-
-        except Exception as e:
-            raise CustomAPIException(
-                {
-                    "code": 500,
-                    "message": "An error occurred while processing the like.",
-                    "data": None,
-                }
-            )
-
-    @swagger_auto_schema(
-        tags=["likes"],
-        operation_summary="좋아요 목록 조회",
-        operation_description="게시물의 좋아요 목록을 조회합니다.",
-        responses={
-            200: "좋아요 목록 조회 성공",
-            401: "인증되지 않은 사용자",
-            404: "게시물을 찾을 수 없음",
-        },
-    )
-    def get(self, request, post_id):
-        """좋아요 목록을 조회합니다."""
-        post = get_object_or_404(Post, id=post_id)
-        likes = Like.objects.filter(post=post)
-        serializer = LikeSerializer(likes, many=True)
-        return Response(
-            {
-                "code": 200,
-                "message": "Likes list retrieved successfully",
-                "data": serializer.data,
-            }
+        like, created = Like.objects.get_or_create(
+            user=request.user,
+            content_type=content_type,
+            object_id=id
         )
+        if not created:
+            return Response({"code": 400, "message": "이미 좋아요를 누른 상태입니다.", "data": None}, status=400)
+        return Response({"code": 201, "message": "좋아요 생성 성공.", "data": {"like_id": like.id}}, status=201)
 
     @swagger_auto_schema(
-        tags=["likes"],
+        tags=["좋아요"],
         operation_summary="좋아요 삭제",
-        operation_description="게시물의 좋아요를 삭제합니다.",
+        operation_description="게시글/댓글의 좋아요를 삭제합니다.",
         responses={
-            200: "좋아요 삭제 성공",
+            204: "좋아요 삭제 성공",
             401: "인증되지 않은 사용자",
-            404: "게시물 또는 좋아요를 찾을 수 없음",
+            404: "게시글/댓글 또는 좋아요를 찾을 수 없음",
         },
     )
-    def delete(self, request, post_id):
-        """게시글의 좋아요를 취소합니다."""
-        post = get_object_or_404(Post, id=post_id)
-        like = get_object_or_404(Like, post=post, user=request.user)
+    def delete(self, request, id):
+        if "posts" in request.path:
+            content_type = ContentType.objects.get_for_model(Post)
+        elif "comments" in request.path:
+            content_type = ContentType.objects.get_for_model(Comment)
+        else:
+            return Response({"code": 400, "message": "잘못된 요청입니다.", "data": None}, status=400)
+        like = Like.objects.filter(
+            user=request.user,
+            content_type=content_type,
+            object_id=id
+        ).first()
+        if not like:
+            return Response({"code": 404, "message": "좋아요를 찾을 수 없습니다.", "data": None}, status=404)
         like.delete()
-
-        return Response(
-            {"code": 200, "message": "Like deleted successfully", "data": None}
-        )
+        return Response({"code": 204, "message": "좋아요 삭제 성공.", "data": None}, status=204)
 
 
 class LikeStatusView(APIView):
-    """좋아요 상태 조회 View"""
-
+    """좋아요 여부(상태) 조회"""
     permission_classes = [IsAuthenticated]
-    allowed_methods = ["GET"]
+    http_method_names = ["get"]
 
     @swagger_auto_schema(
-        tags=["likes"],
-        operation_summary="좋아요 상태 조회",
-        operation_description="현재 사용자의 게시물 좋아요 상태와 총 좋아요 수를 확인합니다.",
-        responses={
-            200: "좋아요 상태 조회 성공",
-            401: "인증되지 않은 사용자",
-            404: "게시물을 찾을 수 없음",
-        },
-    )
-    def get(self, request, post_id):
-        """좋아요 상태를 조회합니다."""
-        post = get_object_or_404(Post, id=post_id)
-
-        is_liked = Like.objects.filter(post=post, user=request.user).exists()
-        likes_count = Like.objects.filter(post=post).count()
-
-        return Response(
-            {
-                "code": 200,
-                "message": "Like status retrieved successfully",
-                "data": {"is_liked": is_liked, "likes_count": likes_count},
-            }
-        )
-
-    @swagger_auto_schema(
-        operation_summary="좋아요 상태 조회",
-        operation_description="좋아요 상태를 반환합니다.",
+        operation_summary="좋아요 여부(상태) 조회",
+        operation_description="게시글/댓글의 좋아요 여부를 반환합니다.",
         tags=["좋아요"],
         responses={
             200: openapi.Response(
@@ -138,7 +95,9 @@ class LikeStatusView(APIView):
                     "application/json": {
                         "code": 200,
                         "message": "좋아요 조회 성공.",
-                        "data": {"liked": True},
+                        "data": {
+                            "liked": True
+                        }
                     }
                 },
             ),
@@ -148,7 +107,7 @@ class LikeStatusView(APIView):
                     "application/json": {
                         "code": 400,
                         "message": "좋아요 정보를 찾을 수 없습니다.",
-                        "data": None,
+                        "data": None
                     }
                 },
             ),
@@ -158,15 +117,45 @@ class LikeStatusView(APIView):
                     "application/json": {
                         "code": 500,
                         "message": "서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
-                        "data": None,
+                        "data": None
                     }
                 },
             ),
         },
     )
-    def like_status(self, request, type=None, id=None):
-        content_type = ContentType.objects.get(app_label=type, model=type)
-        exists = Like.objects.filter(
-            content_type=content_type, object_id=id, user=request.user
-        ).exists()
-        return Response({"liked": exists})
+    def get(self, request, type, id):
+        try:
+            if type == "posts":
+                content_type = ContentType.objects.get_for_model(Post)
+            elif type == "comments":
+                content_type = ContentType.objects.get_for_model(Comment)
+            else:
+                return Response(
+                    {
+                        "code": 400,
+                        "message": "좋아요 정보를 찾을 수 없습니다.",
+                        "data": None
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            liked = Like.objects.filter(
+                user=request.user,
+                content_type=content_type,
+                object_id=id
+            ).exists()
+            return Response(
+                {
+                    "code": 200,
+                    "message": "좋아요 조회 성공.",
+                    "data": {"liked": liked}
+                }
+            )
+        except Exception:
+            return Response(
+                {
+                    "code": 500,
+                    "message": "서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
+                    "data": None
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
