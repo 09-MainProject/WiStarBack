@@ -542,16 +542,48 @@ class PostViewSet(viewsets.ModelViewSet):
         """게시글 좋아요/취소 API (POST: 좋아요, DELETE: 좋아요 취소)"""
         post = self.get_object()
         user = request.user
+        content_type = ContentType.objects.get_for_model(post)
+
         if request.method == "POST":
             # 이미 좋아요가 있으면 아무 변화 없음
-            like, created = Like.objects.get_or_create(post=post, user=user)
+            like, created = Like.objects.get_or_create(
+                content_type=content_type, object_id=post.id, user=user
+            )
             return Response(
                 {"status": "liked"},
                 status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
             )
         elif request.method == "DELETE":
-            deleted, _ = Like.objects.filter(post=post, user=user).delete()
+            deleted, _ = Like.objects.filter(
+                content_type=content_type, object_id=post.id, user=user
+            ).delete()
             return Response(
                 {"status": "unliked"},
                 status=status.HTTP_204_NO_CONTENT if deleted else status.HTTP_200_OK,
             )
+
+    @action(detail=True, methods=["get"], url_path="like-status")
+    def like_status(self, request, pk=None):
+        """게시글 좋아요 상태 조회 API"""
+        post = self.get_object()
+        user = request.user
+        content_type = ContentType.objects.get_for_model(post)
+
+        is_liked = Like.objects.filter(
+            content_type=content_type, object_id=post.id, user=user
+        ).exists()
+
+        # 좋아요한 사용자 목록
+        liked_users = (
+            Like.objects.filter(content_type=content_type, object_id=post.id)
+            .select_related("user")
+            .values_list("user__nickname", flat=True)
+        )
+
+        return Response(
+            {
+                "is_liked": is_liked,
+                "likes_count": post.likes.count(),
+                "liked_users": list(liked_users),
+            }
+        )
