@@ -5,9 +5,9 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from apps.like.models import Like
 from apps.post.models import Post
 from apps.user.models import User
-from apps.like.models import Like
 
 from .models import Comment
 
@@ -45,11 +45,17 @@ class CommentTests(APITestCase):
         # URL 설정
         self.comment_list_url = f"/api/posts/{self.post.id}/comments/"
         self.comment_detail_url = lambda pk: f"/api/posts/{self.post.id}/comments/{pk}/"
+        self.comment_like_status_url = (
+            lambda pk: f"/api/posts/{self.post.id}/comments/{pk}/like-status/"
+        )
 
         self.client.force_authenticate(user=self.user)
         self.comment = Comment.objects.create(
             post=self.post, author=self.user, content="부모 댓글"
         )
+
+        # ContentType 설정
+        self.comment_content_type = ContentType.objects.get_for_model(Comment)
 
     def test_create_comment(self):
         """댓글 생성 테스트"""
@@ -154,3 +160,33 @@ class CommentTests(APITestCase):
             self.assertIn("replies", comment)
             self.assertIsInstance(comment["replies"], list)
             self.assertEqual(comment["author"], self.user.nickname)
+
+    def test_get_comment_like_status(self):
+        """댓글 좋아요 상태 조회 테스트"""
+        # 좋아요 생성
+        Like.objects.create(
+            content_type=self.comment_content_type,
+            object_id=self.comment.id,
+            user=self.user,
+        )
+        Like.objects.create(
+            content_type=self.comment_content_type,
+            object_id=self.comment.id,
+            user=self.other_user,
+        )
+
+        url = self.comment_like_status_url(self.comment.id)
+        response = self.client.get(url)
+        if response.status_code != 200:
+            print("like-status response:", response.data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(response.data["is_liked"])
+        # Like 테이블에서 직접 카운트
+        like_count = Like.objects.filter(
+            content_type=self.comment_content_type, object_id=self.comment.id
+        ).count()
+        self.assertEqual(response.data["likes_count"], like_count)
+        self.assertIn("liked_users", response.data)
+        self.assertEqual(len(response.data["liked_users"]), 2)
+        self.assertIn(self.user.nickname, response.data["liked_users"])
+        self.assertIn(self.other_user.nickname, response.data["liked_users"])

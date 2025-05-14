@@ -8,9 +8,9 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from apps.image.models import Image
 from apps.like.models import Like
 from apps.user.models import User
-from apps.image.models import Image
 
 ## from utils.models import Image  # 임시 주석처리: image 앱 도입 전까지
 
@@ -57,7 +57,9 @@ class Post(models.Model):
         blank=True,
         related_name="deleted_posts",
     )
-    likes = GenericRelation(Like, related_query_name="post_likes", verbose_name="좋아요")
+    likes = GenericRelation(
+        Like, related_query_name="post_likes", verbose_name="좋아요"
+    )
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
