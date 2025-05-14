@@ -17,6 +17,9 @@ class ImageUploadView(GenericAPIView):
     authentication_classes = [JWTAuthentication]  # JWT 인증
     parser_classes = [MultiPartParser, FormParser]
 
+    # def get_serializer_class(self):
+    #     pass
+
     @swagger_auto_schema(
         tags=["이미지"],
         operation_summary="이미지 업로드",
@@ -32,13 +35,16 @@ class ImageUploadView(GenericAPIView):
             data=request.data, context={"request": request}
         )
         serializer.is_valid(raise_exception=True)
-        image = serializer.save()
+        images = serializer.save()
         custom_response = UPLOAD_SUCCESS
-        custom_response["data"] = {
-            "image_url": image.image_url,
-            "thumbnail_url": image.get_thumbnail_url(),
-            "public_id": image.public_id,
-        }
+        custom_response["data"] = [
+            {
+                "image_url": image.image_url,
+                "thumbnail_url": image.get_thumbnail_url(),
+                "public_id": image.public_id,
+            }
+            for image in images
+        ]
         return Response(custom_response, status=status.HTTP_201_CREATED)
 
     @swagger_auto_schema(
