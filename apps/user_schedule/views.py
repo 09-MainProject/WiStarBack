@@ -1,36 +1,61 @@
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, status
 from rest_framework.exceptions import NotFound, PermissionDenied
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
+from apps.follow.models import Follow
+from apps.idol_schedule.models import Schedule
+from apps.idol_schedule.serializers import IdolScheduleSerializer
 from utils.responses import user_schedule as R
 
 from .models import UserSchedule
 from .serializers import UserScheduleSerializer
 
 
-# 일정 목록 조회 및 생성
+# 일정 목록 조회 및 사용자 일정 생성
 class UserScheduleListCreateView(generics.ListCreateAPIView):
     serializer_class = UserScheduleSerializer
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
 
     def get_queryset(self):
         return UserSchedule.objects.filter(user=self.request.user)
 
     @swagger_auto_schema(
-        operation_summary="내 일정 목록 조회",
+        operation_summary="내 일정 목록 조회 (팔로우한 아이돌 일정 포함)",
         tags=["사용자 일정"],
         responses={
-            200: UserScheduleSerializer(many=True),
+            200: "사용자 일정 + 팔로우 아이돌 일정",
         },
     )
     def get(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        serializer = self.get_serializer(queryset, many=True)
+        user = request.user
+
+        # 1. 사용자 일정
+        user_schedules = self.get_queryset()
+        user_schedule_data = self.get_serializer(user_schedules, many=True).data
+
+        # 2. 팔로우한 아이돌 스케줄
+        followed_idol_ids = Follow.objects.filter(user=user).values_list(
+            "idol_id", flat=True
+        )
+        idol_schedules = Schedule.objects.filter(idol_id__in=followed_idol_ids)
+        idol_schedule_data = IdolScheduleSerializer(idol_schedules, many=True).data
+
         return Response(
             {
                 "code": R.SCHEDULE_LIST_SUCCESS["code"],
                 "message": R.SCHEDULE_LIST_SUCCESS["message"],
-                "data": serializer.data,
+                "data": {
+                    "user_schedules": UserScheduleSerializer(
+                        user_schedules, many=True
+                    ).data,
+                    "idol_schedules": IdolScheduleSerializer(
+                        idol_schedules, many=True
+                    ).data,
+                },
             },
             status=R.SCHEDULE_LIST_SUCCESS["status"],
         )
@@ -46,7 +71,6 @@ class UserScheduleListCreateView(generics.ListCreateAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        # 요청한 사용자 정보를 모델에 직접 할당
         serializer.save(user=request.user)
         return Response(
             {
@@ -63,6 +87,8 @@ class UserScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
     http_method_names = ["get", "patch", "delete"]
     serializer_class = UserScheduleSerializer
     queryset = UserSchedule.objects.all()
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
 
     def get_object(self):
         try:
@@ -70,7 +96,6 @@ class UserScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
         except Exception:
             raise NotFound(R.SCHEDULE_NOT_FOUND["message"])
 
-        # 로그인한 사용자의 일정만 접근 가능
         if obj.user != self.request.user:
             raise PermissionDenied(R.SCHEDULE_NO_PERMISSION["message"])
 

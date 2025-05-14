@@ -34,3 +34,20 @@ class ScheduleSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("시작일은 종료일보다 빨라야 합니다.")
 
         return data
+
+
+# 조회 전용 시리얼라이저 (UserScheduleList에서 idol 일정 포함 시 사용)
+class IdolScheduleSerializer(serializers.ModelSerializer):
+    idol_name = serializers.CharField(source="idol.name", read_only=True)
+
+    class Meta:
+        model = Schedule
+        fields = [
+            "id",
+            "title",
+            "start_date",
+            "end_date",
+            "location",
+            "idol_name",
+        ]
+        read_only_fields = fields
