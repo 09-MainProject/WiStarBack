@@ -6,6 +6,7 @@ from rest_framework import generics, permissions
 from rest_framework.response import Response
 
 from utils.responses import idol_schedule as S
+
 from .models import Idol, Schedule
 from .serializers import ScheduleSerializer
 
@@ -57,11 +58,36 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
         operation_summary="아이돌 일정 목록 조회",
         tags=["아이돌 일정"],
         manual_parameters=[
-            openapi.Parameter("title", openapi.IN_QUERY, description="제목 검색", type=openapi.TYPE_STRING),
-            openapi.Parameter("description", openapi.IN_QUERY, description="설명 검색", type=openapi.TYPE_STRING),
-            openapi.Parameter("location", openapi.IN_QUERY, description="장소 검색", type=openapi.TYPE_STRING),
-            openapi.Parameter("start_date", openapi.IN_QUERY, description="시작일 이후", type=openapi.FORMAT_DATE),
-            openapi.Parameter("end_date", openapi.IN_QUERY, description="종료일 이전", type=openapi.FORMAT_DATE),
+            openapi.Parameter(
+                "title",
+                openapi.IN_QUERY,
+                description="제목 검색",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "description",
+                openapi.IN_QUERY,
+                description="설명 검색",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "location",
+                openapi.IN_QUERY,
+                description="장소 검색",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "start_date",
+                openapi.IN_QUERY,
+                description="시작일 이후",
+                type=openapi.FORMAT_DATE,
+            ),
+            openapi.Parameter(
+                "end_date",
+                openapi.IN_QUERY,
+                description="종료일 이전",
+                type=openapi.FORMAT_DATE,
+            ),
         ],
         responses={200: ScheduleSerializer(many=True)},
     )
@@ -81,9 +107,7 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
         operation_summary="아이돌 일정 등록",
         tags=["아이돌 일정"],
         request_body=ScheduleSerializer,
-        responses={
-            201: ScheduleSerializer()
-        },
+        responses={201: ScheduleSerializer()},
     )
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -171,7 +195,9 @@ class ScheduleRetrieveUpdateDeleteView(
         partial = True
         try:
             instance = self.get_object()
-            serializer = self.get_serializer(instance, data=request.data, partial=partial)
+            serializer = self.get_serializer(
+                instance, data=request.data, partial=partial
+            )
             if serializer.is_valid():
                 self.perform_update(serializer)
                 return Response(

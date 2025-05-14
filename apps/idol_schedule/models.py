@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.db import models
+
 from apps.idol.models import Idol
 
 User = get_user_model()
