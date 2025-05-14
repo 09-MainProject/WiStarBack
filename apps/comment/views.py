@@ -67,7 +67,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         queryset = super().get_queryset()
         post_id = self.kwargs.get("post_id")
         if post_id:
-            queryset = queryset.filter(post_id=post_id, parent=None)
+            queryset = queryset.filter(post_id=post_id)
         return queryset
 
     def get_serializer_context(self):
@@ -108,6 +108,25 @@ class CommentViewSet(viewsets.ModelViewSet):
             comment = serializer.save(author=self.request.user, post=post)
         return comment
 
+    @swagger_auto_schema(
+        operation_summary="댓글 목록 조회",
+        operation_description="댓글 목록을 조회합니다.",
+        tags=["comments"],
+        responses={
+            200: openapi.Response(
+                description="댓글 목록 조회 성공",
+                schema=CommentSerializer,
+            ),
+            400: openapi.Response(
+                description="잘못된 요청",
+                examples={
+                    "application/json": {
+                        "detail": "잘못된 요청입니다."
+                    }
+                },
+            ),
+        },
+    )
     def list(self, request, *args, **kwargs):
         """댓글 목록을 반환합니다."""
         try:
@@ -126,47 +145,20 @@ class CommentViewSet(viewsets.ModelViewSet):
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-    def retrieve(self, request, *args, **kwargs):
-        """댓글을 반환합니다."""
-        try:
-            instance = self.get_object()
-            serializer = self.get_serializer(instance)
-            return Response(serializer.data)
-        except Exception as e:
-            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
     @swagger_auto_schema(
         operation_summary="댓글 생성",
         operation_description="새로운 댓글을 생성합니다.",
         tags=["comments"],
         responses={
             201: openapi.Response(
-                description="댓글 작성 성공.",
-                examples={
-                    "application/json": {
-                        "code": 201,
-                        "message": "댓글 작성 성공.",
-                        "data": {"comment_id": 1},
-                    }
-                },
+                description="댓글 작성 성공",
+                schema=CommentSerializer,
             ),
             400: openapi.Response(
-                description="댓글 작성이 실패하였습니다.",
+                description="댓글 작성 실패",
                 examples={
                     "application/json": {
-                        "code": 400,
-                        "message": "댓글 작성이 실패하였습니다.",
-                        "data": None,
-                    }
-                },
-            ),
-            500: openapi.Response(
-                description="서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
-                examples={
-                    "application/json": {
-                        "code": 500,
-                        "message": "서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
-                        "data": None,
+                        "detail": "댓글 작성에 실패했습니다."
                     }
                 },
             ),
@@ -196,32 +188,14 @@ class CommentViewSet(viewsets.ModelViewSet):
         tags=["comments"],
         responses={
             200: openapi.Response(
-                description="댓글 수정 성공.",
-                examples={
-                    "application/json": {
-                        "code": 200,
-                        "message": "댓글 수정 성공.",
-                        "data": {"comment_id": 1},
-                    }
-                },
+                description="댓글 수정 성공",
+                schema=CommentSerializer,
             ),
             400: openapi.Response(
-                description="수정 권한이 없습니다.",
+                description="수정 권한 없음",
                 examples={
                     "application/json": {
-                        "code": 400,
-                        "message": "수정 권한이 없습니다.",
-                        "data": None,
-                    }
-                },
-            ),
-            500: openapi.Response(
-                description="서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
-                examples={
-                    "application/json": {
-                        "code": 500,
-                        "message": "서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
-                        "data": None,
+                        "detail": "댓글을 수정할 권한이 없습니다."
                     }
                 },
             ),
@@ -240,32 +214,18 @@ class CommentViewSet(viewsets.ModelViewSet):
         tags=["comments"],
         responses={
             204: openapi.Response(
-                description="댓글 삭제 성공.",
+                description="댓글 삭제 성공",
                 examples={
                     "application/json": {
-                        "code": 204,
-                        "message": "댓글 삭제 성공.",
-                        "data": None,
+                        "detail": "댓글이 삭제되었습니다."
                     }
                 },
             ),
             400: openapi.Response(
-                description="삭제 권한이 없습니다.",
+                description="삭제 권한 없음",
                 examples={
                     "application/json": {
-                        "code": 400,
-                        "message": "삭제 권한이 없습니다.",
-                        "data": None,
-                    }
-                },
-            ),
-            500: openapi.Response(
-                description="서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
-                examples={
-                    "application/json": {
-                        "code": 500,
-                        "message": "서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
-                        "data": None,
+                        "detail": "댓글을 삭제할 권한이 없습니다."
                     }
                 },
             ),
@@ -286,9 +246,26 @@ class CommentView(APIView):
         tags=["comments"],
         operation_description="특정 게시물의 댓글 목록을 조회합니다.",
         responses={
-            200: CommentSerializer(many=True),
-            401: "인증되지 않은 사용자",
-            404: "게시물을 찾을 수 없음",
+            200: openapi.Response(
+                description="댓글 목록 조회 성공",
+                schema=CommentSerializer,
+            ),
+            401: openapi.Response(
+                description="인증되지 않은 사용자",
+                examples={
+                    "application/json": {
+                        "detail": "Authentication credentials were not provided."
+                    }
+                },
+            ),
+            404: openapi.Response(
+                description="게시물을 찾을 수 없음",
+                examples={
+                    "application/json": {
+                        "detail": "Not found."
+                    }
+                },
+            ),
         },
     )
     def get(self, request, post_id):
@@ -303,12 +280,36 @@ class CommentView(APIView):
     @swagger_auto_schema(
         tags=["comments"],
         operation_description="새로운 댓글을 생성합니다.",
-        request_body=CommentCreateSerializer,
+        request_body=CommentCreateSerializer(),
         responses={
-            201: CommentSerializer,
-            400: "잘못된 요청",
-            401: "인증되지 않은 사용자",
-            404: "게시물을 찾을 수 없음",
+            201: openapi.Response(
+                description="댓글 생성 성공",
+                schema=CommentSerializer,
+            ),
+            400: openapi.Response(
+                description="잘못된 요청",
+                examples={
+                    "application/json": {
+                        "detail": "잘못된 요청입니다."
+                    }
+                },
+            ),
+            401: openapi.Response(
+                description="인증되지 않은 사용자",
+                examples={
+                    "application/json": {
+                        "detail": "Authentication credentials were not provided."
+                    }
+                },
+            ),
+            404: openapi.Response(
+                description="게시물을 찾을 수 없음",
+                examples={
+                    "application/json": {
+                        "detail": "Not found."
+                    }
+                },
+            ),
         },
     )
     def post(self, request, post_id):
@@ -328,13 +329,44 @@ class CommentDetailView(APIView):
     @swagger_auto_schema(
         tags=["comments"],
         operation_description="특정 댓글을 수정합니다.",
-        request_body=CommentUpdateSerializer,
+        request_body=CommentUpdateSerializer(),
         responses={
-            200: CommentSerializer,
-            400: "잘못된 요청",
-            401: "인증되지 않은 사용자",
-            403: "권한 없음",
-            404: "댓글을 찾을 수 없음",
+            200: openapi.Response(
+                description="댓글 수정 성공",
+                schema=CommentSerializer,
+            ),
+            400: openapi.Response(
+                description="잘못된 요청",
+                examples={
+                    "application/json": {
+                        "detail": "잘못된 요청입니다."
+                    }
+                },
+            ),
+            401: openapi.Response(
+                description="인증되지 않은 사용자",
+                examples={
+                    "application/json": {
+                        "detail": "Authentication credentials were not provided."
+                    }
+                },
+            ),
+            403: openapi.Response(
+                description="권한 없음",
+                examples={
+                    "application/json": {
+                        "detail": "권한이 없습니다."
+                    }
+                },
+            ),
+            404: openapi.Response(
+                description="댓글을 찾을 수 없음",
+                examples={
+                    "application/json": {
+                        "detail": "Not found."
+                    }
+                },
+            ),
         },
     )
     def put(self, request, comment_id):
@@ -353,10 +385,38 @@ class CommentDetailView(APIView):
         tags=["comments"],
         operation_description="특정 댓글을 삭제합니다.",
         responses={
-            204: "댓글 삭제 성공",
-            401: "인증되지 않은 사용자",
-            403: "권한 없음",
-            404: "댓글을 찾을 수 없음",
+            204: openapi.Response(
+                description="댓글 삭제 성공",
+                examples={
+                    "application/json": {
+                        "detail": "댓글이 삭제되었습니다."
+                    }
+                },
+            ),
+            401: openapi.Response(
+                description="인증되지 않은 사용자",
+                examples={
+                    "application/json": {
+                        "detail": "Authentication credentials were not provided."
+                    }
+                },
+            ),
+            403: openapi.Response(
+                description="권한 없음",
+                examples={
+                    "application/json": {
+                        "detail": "권한이 없습니다."
+                    }
+                },
+            ),
+            404: openapi.Response(
+                description="댓글을 찾을 수 없음",
+                examples={
+                    "application/json": {
+                        "detail": "Not found."
+                    }
+                },
+            ),
         },
     )
     def delete(self, request, comment_id):
