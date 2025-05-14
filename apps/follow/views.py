@@ -22,8 +22,13 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from apps.follow.models import Follow
 from apps.follow.serializers import FollowSerializer
 from apps.idol.models import Idol
-from utils.responses.follow import FOLLOW_ALREADY_EXISTS, FOLLOW_DELETE_SUCCESS, FOLLOW_NOT_FOUND, \
-    FOLLOW_STATUS_SUCCESS, FOLLOW_CREATE_SUCCESS
+from utils.responses.follow import (
+    FOLLOW_ALREADY_EXISTS,
+    FOLLOW_CREATE_SUCCESS,
+    FOLLOW_DELETE_SUCCESS,
+    FOLLOW_NOT_FOUND,
+    FOLLOW_STATUS_SUCCESS,
+)
 
 
 class FollowListView(ListAPIView):
@@ -64,8 +69,9 @@ class FollowStatusView(RetrieveAPIView):
         is_following = Follow.objects.filter(user=request.user, idol=idol).exists()
         return Response(
             {**FOLLOW_STATUS_SUCCESS, "data": {"is_following": is_following}},
-            status=FOLLOW_STATUS_SUCCESS["code"]
+            status=FOLLOW_STATUS_SUCCESS["code"],
         )
+
 
 class FollowCreateDestroyView(GenericAPIView):
     """POST /api/idols/{idol_id}/follows - 아이돌 팔로우 등록 및 취소"""
@@ -87,7 +93,10 @@ class FollowCreateDestroyView(GenericAPIView):
 
         follow = Follow.objects.create(user=request.user, idol=idol)
         serializer = self.get_serializer(follow)
-        return Response({**FOLLOW_CREATE_SUCCESS, "data": serializer.data}, status=FOLLOW_CREATE_SUCCESS["code"])
+        return Response(
+            {**FOLLOW_CREATE_SUCCESS, "data": serializer.data},
+            status=FOLLOW_CREATE_SUCCESS["code"],
+        )
 
     @swagger_auto_schema(
         tags=["아이돌/팔로우"],

@@ -42,12 +42,15 @@ from utils.responses.user import (
     PASSWORD_CHECK_INVALID,
     PASSWORD_MATCH_SUCCESS,
     PASSWORD_NOT_MATCH,
+    PROFILE_DELETE_RESPONSE,
+    PROFILE_RETRIEVE_RESPONSE,
+    PROFILE_UPDATE_RESPONSE,
     SIGNATURE_EXPIRED,
     SIGNUP_PASSWORD_MISMATCH,
     SIGNUP_SUCCESS,
     TOKEN_REFRESH_RESPONSE,
     VERIFY_EMAIL_SUCCESS,
-    WEAK_PASSWORD, PROFILE_RETRIEVE_RESPONSE, PROFILE_UPDATE_RESPONSE, PROFILE_DELETE_RESPONSE,
+    WEAK_PASSWORD,
 )
 
 
@@ -604,10 +607,7 @@ class ProfileView(RetrieveUpdateDestroyAPIView):
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
-        return Response({
-            **PROFILE_RETRIEVE_RESPONSE,
-            "data": serializer.data
-        })
+        return Response({**PROFILE_RETRIEVE_RESPONSE, "data": serializer.data})
 
     @swagger_auto_schema(
         tags=["유저/프로필"],
@@ -677,21 +677,23 @@ class ProfileView(RetrieveUpdateDestroyAPIView):
         return self.partial_update(request, *args, **kwargs)
 
     def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)
+        partial = kwargs.pop("partial", False)
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
 
-        if getattr(instance, '_prefetched_objects_cache', None):
+        if getattr(instance, "_prefetched_objects_cache", None):
             # If 'prefetch_related' has been applied to a queryset, we need to
             # forcibly invalidate the prefetch cache on the instance.
             instance._prefetched_objects_cache = {}
 
-        return Response({
-            **PROFILE_UPDATE_RESPONSE,
-            "data": serializer.data,
-        })
+        return Response(
+            {
+                **PROFILE_UPDATE_RESPONSE,
+                "data": serializer.data,
+            }
+        )
 
     @swagger_auto_schema(
         tags=["유저/프로필"],
