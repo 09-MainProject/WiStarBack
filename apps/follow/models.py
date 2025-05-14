@@ -11,14 +11,6 @@ User = get_user_model()
 
 
 class Follow(models.Model):
-    """
-    팔로우 모델
-
-    Attributes:
-        user (User): 팔로우를 누른 사용자
-        idol (Idol): 팔로우한 아이돌
-        created_at (datetime): 생성 시간
-    """
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="followings")
     idol = models.ForeignKey(Idol, on_delete=models.CASCADE, related_name="followers")
@@ -32,5 +24,4 @@ class Follow(models.Model):
         ordering = ["-created_at"]
 
     def __str__(self):
-        """팔로우의 문자열 표현을 반환."""
         return f"{self.user.username}가 {self.idol}을 팔로우"

@@ -250,3 +250,15 @@ SWAGGER_EXCLUDED_APPS = [
     # "apps.idol_schedule.views",
     # "apps.user_schedule.views",
 ]  # 제외할 앱 이름
+
+
+SWAGGER_SETTINGS = {
+    "SECURITY_DEFINITIONS": {
+        "Bearer": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header",
+            "description": "JWT 인증을 위해 다음과 같이 입력하세요: **Bearer &lt;access_token&gt;**",
+        }
+    },
+}

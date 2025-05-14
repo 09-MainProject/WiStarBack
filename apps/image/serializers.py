@@ -3,6 +3,14 @@ from rest_framework import serializers
 
 from apps.image.models import Image
 from apps.image.utils import delete_from_cloudinary, upload_to_cloudinary
+from utils.exceptions import CustomAPIException
+from utils.responses.image import (
+    IMAGE_CANNOT_VALIDATE_OWNERSHIP,
+    IMAGE_INVALID_MODEL,
+    IMAGE_NO_PERMISSION,
+    IMAGE_OBJECT_NOT_FOUND,
+    IMAGE_REQUEST_MISSING,
+)
 
 
 class ImageUploadSerializer(serializers.ModelSerializer):
@@ -23,14 +31,41 @@ class ImageUploadSerializer(serializers.ModelSerializer):
         read_only_fields = ["image_url", "public_id", "uploaded_at"]
 
     def validate(self, data):
+
+        request = self.context.get("request")
+        if not request:
+            raise CustomAPIException(IMAGE_REQUEST_MISSING)
+
         try:
-            data["content_type"] = ContentType.objects.get(
-                model=data["object_type"].lower()
-            )
+            content_type = ContentType.objects.get(model=data["object_type"].lower())
         except ContentType.DoesNotExist:
-            raise serializers.ValidationError(
-                {"object_type": "유효하지 않은 모델입니다."}
-            )
+            raise CustomAPIException(IMAGE_INVALID_MODEL)
+
+        # content_type의 모델 클래스을 반환
+        model_class = content_type.model_class()
+
+        try:
+            target_instance = model_class.objects.get(pk=data["object_id"])
+        except model_class.DoesNotExist:
+            raise CustomAPIException(IMAGE_OBJECT_NOT_FOUND)
+
+        # 아이돌이면 검사 제외 (임시설정)
+        if data["object_type"] != "idol":
+
+            # 유저 클래스면 같은 유저 인지
+            if isinstance(target_instance, request.user.__class__):
+                if target_instance != request.user:
+                    raise CustomAPIException(IMAGE_NO_PERMISSION)
+            # 작성자가 존재하면 작성자와 유저가 같은지
+            elif hasattr(target_instance, "author"):
+                if target_instance.author != request.user:
+                    raise CustomAPIException(IMAGE_NO_PERMISSION)
+            # 검사 실패
+            else:
+                raise CustomAPIException(IMAGE_CANNOT_VALIDATE_OWNERSHIP)
+
+        data["content_type"] = content_type
+        data["related_instance"] = target_instance
         return data
 
     def create(self, validated_data):

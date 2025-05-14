@@ -3,9 +3,7 @@ from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 
 from apps.image.models import Image
-
-# from apps.image.models import Image
-from utils.models import CloudinaryImageMixin, TimestampModel
+from utils.models import TimestampModel
 
 
 # 사용자 지정 메니져

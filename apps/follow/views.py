@@ -1,10 +1,13 @@
 from django.shortcuts import get_object_or_404
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework.generics import (
     CreateAPIView,
     DestroyAPIView,
+    GenericAPIView,
     ListAPIView,
     RetrieveAPIView,
 )
+from rest_framework.mixins import CreateModelMixin, DestroyModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.status import (
@@ -19,6 +22,13 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from apps.follow.models import Follow
 from apps.follow.serializers import FollowSerializer
 from apps.idol.models import Idol
+from utils.responses.follow import (
+    FOLLOW_ALREADY_EXISTS,
+    FOLLOW_CREATE_SUCCESS,
+    FOLLOW_DELETE_SUCCESS,
+    FOLLOW_NOT_FOUND,
+    FOLLOW_STATUS_SUCCESS,
+)
 
 
 class FollowListView(ListAPIView):
@@ -31,57 +41,74 @@ class FollowListView(ListAPIView):
     def get_queryset(self):
         return Follow.objects.filter(user=self.request.user)
 
+    @swagger_auto_schema(
+        tags=["아이돌/팔로우"],
+        operation_summary="내 팔로우 리스트",
+    )
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+
 
 class FollowStatusView(RetrieveAPIView):
     """GET /api/idols/{idol_id}/follow-status - 특정 아이돌 팔로우 여부 확인"""
-
-    permission_classes = [IsAuthenticated]
-    authentication_classes = [JWTAuthentication]
-
-    def retrieve(self, request, *args, **kwargs):
-        idol_id = self.kwargs.get("idol_id")
-        idol = get_object_or_404(Idol, pk=idol_id)
-        is_following = Follow.objects.filter(user=request.user, idol=idol).exists()
-        return Response({"is_following": is_following}, status=HTTP_200_OK)
-
-
-class FollowCreateView(CreateAPIView):
-    """POST /api/idols/{idol_id}/follows - 아이돌 팔로우 등록"""
 
     serializer_class = FollowSerializer
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
 
-    def create(self, request, *args, **kwargs):
+    @swagger_auto_schema(
+        tags=["아이돌/팔로우"],
+        operation_summary="아이돌 팔로우 여부 확인",
+    )
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        idol_id = self.kwargs.get("idol_id")
+        idol = get_object_or_404(Idol, pk=idol_id)
+        is_following = Follow.objects.filter(user=request.user, idol=idol).exists()
+        return Response(
+            {**FOLLOW_STATUS_SUCCESS, "data": {"is_following": is_following}},
+            status=FOLLOW_STATUS_SUCCESS["code"],
+        )
+
+
+class FollowCreateDestroyView(GenericAPIView):
+    """POST /api/idols/{idol_id}/follows - 아이돌 팔로우 등록 및 취소"""
+
+    serializer_class = FollowSerializer  # 스웨거에서 필요해서 넣음.
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    @swagger_auto_schema(
+        tags=["아이돌/팔로우"],
+        operation_summary="아이돌 팔로우",
+    )
+    def post(self, request, *args, **kwargs):
         idol_id = self.kwargs.get("idol_id")
         idol = get_object_or_404(Idol, pk=idol_id)
 
         if Follow.objects.filter(user=request.user, idol=idol).exists():
-            return Response(
-                {"detail": "이미 팔로우 중입니다."}, status=HTTP_400_BAD_REQUEST
-            )
+            return Response(FOLLOW_ALREADY_EXISTS, status=FOLLOW_ALREADY_EXISTS["code"])
 
         follow = Follow.objects.create(user=request.user, idol=idol)
         serializer = self.get_serializer(follow)
-        return Response(serializer.data, status=HTTP_201_CREATED)
+        return Response(
+            {**FOLLOW_CREATE_SUCCESS, "data": serializer.data},
+            status=FOLLOW_CREATE_SUCCESS["code"],
+        )
 
-
-class FollowDeleteView(DestroyAPIView):
-    """DELETE /api/idols/{idol_id}/follows - 아이돌 팔로우 취소"""
-
-    permission_classes = [IsAuthenticated]
-
+    @swagger_auto_schema(
+        tags=["아이돌/팔로우"],
+        operation_summary="아이돌 언팔로우",
+    )
     def delete(self, request, *args, **kwargs):
         idol_id = self.kwargs.get("idol_id")
         idol = get_object_or_404(Idol, pk=idol_id)
 
         follow = Follow.objects.filter(user=request.user, idol=idol).first()
         if not follow:
-            return Response(
-                {"detail": "팔로우하지 않았습니다."}, status=HTTP_404_NOT_FOUND
-            )
+            return Response(FOLLOW_NOT_FOUND, status=FOLLOW_NOT_FOUND["code"])
 
         follow.delete()
-        return Response(
-            {"detail": "팔로우가 취소되었습니다."}, status=HTTP_204_NO_CONTENT
-        )
+        return Response(FOLLOW_DELETE_SUCCESS, status=FOLLOW_DELETE_SUCCESS["code"])

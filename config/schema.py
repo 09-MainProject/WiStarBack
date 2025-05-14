@@ -5,7 +5,9 @@ from drf_yasg.views import get_schema_view
 from rest_framework import permissions
 
 
+# 특정 앱의 뷰 스웨거 문서화 제외 설정
 class ExcludeAppsSchemaGenerator(OpenAPISchemaGenerator):
+    # 제외할 앱의 뷰 설정  settings.py SWAGGER_EXCLUDED_APPS에 설정
     EXCLUDED_APPS = getattr(settings, "SWAGGER_EXCLUDED_APPS", [])
 
     def get_endpoints(self, request):
@@ -30,6 +32,7 @@ schema_view = get_schema_view(
         license=openapi.License(name="BSD License"),
     ),
     public=True,
+    authentication_classes=[],  # Swagger 자체는 인증 안함
     permission_classes=[
         permissions.AllowAny,
     ],
@@ -43,17 +46,3 @@ schema_view = get_schema_view(
 #
 # 설치
 # poetry add drf-yasg
-
-
-# 특정 앱 스웨거 비활성화 설정하는 클래스
-# class ExcludeAppsSchemaGenerator(OpenAPISchemaGenerator):
-#     EXCLUDED_APPS = getattr(settings, "SWAGGER_EXCLUDED_APPS", [])
-#
-#     def get_endpoints(self, request):
-#         """기존 get_endpoints 결과에서 특정 앱에 해당하는 endpoint 제거"""
-#         endpoints = super().get_endpoints(request)
-#         filtered = {}
-#         for path, (view_cls, path_regex, method_map) in endpoints.items():
-#             if not any(view_cls.__module__.startswith(app) for app in self.EXCLUDED_APPS):
-#                 filtered[path] = (view_cls, path_regex, method_map)
-#         return filtered

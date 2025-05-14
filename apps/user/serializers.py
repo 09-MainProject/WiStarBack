@@ -113,7 +113,15 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["id", "name", "nickname", "email", "image_url"]
+        fields = [
+            "id",
+            "name",
+            "nickname",
+            "email",
+            "image_url",
+            "created_at",
+            "updated_at",
+        ]
 
     def get_image_url(self, obj):
         profile_image = obj.profile_images.first()

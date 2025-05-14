@@ -33,7 +33,6 @@ from utils.csrf import generate_csrf_token, validate_csrf_token
 from utils.email import send_email
 from utils.responses.user import (
     CSRF_INVALID_TOKEN,
-    DELETE_SUCCESS,
     INVALID_REFRESH_TOKEN,
     INVALID_SIGNATURE,
     LOGIN_FAILED,
@@ -43,6 +42,9 @@ from utils.responses.user import (
     PASSWORD_CHECK_INVALID,
     PASSWORD_MATCH_SUCCESS,
     PASSWORD_NOT_MATCH,
+    PROFILE_DELETE_RESPONSE,
+    PROFILE_RETRIEVE_RESPONSE,
+    PROFILE_UPDATE_RESPONSE,
     SIGNATURE_EXPIRED,
     SIGNUP_PASSWORD_MISMATCH,
     SIGNUP_SUCCESS,
@@ -124,10 +126,6 @@ class RegisterView(CreateAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
 
-        # 개발 환경에서는 이메일 인증 건너뛰기
-        user.is_active = True
-        user.save()
-
         # 이메일 서명
         signer = TimestampSigner()
 
@@ -146,13 +144,12 @@ class RegisterView(CreateAPIView):
 
         response_data = serializer.data
         custom_response = SIGNUP_SUCCESS
-        custom_response["data"] = response_data
 
         if settings.DEBUG:
-            # print('[WiStar] 이메일 인증 링크:', verify_url)
             # 응답에 verify_url 포함
             response_data["verify_url"] = verify_url
-            custom_response["data"] = response_data
+
+        custom_response["data"] = response_data
 
         return Response(custom_response, status=status.HTTP_201_CREATED)
 
@@ -163,16 +160,16 @@ class VerifyEmailView(APIView):
     @swagger_auto_schema(
         tags=["유저/인증"],
         operation_summary="이메일 인증 링크 확인",
-        manual_parameters=[
-            openapi.Parameter(
-                "code",
-                openapi.IN_QUERY,
-                description="이메일에 첨부된 서명된 인증 코드",
-                type=openapi.TYPE_STRING,
-                required=True,
-                example="(코드만입력)c2lnbmVkX2NvZGVkX2VtYWls",
-            )
-        ],
+        # manual_parameters=[
+        #     openapi.Parameter(
+        #         "code",
+        #         openapi.IN_QUERY,
+        #         description="이메일에 첨부된 서명된 인증 코드",
+        #         type=openapi.TYPE_STRING,
+        #         required=True,
+        #         example="(코드만입력)c2lnbmVkX2NvZGVkX2VtYWls",
+        #     )
+        # ],
         responses={
             200: openapi.Response(
                 description="이메일 인증 성공",
@@ -352,16 +349,16 @@ class LogoutAPIView(APIView):
         operation_summary="JWT 로그아웃",
         operation_description="HttpOnly 쿠키에서 refresh_token을 삭제하고, 블랙리스트에 등록합니다.",
         request_body=None,
-        manual_parameters=[
-            openapi.Parameter(
-                name="Authorization",
-                in_=openapi.IN_HEADER,
-                type=openapi.TYPE_STRING,
-                description="Bearer 액세스 토큰 (예: Bearer eyJs1j2jx...)",
-                required=True,
-                example="Bearer <access_token>",
-            ),
-        ],
+        # manual_parameters=[
+        #     openapi.Parameter(
+        #         name="Authorization",
+        #         in_=openapi.IN_HEADER,
+        #         type=openapi.TYPE_STRING,
+        #         description="Bearer 액세스 토큰 (예: Bearer eyJs1j2jx...)",
+        #         required=True,
+        #         example="Bearer <access_token>",
+        #     ),
+        # ],
         responses={
             200: openapi.Schema(
                 type=openapi.TYPE_OBJECT,
@@ -421,7 +418,7 @@ class CustomTokenRefreshView(APIView):
     @swagger_auto_schema(
         tags=["유저"],
         operation_summary="액세스 토큰 재발급",
-        operation_description="HttpOnly 쿠키에 저장된 리프레시 토큰으로 새로운 액세스 토큰과 CSRF 토큰을 재발급합니다.",
+        operation_description="(스웨거에서 테스트 불가) HttpOnly 쿠키에 저장된 리프레시 토큰으로 새로운 액세스 토큰과 CSRF 토큰을 재발급합니다.",
         request_body=None,
         manual_parameters=[
             openapi.Parameter(
@@ -577,16 +574,16 @@ class ProfileView(RetrieveUpdateDestroyAPIView):
         tags=["유저/프로필"],
         operation_summary="내 프로필 조회",
         request_body=None,
-        manual_parameters=[
-            openapi.Parameter(
-                name="Authorization",
-                in_=openapi.IN_HEADER,
-                type=openapi.TYPE_STRING,
-                description="Bearer 액세스 토큰 (예: Bearer eyJs1j2jx...)",
-                required=True,
-                example="Bearer <access_token>",
-            ),
-        ],
+        # manual_parameters=[
+        #     openapi.Parameter(
+        #         name="Authorization",
+        #         in_=openapi.IN_HEADER,
+        #         type=openapi.TYPE_STRING,
+        #         description="Bearer 액세스 토큰 (예: Bearer eyJs1j2jx...)",
+        #         required=True,
+        #         example="Bearer <access_token>",
+        #     ),
+        # ],
         responses={
             200: ProfileSerializer,
             401: openapi.Response(
@@ -607,20 +604,25 @@ class ProfileView(RetrieveUpdateDestroyAPIView):
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
 
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response({**PROFILE_RETRIEVE_RESPONSE, "data": serializer.data})
+
     @swagger_auto_schema(
         tags=["유저/프로필"],
         operation_summary="내 프로필 수정",
         request_body=ProfileUpdateSerializer,
-        manual_parameters=[
-            openapi.Parameter(
-                name="Authorization",
-                in_=openapi.IN_HEADER,
-                type=openapi.TYPE_STRING,
-                description="Bearer 액세스 토큰 (예: Bearer eyJs1j2jx...)",
-                required=True,
-                example="Bearer <access_token>",
-            ),
-        ],
+        # manual_parameters=[
+        #     openapi.Parameter(
+        #         name="Authorization",
+        #         in_=openapi.IN_HEADER,
+        #         type=openapi.TYPE_STRING,
+        #         description="Bearer 액세스 토큰 (예: Bearer eyJs1j2jx...)",
+        #         required=True,
+        #         example="Bearer <access_token>",
+        #     ),
+        # ],
         responses={
             200: openapi.Response(
                 description="프로필 수정 성공",
@@ -674,20 +676,39 @@ class ProfileView(RetrieveUpdateDestroyAPIView):
     def patch(self, request, *args, **kwargs):
         return self.partial_update(request, *args, **kwargs)
 
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop("partial", False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        if getattr(instance, "_prefetched_objects_cache", None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
+            instance._prefetched_objects_cache = {}
+
+        return Response(
+            {
+                **PROFILE_UPDATE_RESPONSE,
+                "data": serializer.data,
+            }
+        )
+
     @swagger_auto_schema(
         tags=["유저/프로필"],
         operation_summary="회원 탈퇴",
         request_body=None,
-        manual_parameters=[
-            openapi.Parameter(
-                name="Authorization",
-                in_=openapi.IN_HEADER,
-                type=openapi.TYPE_STRING,
-                description="Bearer 액세스 토큰 (예: Bearer eyJs1j2jx...)",
-                required=True,
-                example="Bearer <access_token>",
-            ),
-        ],
+        # manual_parameters=[
+        #     openapi.Parameter(
+        #         name="Authorization",
+        #         in_=openapi.IN_HEADER,
+        #         type=openapi.TYPE_STRING,
+        #         description="Bearer 액세스 토큰 (예: Bearer eyJs1j2jx...)",
+        #         required=True,
+        #         example="Bearer <access_token>",
+        #     ),
+        # ],
         responses={
             200: openapi.Response(
                 description="회원 탈퇴 성공",
@@ -725,7 +746,7 @@ class ProfileView(RetrieveUpdateDestroyAPIView):
 
         user = self.get_object()
         user.delete()
-        return Response(DELETE_SUCCESS, status=status.HTTP_200_OK)
+        return Response(PROFILE_DELETE_RESPONSE, status=status.HTTP_200_OK)
 
 
 class PasswordCheckView(APIView):
