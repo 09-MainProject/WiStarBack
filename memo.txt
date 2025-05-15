@@ -62,7 +62,7 @@ project_name/
 │   │   └── views.py        # 뷰 로직
 │   └── ...
 ├── envs/                   # 환경변수 파일들
-│   ├── .env.local          # 로컬 환경에서 서버 구동 및 테스트 시 필요한 환경변수
+│   ├── .env                # 로컬 및 배포 환경에서 서버 구동 및 테스트 시 필요한 환경변수
 │   └── .env.prod           # 배포 환경에서 서버 구동 및 테스트 시 필요한 환경변수
 ├── resources/              # 초기 설정 파일 및 스크립트, nginx, docker, kubernetes 의 yaml 파일
 │   ├── nginx/
@@ -592,7 +592,6 @@ HttpOnly Cookie	JS에서 삭제 불가 → 서버에서 쿠키 만료 처리
 
 
 
-
 ----------------------
 HttpOnly 쿠키의 핵심 특징
 ----------------------
@@ -626,12 +625,12 @@ MIDDLEWARE = [
 
 # 프론트 도메인 등록
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
+    "http://localhost:5173",
 ]
 
 # 쿠키 포함 허용
 CORS_ALLOW_CREDENTIALS = True
-
+CORS_ALLOW_METHODS = ['GET','POST','PUT','PATCH','DELETE','OPTIONS']
 
 --------------------
 이메일 보내는 기능 문제
@@ -1056,7 +1055,7 @@ pyenv virtualenv 3.13.1 wistar
 # 가상환경 적용
 pyenv local 가상환경이름
 pyenv local wistar
-pyenv local 3.13.1
+pyenv local 3.13.1  #가상환경 생성 없이 버전 파이썬 버전 설정
 
 # 가상환경 적용 확인
 python --version
@@ -1120,6 +1119,11 @@ Environment="DJANGO_SETTINGS_MODULE=config.settings.settings"
 [Install]
 WantedBy=multi-user.target
 
+여기서 가상환경을
+pyenv virtualenv 3.13.1 wistar 이렇게 만들어서 사용했으면
+/home/ubuntu/.pyenv/versions/wistar/bin/gunicorn
+이렇게 이 부분만 바꾸면 된다.
+
 # 시스템설정 daemon-reload
 sudo systemctl daemon-reload
 
@@ -1150,7 +1154,6 @@ requests 없어서 에러 발생
 pip install requests
 
 Gunicorn 서비스 재시작
-sudo systemctl daemon-reload
 sudo systemctl restart gunicorn.service
 
 서비스 상태 확인
@@ -1491,5 +1494,104 @@ git checkout -b <로컬브랜치명> origin/<원격브랜치명>
 
 서버에 변경 사항 적용
 git pull origin main
-sudo systemctl restart uwsgi
+sudo systemctl restart gunicorn
 sudo systemctl reload nginx
+
+# gunicorn 서비스 상태 확인
+sudo systemctl status gunicorn
+sudo systemctl status nginx
+
+
+로컬 변경사항 제외하고 원격 리파직토리 적용
+# 1. 변경사항 임시 저장 (커밋 안 해도 됨)
+git stash push -m "temp"
+
+# 2. 다른 브랜치로 이동
+git checkout prod/test2
+
+# 3. prod/develop 삭제
+git branch -D prod/develop
+
+# 4. 원격 기준으로 다시 생성
+git fetch origin
+git checkout -b prod/develop origin/prod/develop
+
+# 변경사항 다시 적용하고 싶다면
+git stash pop
+
+# 필요 없다면 버리기
+git stash drop
+# 또는
+git stash clear  # 모든 stash 제거
+
+
+# 원하는 변경사항만 적용
+git merge develop --no-commit --no-ff
+
+develop 브랜치에 pr적용할 때 원하는 대상만 적용하고 싶으면
+git checkout develop  # 병합 대상 브랜치
+git fetch origin pull/36/head:pr-36  #pr을 불러옴
+git merge pr-36 --no-commit --no-ff
+
+원하는 파일 적용 및 해제
+git restore --staged apps/user_schedule/migrations/000X_*.py
+git restore apps/user_schedule/migrations/000X_*.py
+
+나머지 변경 사항만 커밋
+git add .
+git commit -m "PR #36 수동 병합 (마이그레이션 제외)"
+
+원격 브랜치에 적용
+git push
+
+
+
+도커 컨테이너 접속
+docker exec -it wistarback bash
+
+
+도커 컨테이너 db 접속
+docker exec -it wistar_db psql -U postgres -d oz_project
+
+테이블 목록
+\dt
+
+이미 존재하는 로컬 브랜치에 원격 브랜치 추적 설정
+git branch --set-upstream-to=origin/<원격브랜치명> <로컬브랜치명>
+
+
+gunicorn 서버 로그 확인
+sudo journalctl -u gunicorn.service -n 50 --no-pager
+
+pyenv virtualenv 3.13.1 wistar
+pyenv local wistar
+인터프리터 설정 (설정시 가상환경 자동 활성화)
+
+
+현재 poetry가 사용중인 가상환경 경로 확인
+poetry env info --path
+
+현재 프로젝트가 사용중인 poetry 가상환경 리스트
+poetry env list
+
+poetry에서 자동 생성된 가상환경 위치
+cd /Users/taejin/Library/Caches/pypoetry/virtualenvs/
+
+poetry 가상환경 강제 삭제
+rm -rf /Users/taejin/Library/Caches/pypoetry/virtualenvs/myfavidolback-QFqDp6Nl-py3.13
+
+
+# 자동 배포 설정시 심볼릭 링크를 설정하는게 편하다
+# local 심볼릭 링크 생성
+
+프로젝트 경로에서 실행
+ln -sf $(pwd)/config/settings/local.py $(pwd)/config/settings/settings.py
+
+경로에 들어가서 실행
+cd config/settings
+ln -sf local.py settings.py
+
+# 운영 서버에서만 실행
+ln -sf $(pwd)/config/urls/urls_prod.py $(pwd)/config/urls/urls.py
+# 로컬 개발에서는
+ln -sf $(pwd)/config/urls/urls_dev.py $(pwd)/config/urls/urls.py
