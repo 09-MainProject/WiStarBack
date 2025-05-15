@@ -5,7 +5,11 @@ from .views import IdolViewSet
 app_name = "idols"
 
 urlpatterns = [
-    path("idols", IdolViewSet.as_view({"get": "list", "post": "create"}), name="idol-list"),
+    path(
+        "idols",
+        IdolViewSet.as_view({"get": "list", "post": "create"}),
+        name="idol-list",
+    ),
     path("idols/search", IdolViewSet.as_view({"get": "search"}), name="idol-search"),
     path(
         "idols<int:pk>",
