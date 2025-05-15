@@ -99,12 +99,12 @@ CORS_ALLOWED_ORIGINS = [
 
 # 쿠키 포함 허용
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_METHODS = ['GET','POST','PUT','PATCH','DELETE','OPTIONS']
+CORS_ALLOW_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
 
 # 기본경로
 # ROOT_URLCONF = "config.urls"
 # 바뀐경로
-ROOT_URLCONF = 'config.urls.urls'
+ROOT_URLCONF = "config.urls.urls"
 
 TEMPLATES = [
     {

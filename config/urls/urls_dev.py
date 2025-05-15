@@ -25,12 +25,12 @@ from config.schema import schema_view  # 스웨거 설정 파일
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/users/", include("apps.user.urls")),
-    path("api/posts/", include("apps.post.urls")),
+    path("api/", include("apps.post.urls")),
     path(
-        "api/posts/<int:post_id>/comments/", include("apps.comment.urls")
+        "api/posts/<int:post_id>/comments", include("apps.comment.urls")
     ),  # comment 앱의 URL
     path("api/", include("apps.like.urls")),
-    path("api/idols/", include("apps.idol.urls")),
+    path("api/", include("apps.idol.urls")),
     path("api/idols/", include("apps.follow.urls")),
     path("api/images/", include("apps.image.urls")),
     path("api/idols/", include("apps.idol_schedule.urls")),

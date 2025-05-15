@@ -58,7 +58,7 @@ ignore_errors = true
 
 [tool.pytest.ini_options]
 testpaths = ["apps"]
-DJANGO_SETTINGS_MODULE = "config.settings"
+DJANGO_SETTINGS_MODULE = "config.settings.settings"
 python_files = ["test_*.py", "*_test.py", "tests.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
