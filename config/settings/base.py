@@ -14,19 +14,20 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 
 import certifi
+from dotenv import dotenv_values
 
 os.environ["SSL_CERT_FILE"] = certifi.where()
+
 
 from datetime import timedelta
 from pathlib import Path
 
-from dotenv import load_dotenv
-
-load_dotenv()
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
+# dotenv_values 메서드는 env 파일의 경로를 파라미터로 전달 받아 해당 파일을 읽어온 후 Key, Value 형태로 매핑하여 dict로 반환합니다.
+ENV = dotenv_values(BASE_DIR / "envs/.env")
+# ENV = dotenv_values(BASE_DIR / "envs/.env.prod")  # 배포 환경 테스트
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -92,13 +93,18 @@ MIDDLEWARE = [
 
 # 프론트 도메인 등록
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
+    "http://localhost:5173",
+    "https://wistar.o-r.kr",
 ]
 
 # 쿠키 포함 허용
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
 
-ROOT_URLCONF = "config.urls"
+# 기본경로
+# ROOT_URLCONF = "config.urls"
+# 바뀐경로
+ROOT_URLCONF = "config.urls.urls"
 
 TEMPLATES = [
     {

@@ -4,7 +4,7 @@ import hmac
 import secrets
 import time
 
-from config.settings import SECRET_KEY
+from config.settings.settings import SECRET_KEY
 
 # HMAC(Hash-based Message Authentication Code)**를 이용해 토큰의 위변조를 방지하는 구조
 

@@ -136,16 +136,13 @@ celerybeat.pid
 *.env
 .env.*
 envs/
-.env.local
-*.env.local
-.env.prod
-*.env.prod
-.venv
 env/
-.venv/
-venv/
 ENV/
 env.bak/
+
+.venv
+.venv/
+venv/
 venv.bak/
 
 media/*

@@ -2,7 +2,11 @@
 
 import random
 
+from dotenv import load_dotenv
+
 from .base import *  # noqa: F403
+
+load_dotenv(BASE_DIR / "envs/.env.prod")  # 환경 변수 파일 로드
 
 # DEBUG = True
 # ALLOWED_HOSTS: list[str] = []

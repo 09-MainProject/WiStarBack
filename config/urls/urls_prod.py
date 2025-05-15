@@ -24,7 +24,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/users/", include("apps.user.urls")),
-    path("api/posts/", include("apps.post.urls")),
+    path("api/", include("apps.post.urls")),
     path(
         "api/posts/<int:post_id>/comments/", include("apps.comment.urls")
     ),  # comment 앱의 URL

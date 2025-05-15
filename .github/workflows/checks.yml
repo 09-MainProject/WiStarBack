@@ -79,20 +79,21 @@ jobs:
 #          coverage report --fail-under=80
 
 # 메인 브랜치 변경 시 자동 배포 적용
-#  deploy:
-#    runs-on: ubuntu-latest
-#    needs: test
-#    if: github.ref == 'refs/heads/main'  # main 브랜치일 때만 실행
-#    steps:
-#      - name: EC2 ssh connection and deploy
-#        uses: appleboy/ssh-action@master
-#        with:
-#          host: ${{ secrets.SSH_HOST }}
-#          username: ${{ secrets.SSH_USERNAME }}
-#          password: ${{ secrets.SSH_PASSWORD }}
-#          command_timeout: 5m
-#          script: |
-#            cd /home/ubuntu/WiStarBack
-#            git pull origin main
-#            sudo systemctl restart gunicorn
-#            sudo systemctl reload nginx
+  deploy:
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/main'  # main 브랜치일 때만 실행
+    steps:
+      - name: EC2 ssh connection and deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          command_timeout: 5m
+          script: |
+            cd /home/ubuntu/WiStarBack
+            git pull origin main
+            poetry install --no-root
+            sudo systemctl restart wistar
+            sudo systemctl reload nginx
