@@ -1,0 +1,153 @@
+# 트러블 슈팅
+
+### 문제 정의
+
+발생한 문제의 구체적인 증상이나 오류 메시지를 기록합니다.
+문제가 발생한 환경(운영체제, 브라우저, 버전 등)도 명확히 기록해 두는 것이 좋습니다.
+
+오류 메시지 및 로그는 캡쳐하여 블로그에 게시하는 편이 좋습니다.
+
+
+```
+•	오류 메시지: 500 Internal Server Error, You may need to add '43.203.181.6' to ALLOWED_HOSTS.
+•	발생 시점: 서버 접속 시
+•	Django 버전: 5.2
+•	데이터베이스: PostgreSQL
+```
+
+### 정보 수집
+
+로그 파일을 확인하거나, 해당 문제와 관련된 소스 코드와 설정 파일을 점검합니다.
+데이터베이스 상태, 폼 데이터, 요청 정보 등을 수집하여 문제가 어디서 발생하는지 좁혀나갑니다.
+문제를 재현하는 방법을 구체적으로 기록합니다.
+
+
+```
+서버 가상 환경과 gunicorn 시스템 설정, Django settings.py 경로 변경 후
+서버 접속시 500에러가 뜨면서 서버의 Gunicorn이 응답이 없음.
+
+Django settings.py경로를
+config.settings.py에서 config.settings.settings.py로 변경하고
+
+가상 환경 설정
+pyenv virtualenv 3.13.1 wistar
+pyenv local wistar
+
+이렇게 가상 환결 설정을 한 후
+
+가상환경에 라이브러리 설치
+poetry install --no-root
+pip install gunicorn
+
+설치 후 기존 시스템 설정을 수정
+sudo vi /etc/systemd/system/gunicorn.service
+
+시스템 설정에서 가상환경 경로 수정
+/home/ubuntu/.pyenv/versions/wistar/bin/gunicorn
+
+수정 후 시스템 설정 적용
+sudo systemctl daemon-reload
+
+Gunicorn 서비스 재시작
+sudo systemctl restart gunicorn.service
+
+서비스 상태 확인
+sudo systemctl status gunicorn.service
+```
+
+
+### 원인 추론
+
+수집된 자료를 바탕으로 문제의 원인을 추론합니다.
+
+로그나 디버깅 도구를 사용하여 정확한 문제 지점을 확인합니다.
+문제의 원인을 추론할 때는 가능성 높은 여러 가지 원인을 기록해 두는 것이 좋습니다.
+
+
+```
+로컬에서 테스트시 로컬환경 배포환경 문제 없음.
+
+settings.py등 코드를 점검.
+
+문제 없음.
+
+서버 설정을 재확인.
+
+가상환경 경로도 수정했고 Gunicorn도 실행 됬고 문제 없어 보임.
+하지만 Gunicorn 로그를 확인해보면 Gunicorn이 재시작된것 외엔 아무동작을 안한것을 알 수 있음.
+
+Gunicorn 로그 확인
+sudo journalctl -u gunicorn.service -n 50 --no-pager
+
+몇 번이고 재시작하고 서버 접속해보고한 로그 (실제 횟수는 이것보다 훨씬 많다)
+May 16 01:28:06 ip-172-31-15-207 systemd[1]: Started gunicorn.service - gunicorn daemon.
+May 16 01:43:18 ip-172-31-15-207 systemd[1]: Stopping gunicorn.service - gunicorn daemon...
+May 16 01:43:18 ip-172-31-15-207 systemd[1]: gunicorn.service: Deactivated successfully.
+May 16 01:43:18 ip-172-31-15-207 systemd[1]: Stopped gunicorn.service - gunicorn daemon.
+May 16 01:43:18 ip-172-31-15-207 systemd[1]: Started gunicorn.service - gunicorn daemon.
+May 16 01:43:34 ip-172-31-15-207 systemd[1]: Stopping gunicorn.service - gunicorn daemon...
+May 16 01:43:34 ip-172-31-15-207 systemd[1]: gunicorn.service: Deactivated successfully.
+May 16 01:43:34 ip-172-31-15-207 systemd[1]: Stopped gunicorn.service - gunicorn daemon.
+May 16 01:43:34 ip-172-31-15-207 systemd[1]: Started gunicorn.service - gunicorn daemon.
+
+로컬에선 잘 됬고 배포 서버에선 잘 안되는 상황이기 때문에 배포 서버 설정을 의심을 계속 했지만 찾기 힘들었음.
+
+```
+
+
+### 조치 방안 작성과 구현
+
+추론한 원인에 따른 조치 방안을 마련하고 구현을 거쳐 문제를 해결합니다.
+
+원인에 대한 해결책을 단계별로 작성합니다.
+
+
+
+```
+•	폼의 유효성 검사를 강화하여 올바르게 처리되는지 확인.
+•	User 객체가 제대로 생성되고 있는지 확인하기 위해 추가적인 로그나 디버그 정보를 남깁니다.
+```
+
+```python
+코드와 설정들을 하나씩 차근 차근 다시 한번 살펴봄.
+
+개발환경과 배포환경을 로컬에서 여러 방법으로 테스트 해봤지만 문제없음.
+
+작성한 코드가 문제가 없다는 판단하에 서버에서 집중적으로 원인을 찾기 시작.
+
+pyenv which python 명령어로
+Gunicorn 시스템 설정에 설정된 가상환경 경로와
+실제 활성화된 가상환경 경로를 비교 분석
+일치함.
+
+다시 한번 서버 로그를 확인.. 해봤자 똑같이 Gunicorn이 재시작 외엔 동작한게 없음.
+
+Gunicorn 시스템 설정을 다시 한번 보다가
+DJANGO_SETTINGS_MODULE 설정이 잘못됬다는걸 깨달음.
+Environment="DJANGO_SETTINGS_MODULE=config.settings"
+에서
+Environment="DJANGO_SETTINGS_MODULE=config.settings.settings"
+로 바꿈
+
+시스템 설정 변경 사항이 적용되게 daemon을 재시작해주고
+sudo systemctl daemon-reload
+
+Gunicorn 서비스 실행
+sudo systemctl start gunicorn.service
+
+Gunicorn 서비스 상태 확인
+sudo systemctl status gunicorn.service
+
+서버의 오류 메시지가 변경됨으로써 해당 문제는 해결 했지만 다른 문제가 발생
+
+You may need to add '43.203.181.6' to ALLOWED_HOSTS.
+
+서버 주소('43.203.181.6')를 ALLOWED_HOSTS 목록에 추가하지 않아서 발생함.
+
+추가 후 완전 해결
+```
+
+### 결과 정리
+
+문제가 해결되지 않았다면, 어떤 점이 해결되지 않았는지 기록하고 다시 4번으로 돌아가서 추가적인 원인을 분석합니다.
+최종적으로 해결된 경우, 그 과정과 결과를 상세히 기록하여 다른 사람도 이해할 수 있도록 합니다.
