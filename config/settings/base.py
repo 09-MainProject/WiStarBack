@@ -92,11 +92,13 @@ MIDDLEWARE = [
 
 # 프론트 도메인 등록
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
+    "http://localhost:5173",
+    "https://wistar.o-r.kr",
 ]
 
 # 쿠키 포함 허용
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
 
 ROOT_URLCONF = "config.urls"
 
