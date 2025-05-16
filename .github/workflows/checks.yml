@@ -95,5 +95,5 @@ jobs:
             cd /home/ubuntu/WiStarBack
             git pull origin main
             poetry install --no-root
-            sudo systemctl restart wistar
+            sudo systemctl restart gunicorn
             sudo systemctl reload nginx
