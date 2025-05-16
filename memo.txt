@@ -1595,3 +1595,14 @@ ln -sf local.py settings.py
 ln -sf $(pwd)/config/urls/urls_prod.py $(pwd)/config/urls/urls.py
 # 로컬 개발에서는
 ln -sf $(pwd)/config/urls/urls_dev.py $(pwd)/config/urls/urls.py
+
+
+로컬 개발 서버(runserver):
+DEBUG = True일 때는 ALLOWED_HOSTS 검사를 거의 하지 않음
+그래서 []이더라도 정상 작동
+
+서버 (Gunicorn + Nginx 등):
+manage.py runserver가 아니라 WSGI 서버를 통해 배포되면
+Django는 ALLOWED_HOSTS를 엄격하게 검사함
+DEBUG = True라도 무조건 ALLOWED_HOSTS에 포함되어 있어야 함
+
