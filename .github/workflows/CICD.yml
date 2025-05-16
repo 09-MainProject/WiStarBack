@@ -1,4 +1,4 @@
-name: Django Project CI
+name: Django Project CI, CD
 # yml 검사 사이트
 # https://www.yamllint.com/
 # Trigger : main 또는 develop 브랜치에 푸쉬되거나 PR 이 생성되는 경우.
