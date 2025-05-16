@@ -89,7 +89,7 @@ jobs:
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
-          password: ${{ secrets.SSH_PASSWORD }}
+          key: ${{ secrets.SSH_PASSWORD }}
           command_timeout: 5m
           script: |
             cd /home/ubuntu/WiStarBack
