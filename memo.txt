@@ -1606,3 +1606,6 @@ manage.py runserver가 아니라 WSGI 서버를 통해 배포되면
 Django는 ALLOWED_HOSTS를 엄격하게 검사함
 DEBUG = True라도 무조건 ALLOWED_HOSTS에 포함되어 있어야 함
 
+
+장고 시크릿 키 생성 명령어
+python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'

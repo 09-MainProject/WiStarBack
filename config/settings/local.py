@@ -39,6 +39,7 @@ cloudinary.config(
 
 
 # 파일 저장 기본 설정을 Cloudinary로 설정 (선택 사항)
+# Django의 ImageField, FileField에서 저장하는 모든 업로드 파일은 MEDIA_ROOT가 아닌 Cloudinary에 저장됩니다.
 # DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 # # 기본 이미지 url 설정
