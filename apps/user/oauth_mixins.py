@@ -21,7 +21,6 @@ class KaKaoProviderInfoMixin:
             "authorization_url": "https://kauth.kakao.com/oauth/authorize",
             "frontend_redirect_url": f"{settings.FRONTEND_URL}/oauth/callback",
             "frontend_redirect_url_test": f"{settings.FRONTEND_URL}/oauth/callback-test",
-            "frontend_fail_url": f"{settings.FRONTEND_URL}/oauth/failure",
         }
 
 
@@ -30,7 +29,7 @@ class GoogleProviderInfoMixin:
         return {
             "name": "구글",
             "callback_url": "/users/google/callback",
-            "callback_url_test": "/users/google/callback-test",
+            "callback_url_test": "/api/users/google/callback-test",
             "token_url": "https://oauth2.googleapis.com/token",
             "profile_url": "https://www.googleapis.com/oauth2/v1/userinfo",
             "login_url": "https://accounts.google.com/o/oauth2/v2/auth",
@@ -44,7 +43,6 @@ class GoogleProviderInfoMixin:
             "authorization_url": "https://accounts.google.com/o/oauth2/v2/auth",
             "frontend_redirect_url": f"{settings.FRONTEND_URL}/oauth/callback",
             "frontend_redirect_url_test": f"{settings.FRONTEND_URL}/oauth/callback-test",
-            "frontend_fail_url": f"{settings.FRONTEND_URL}/oauth/failure",
         }
 
 
@@ -53,7 +51,7 @@ class NaverProviderInfoMixin:
         return {
             "name": "네이버",
             "callback_url": "/users/naver/callback",
-            "callback_url_test": "/users/naver/callback-test",
+            "callback_url_test": "/api/users/naver/callback-test",
             "token_url": "https://nid.naver.com/oauth2.0/token",
             "profile_url": "https://openapi.naver.com/v1/nid/me",
             "login_url": "https://nid.naver.com/oauth2.0/authorize",
@@ -65,6 +63,6 @@ class NaverProviderInfoMixin:
             "nickname_field": "nickname",
             "profile_image_field": "profile_image",
             "authorization_url": "https://nid.naver.com/oauth2.0/authorize",
+            "frontend_redirect_url": f"{settings.FRONTEND_URL}/oauth/callback",
             "frontend_redirect_url_test": f"{settings.FRONTEND_URL}/oauth/callback-test",
-            "frontend_fail_url": f"{settings.FRONTEND_URL}/oauth/failure",
         }
