@@ -12,15 +12,11 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 # 이메일 보낼 때 SSL 인증서 경로 인식 불가 시 설정
 import os
+from datetime import timedelta
+from pathlib import Path
 
 import certifi
 from dotenv import dotenv_values
-
-os.environ["SSL_CERT_FILE"] = certifi.where()
-
-
-from datetime import timedelta
-from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -28,6 +24,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 # dotenv_values 메서드는 env 파일의 경로를 파라미터로 전달 받아 해당 파일을 읽어온 후 Key, Value 형태로 매핑하여 dict로 반환합니다.
 ENV = dotenv_values(BASE_DIR / "envs/.env")
 # ENV = dotenv_values(BASE_DIR / "envs/.env.prod")  # 배포 환경 테스트
+
+if ENV.get("DJANGO_ENV", "local") == "local":
+    os.environ["SSL_CERT_FILE"] = certifi.where()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
