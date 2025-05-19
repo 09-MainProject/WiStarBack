@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>이메일 인증 결과</title>
+    <style>
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background-color: white;
+            padding: 40px 60px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .status {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #212529;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #000000; /* 검정색 */
+            color: white;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 1rem;
+        }
+        .button:hover {
+            background-color: #333333; /* 마우스 오버 시 */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="status">{{ message }}</div>
+        <a href="{{ data.return_url }}" class="button">돌아가기</a>
+    </div>
+</body>
+</html>

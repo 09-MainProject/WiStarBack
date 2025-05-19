@@ -1,4 +1,5 @@
 import pytest
+from django.conf import settings
 from django.core import signing
 from django.core.signing import TimestampSigner
 from django.urls import reverse
@@ -37,16 +38,29 @@ def test_signup_user(api_client):
 
 
 @pytest.mark.django_db
-def test_verify_email(api_client, create_user):
+def test_verify_email_success_redirect(api_client, create_user):
+    # 비활성 유저 생성
     user = create_user(email="verify@example.com", password="1234", is_active=False)
+
+    # 서명된 코드 생성
     signer = TimestampSigner()
     signed_email = signer.sign(user.email)
     signed_code = signing.dumps(signed_email)
+
     url = reverse("user:verify_email") + f"?code={signed_code}"
 
-    response = api_client.get(url)
-    user.refresh_from_db()
-    assert response.status_code == status.HTTP_200_OK
+    # 요청: 리디렉트 응답을 추적하지 않음
+    response = api_client.get(url, follow=False)
+
+    # 리디렉션 응답
+    assert response.status_code == 302
+
+    # 리디렉트 위치 확인
+    expected_prefix = f"{settings.FRONTEND_URL}/users/verify/email?"
+    assert response["Location"].startswith(expected_prefix)
+
+    # 유저가 인증되었는지 확인
+    user.refresh_from_db()  # user 객체가 메모리 상에 갖고 있는 값을 DB에 있는 최신 상태로 다시 덮어쓰기
     assert user.is_active is True
 
 

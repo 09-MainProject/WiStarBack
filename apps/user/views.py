@@ -1,8 +1,11 @@
+import copy
+from urllib.parse import urlencode
+
 from django.conf import settings
 from django.core import signing
 from django.core.signing import SignatureExpired, TimestampSigner
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect, render
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
@@ -161,16 +164,16 @@ class VerifyEmailView(APIView):
     @swagger_auto_schema(
         tags=["유저/인증"],
         operation_summary="이메일 인증 링크 확인",
-        # manual_parameters=[
-        #     openapi.Parameter(
-        #         "code",
-        #         openapi.IN_QUERY,
-        #         description="이메일에 첨부된 서명된 인증 코드",
-        #         type=openapi.TYPE_STRING,
-        #         required=True,
-        #         example="(코드만입력)c2lnbmVkX2NvZGVkX2VtYWls",
-        #     )
-        # ],
+        manual_parameters=[
+            openapi.Parameter(
+                "code",
+                openapi.IN_QUERY,
+                description="이메일에 첨부된 서명된 인증 코드",
+                type=openapi.TYPE_STRING,
+                required=True,
+                example="(코드만입력)c2lnbmVkX2NvZGVkX2VtYWls",
+            )
+        ],
         responses={
             200: openapi.Response(
                 description="이메일 인증 성공",
@@ -230,22 +233,48 @@ class VerifyEmailView(APIView):
             # 3. 직렬화된 데이터를 역직렬화
             decoded_user_email = signing.loads(code)
             # 4. 타임스탬프 유효성 검사 포함하여 복호화
-            email = signer.unsign(decoded_user_email, max_age=60 * 5)  # 5분 설정
+            email = signer.unsign(decoded_user_email, max_age=60 * 10)  # 10분 설정
 
         # except Exception as e:  # 이렇게 처리 많이 하지만 에러를 지정해서 하는게 제일 좋음.
         except SignatureExpired:  # 시간 지나서 오류발생하면 오류처리
-            return JsonResponse(SIGNATURE_EXPIRED, status=status.HTTP_410_GONE)
+            params = {
+                "code": SIGNATURE_EXPIRED["code"],
+                "message": SIGNATURE_EXPIRED["message"],
+            }
+            url = f"{settings.FRONTEND_URL}/users/verify/email?{urlencode(params)}"
+            return redirect(url)
+            # return JsonResponse(SIGNATURE_EXPIRED, status=status.HTTP_410_GONE)
         except Exception:
-            return Response(INVALID_SIGNATURE, status=status.HTTP_400_BAD_REQUEST)
+            params = {
+                "code": INVALID_SIGNATURE["code"],
+                "message": INVALID_SIGNATURE["message"],
+            }
+            url = f"{settings.FRONTEND_URL}/users/verify/email?{urlencode(params)}"
+            return redirect(url)
+            # return Response(INVALID_SIGNATURE, status=status.HTTP_400_BAD_REQUEST)
 
         user = get_object_or_404(User, email=email)
 
+        # 이미 인증된 경우
         if user.is_active:
-            return Response(VERIFY_EMAIL_ALREADY_VERIFIED, status=status.HTTP_200_OK)
+            params = {
+                "code": VERIFY_EMAIL_ALREADY_VERIFIED["code"],
+                "message": VERIFY_EMAIL_ALREADY_VERIFIED["message"],
+                "verified": VERIFY_EMAIL_ALREADY_VERIFIED["data"]["verified"],
+            }
+            url = f"{settings.FRONTEND_URL}/users/verify/email?{urlencode(params)}"
+            return redirect(url)
 
+        # 인증 성공한 경우
         user.is_active = True
         user.save()
-        return Response(VERIFY_EMAIL_SUCCESS, status=status.HTTP_200_OK)
+        params = {
+            "code": VERIFY_EMAIL_SUCCESS["code"],
+            "message": VERIFY_EMAIL_SUCCESS["message"],
+            "verified": VERIFY_EMAIL_SUCCESS["data"]["verified"],
+        }
+        url = f"{settings.FRONTEND_URL}/users/verify/email?{urlencode(params)}"
+        return redirect(url)
 
 
 # 로그인
