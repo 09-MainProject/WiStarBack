@@ -49,6 +49,7 @@ from utils.responses.user import (
     SIGNUP_PASSWORD_MISMATCH,
     SIGNUP_SUCCESS,
     TOKEN_REFRESH_RESPONSE,
+    VERIFY_EMAIL_ALREADY_VERIFIED,
     VERIFY_EMAIL_SUCCESS,
     WEAK_PASSWORD,
 )
@@ -237,7 +238,11 @@ class VerifyEmailView(APIView):
         except Exception:
             return Response(INVALID_SIGNATURE, status=status.HTTP_400_BAD_REQUEST)
 
-        user = get_object_or_404(User, email=email, is_active=False)
+        user = get_object_or_404(User, email=email)
+
+        if user.is_active:
+            return Response(VERIFY_EMAIL_ALREADY_VERIFIED, status=status.HTTP_200_OK)
+
         user.is_active = True
         user.save()
         return Response(VERIFY_EMAIL_SUCCESS, status=status.HTTP_200_OK)
@@ -313,8 +318,8 @@ class CustomTokenObtainPairView(TokenObtainPairView):
                 key="refresh_token",
                 value=refresh_token,
                 httponly=True,
-                # secure=True,        # HTTPS 환경에서만 전송
-                secure=False,  # 로컬 개발 환경에 맞춰서 설정
+                secure=True,  # HTTPS 환경에서만 전송
+                # secure=False,  # 로컬 개발 환경에 맞춰서 설정
                 samesite="Lax",  # CSRF 공격 방지 설정
                 path="/api/users/token",  # 필요한 경로에만 쿠키 사용
                 max_age=60 * 60 * 24 * 1,  # 1일 (초 단위)

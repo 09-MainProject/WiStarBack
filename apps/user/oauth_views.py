@@ -139,8 +139,8 @@ class OAuthCallbackView(APIView, ABC):
             key="refresh_token",
             value=str(refresh_token),
             httponly=True,
-            # secure=True,        # HTTPS 환경에서만 전송
-            secure=False,  # 로컬 개발 환경에 맞춰서 설정
+            secure=True,  # HTTPS 환경에서만 전송
+            # secure=False,  # 로컬 개발 환경에 맞춰서 설정
             samesite="Lax",  # CSRF 공격 방지 설정
             path="/api/users/token",  # 필요한 경로에만 쿠키 사용
             max_age=60 * 60 * 24 * 1,  # 1일 (초 단위)
