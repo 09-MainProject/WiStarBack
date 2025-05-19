@@ -172,6 +172,38 @@ NOT_AUTHENTICATED = {
     "data": None,
 }
 
+# Oauth
+
+OAUTH_CODE_OR_STATE_MISSING = {
+    "code": 400,
+    "message": "코드 또는 스테이트가 없습니다.",
+    "data": None,
+}
+
+OAUTH_TOKEN_FAILED = {
+    "code": 401,
+    "message": "토큰을 가져올 수 없습니다.",
+    "data": None,
+}
+
+OAUTH_ACCESS_TOKEN_MISSING = {
+    "code": 401,
+    "message": "엑세스 토큰이 없습니다.",
+    "data": None,
+}
+
+OAUTH_PROFILE_FAILED = {
+    "code": 401,
+    "message": "프로필을 가져올 수 없습니다.",
+    "data": None,
+}
+
+OAUTH_EMAIL_MISSING = {
+    "code": 400,
+    "message": "이메일을 가져올 수 없습니다.",
+    "data": None,
+}
+
 
 # ValidationError	유효성 검증 실패	400
 # NotAuthenticated	인증 안 됨	401

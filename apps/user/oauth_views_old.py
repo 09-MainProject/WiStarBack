@@ -3,13 +3,11 @@ from abc import ABC, abstractmethod
 from urllib.parse import urlencode
 
 import requests
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core import signing
 from django.shortcuts import redirect, render
 from django.views.generic import RedirectView
 from rest_framework.permissions import AllowAny
-from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -20,14 +18,6 @@ from apps.user.oauth_mixins import (
 )
 from utils.csrf import generate_csrf_token
 from utils.random_nickname import generate_unique_numbered_nickname
-from utils.responses.user import (
-    LOGIN_SUCCESS,
-    OAUTH_ACCESS_TOKEN_MISSING,
-    OAUTH_CODE_OR_STATE_MISSING,
-    OAUTH_EMAIL_MISSING,
-    OAUTH_PROFILE_FAILED,
-    OAUTH_TOKEN_FAILED,
-)
 
 User = get_user_model()
 
@@ -52,6 +42,13 @@ def get_social_login_params(provider_info, callback_url):
     return params
 
 
+def build_callback_url(provider_info, request):
+    scheme = request.scheme
+    host = request.META.get("HTTP_HOST", "")
+    domain = f"{scheme}://{host}".replace("localhost", "127.0.0.1")
+    return domain + provider_info["callback_url_test"]
+
+
 class OauthLoginRedirectView(RedirectView, ABC):
 
     @abstractmethod
@@ -60,7 +57,7 @@ class OauthLoginRedirectView(RedirectView, ABC):
 
     def get_redirect_url(self, *args, **kwargs):
         provider_info = self.get_provider_info()
-        callback_url = settings.FRONTEND_URL + provider_info["callback_url"]
+        callback_url = build_callback_url(provider_info, self.request)
         state = signing.dumps(provider_info["state"])
 
         params = get_social_login_params(provider_info, callback_url)
@@ -75,12 +72,14 @@ class OAuthCallbackView(APIView, ABC):
     def get_provider_info(self):
         pass
 
-    def post(self, request, *args, **kwargs):
-        code = request.data.get("code")
-        state = request.data.get("state")
+    def get(self, request, *args, **kwargs):
+        code = request.GET.get("code")
+        state = request.GET.get("state")
 
         if not code or not state:
-            return Response(OAUTH_CODE_OR_STATE_MISSING, status=400)
+            return redirect(
+                f"{self.get_frontend_fail_url()}?error=코드 또는 스테이트가 없습니다."
+            )
 
         # 소셜로그인에 필요한 redirect_uri, client_id, grant_type 등의 provider_info 를 가져옴
         provider_info = self.get_provider_info()
@@ -90,22 +89,30 @@ class OAuthCallbackView(APIView, ABC):
         # 엑세스 토큰 요청
         token_response = self.get_access_token(code, state, provider_info)
         if token_response.status_code != 200:
-            return Response(OAUTH_TOKEN_FAILED, status=401)
+            return redirect(
+                f"{self.get_frontend_fail_url()}?error=토큰을 가져올 수 없습니다."
+            )
 
         access_token = token_response.json().get("access_token")
         if not access_token:
-            return Response(OAUTH_ACCESS_TOKEN_MISSING, status=401)
+            return redirect(
+                f"{self.get_frontend_fail_url()}?error=엑세스 토큰이 없습니다."
+            )
 
         # 프로필 요청
         profile_response = self.get_profile(access_token, provider_info)
         if profile_response.status_code != 200:
-            return Response(OAUTH_PROFILE_FAILED, status=401)
+            return redirect(
+                f"{self.get_frontend_fail_url()}?error=프로필을 가져올 수 없습니다."
+            )
 
         profile_data = profile_response.json()
         email, name, nickname = self.get_user_data(profile_data, provider_info)
 
         if not email:
-            return Response(OAUTH_EMAIL_MISSING, status=400)
+            return redirect(
+                f"{self.get_frontend_fail_url()}?error=이메일을 가져올 수 없습니다."
+            )
 
         # 기존 유저가 있으면 가져오고 없으면 새로 생성
         user, created = User.objects.get_or_create(email=email)
@@ -124,17 +131,11 @@ class OAuthCallbackView(APIView, ABC):
         csrf_token = generate_csrf_token()
 
         # 프론트로 토큰 전달
-        response = Response(
-            {
-                **LOGIN_SUCCESS,
-                "data": {
-                    "access_token": access_token,
-                    "csrf_token": csrf_token,
-                },
-            }
-        )
+        params = urlencode({"access_token": access_token, "csrf_token": csrf_token})
+        redirect_response = redirect(f"{self.get_frontend_success_url()}?{params}")
+
         # 쿠키 추가
-        response.set_cookie(
+        redirect_response.set_cookie(
             key="refresh_token",
             value=str(refresh_token),
             httponly=True,
@@ -145,7 +146,7 @@ class OAuthCallbackView(APIView, ABC):
             max_age=60 * 60 * 24 * 1,  # 1일 (초 단위)
         )
 
-        return response
+        return redirect_response
 
     # 엑세스 토큰 가져오는 메서드
     def get_access_token(self, code, state, provider_info):
@@ -160,8 +161,7 @@ class OAuthCallbackView(APIView, ABC):
                     "grant_type": "authorization_code",
                     "code": code,
                     "state": state,
-                    "redirect_uri": settings.FRONTEND_URL
-                    + provider_info["callback_url"],
+                    "redirect_uri": build_callback_url(provider_info, self.request),
                     "client_id": provider_info["client_id"],
                     "client_secret": provider_info["client_secret"],
                 },
@@ -221,7 +221,7 @@ class OAuthCallbackView(APIView, ABC):
 
     # 성공 프론트 리다이렉트 url
     def get_frontend_success_url(self):
-        return f"{self.get_provider_info()['frontend_redirect_url']}"
+        return f"{self.get_provider_info()['frontend_redirect_url_test']}"
 
     # 실패 프론트 리다이렉트 url
     def get_frontend_fail_url(self):
@@ -256,3 +256,7 @@ class NaverLoginRedirectView(NaverProviderInfoMixin, OauthLoginRedirectView):
 # 네이버 콜백
 class NaverCallbackView(NaverProviderInfoMixin, OAuthCallbackView):
     pass
+
+
+def oauth_callback_test_page(request):
+    return render(request, "oauth_callback_test.html")
