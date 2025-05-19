@@ -12,12 +12,11 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 # 이메일 보낼 때 SSL 인증서 경로 인식 불가 시 설정
 import os
+from datetime import timedelta
+from pathlib import Path
 
 import certifi
 from dotenv import dotenv_values
-
-from datetime import timedelta
-from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
