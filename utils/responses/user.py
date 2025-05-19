@@ -49,7 +49,16 @@ DUPLICATE_NICKNAME = {
 VERIFY_EMAIL_SUCCESS = {
     "code": 200,
     "message": "이메일 인증이 완료되었습니다.",
-    "data": None,
+    "data": {
+        "verified": True
+    },
+}
+VERIFY_EMAIL_ALREADY_VERIFIED = {
+    "code": 200,
+    "message": "이미 인증된 이메일입니다.",
+    "data": {
+        "verified": True
+    },
 }
 SIGNATURE_EXPIRED = {
     "code": 410,
