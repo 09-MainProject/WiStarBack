@@ -5,7 +5,10 @@ from django.conf import settings
 from django.core import signing
 from django.core.signing import SignatureExpired, TimestampSigner
 from django.http import JsonResponse
+from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_protect
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
@@ -32,7 +35,6 @@ from apps.user.serializers import (
     ProfileUpdateSerializer,
     RegisterSerializer,
 )
-from utils.csrf import generate_csrf_token, validate_csrf_token
 from utils.email import send_email
 from utils.responses.user import (
     CSRF_INVALID_TOKEN,
@@ -332,8 +334,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
             refresh_token = tokens.get("refresh")
 
             # 커스텀 CSRF 토큰 발급
-            csrf_token = generate_csrf_token()
-            # csrf_token = get_token(request)
+            csrf_token = get_token(request=request)
 
             custom_response = LOGIN_SUCCESS
             custom_response["data"] = {
@@ -358,19 +359,6 @@ class CustomTokenObtainPairView(TokenObtainPairView):
         except AuthenticationFailed as e:
             # SimpleJWT가 raise하는 예외
             return Response(LOGIN_FAILED, status=status.HTTP_401_UNAUTHORIZED)
-
-
-# class LogoutAPIView(CreateAPIView):
-#     # permission_classes = [IsAuthenticated]  # 인증된 사용자만 데이터 접근 가능
-#     permission_classes = []  # 인증 없이 호출 가능
-#     serializer_class = LogoutSerializer
-#
-#     def create(self, request, *args, **kwargs):
-#         serializer = self.get_serializer(data=request.data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response({"detail": "로그아웃되었습니다."}, status=status.HTTP_205_RESET_CONTENT)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 # 로그아웃
@@ -448,6 +436,7 @@ class LogoutAPIView(APIView):
 
 
 # 엑세스 토큰 리프레시
+@method_decorator(csrf_protect, name='dispatch')
 class CustomTokenRefreshView(APIView):
     @swagger_auto_schema(
         tags=["유저"],
@@ -531,10 +520,6 @@ class CustomTokenRefreshView(APIView):
         },
     )
     def post(self, request, *args, **kwargs):
-        # CSRF 토큰 검증
-        csrf_token = request.headers.get("X-CSRFToken")
-        if not csrf_token or not validate_csrf_token(csrf_token):
-            return Response(CSRF_INVALID_TOKEN, HTTP_403_FORBIDDEN)
 
         # 리프레시 토큰 쿠키에서 가져오기
         refresh_token = request.COOKIES.get("refresh_token")
@@ -547,7 +532,7 @@ class CustomTokenRefreshView(APIView):
         new_access_token = serializer.validated_data.get("access")
 
         # 새로운 커스텀 CSRF 토큰 발급 (선택)
-        new_csrf_token = generate_csrf_token()
+        new_csrf_token = get_token(request=request)
 
         # 새로운 리프레시 토큰이 있다면 (ROTATE 설정 시)
         new_refresh_token = serializer.validated_data.get("refresh")

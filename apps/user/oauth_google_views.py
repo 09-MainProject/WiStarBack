@@ -11,7 +11,6 @@
 # from rest_framework.views import APIView
 # from rest_framework_simplejwt.tokens import RefreshToken
 #
-# from utils.csrf import generate_csrf_token
 # from utils.random_nickname import generate_unique_numbered_nickname
 #
 # User = get_user_model()
@@ -86,7 +85,7 @@
 #             return redirect(f"{settings.FRONTEND_URL}/oauth/failure?{params}")
 #
 #     # 커스텀 CSRF 토큰 발급
-#     csrf_token = generate_csrf_token()
+#     csrf_token = get_token(request=request)
 #
 #     # JWT 토큰 발급
 #     refresh_token = RefreshToken.for_user(user)
