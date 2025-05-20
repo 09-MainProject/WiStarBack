@@ -6,6 +6,7 @@ import requests
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core import signing
+from django.core.signing import BadSignature
 from django.middleware.csrf import get_token
 from django.shortcuts import redirect, render
 from django.views.generic import RedirectView
@@ -21,6 +22,7 @@ from apps.user.oauth_mixins import (
     KaKaoProviderInfoMixin,
     NaverProviderInfoMixin,
 )
+from utils.exceptions import CustomAPIException
 from utils.random_nickname import generate_unique_numbered_nickname
 from utils.responses.user import (
     LOGIN_SUCCESS,
@@ -28,6 +30,7 @@ from utils.responses.user import (
     OAUTH_CODE_OR_STATE_MISSING,
     OAUTH_EMAIL_MISSING,
     OAUTH_PROFILE_FAILED,
+    OAUTH_STATE_INVALID,
     OAUTH_TOKEN_FAILED,
 )
 
@@ -107,6 +110,12 @@ class OAuthCallbackView(APIView, ABC):
 
         if not code or not state:
             return Response(OAUTH_CODE_OR_STATE_MISSING, status=400)
+
+        # 콜백에서 검증 (시간 제한 없이)
+        try:
+            state = signing.loads(state)
+        except BadSignature:
+            raise CustomAPIException(OAUTH_STATE_INVALID)
 
         # 소셜로그인에 필요한 redirect_uri, client_id, grant_type 등의 provider_info 를 가져옴
         provider_info = self.get_provider_info()

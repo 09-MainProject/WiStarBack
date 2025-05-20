@@ -202,7 +202,11 @@ OAUTH_EMAIL_MISSING = {
     "message": "이메일을 가져올 수 없습니다.",
     "data": None,
 }
-
+OAUTH_STATE_INVALID = {
+    "code": 400,
+    "message": "state 값이 위조되었거나 올바르지 않습니다.",
+    "data": None,
+}
 
 # ValidationError	유효성 검증 실패	400
 # NotAuthenticated	인증 안 됨	401
