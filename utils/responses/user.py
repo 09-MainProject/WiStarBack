@@ -116,7 +116,6 @@ CSRF_VALIDATION_FAILED = {
 CSRF_INVALID_TOKEN = {
     "code": 403,
     "message": "유효하지 않은 CSRF 토큰입니다.",
-    "data": None,
 }
 
 # Refresh 토큰

@@ -6,6 +6,7 @@ import requests
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core import signing
+from django.middleware.csrf import get_token
 from django.shortcuts import redirect, render
 from django.views.generic import RedirectView
 from drf_yasg import openapi
@@ -20,7 +21,6 @@ from apps.user.oauth_mixins import (
     KaKaoProviderInfoMixin,
     NaverProviderInfoMixin,
 )
-from utils.csrf import generate_csrf_token
 from utils.random_nickname import generate_unique_numbered_nickname
 from utils.responses.user import (
     LOGIN_SUCCESS,
@@ -147,7 +147,7 @@ class OAuthCallbackView(APIView, ABC):
         refresh_token = RefreshToken.for_user(user)
         access_token = str(refresh_token.access_token)
         # 커스텀 CSRF 토큰 발급
-        csrf_token = generate_csrf_token()
+        csrf_token = get_token(request=request)
 
         # 프론트로 토큰 전달
         response = Response(
