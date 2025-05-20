@@ -178,7 +178,7 @@
 > 
 > [📜 요구사항 정의서](https://docs.google.com/spreadsheets/d/1j6LmhFHiRqi9j7MlOIx9FTuPqTV3b5InJgEGm05m4CI/edit?gid=428803499#gid=428803499)
 > 
-> [📜 ERD 예시](https://drive.google.com/file/d/13ADl5WzuDYPcgHTkB6wKpu2tTwsJDX3s/view?usp=sharing)
+> [📜 ERD](https://drive.google.com/file/d/13ADl5WzuDYPcgHTkB6wKpu2tTwsJDX3s/view?usp=drive_link)
 > 
 > [📜 테이블 명세서](https://docs.google.com/spreadsheets/d/12pDVQs0daAvF2T8SBJ7TGTXsyEkNbVAuEVa_CjuTdoo/edit?gid=0#gid=0)
 >
