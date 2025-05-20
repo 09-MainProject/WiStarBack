@@ -51,7 +51,7 @@
 
 ### :wrench: System Architecture
 
-<img src="https://user-images.githubusercontent.com/90237119/215304129-d8006105-cf1c-49c7-a819-4f819dfac523.png"/>
+<img src="https://drive.google.com/file/d/1KBn1pl9cVa4tY9vCXCkFzfBUfdJL0NLI/view?usp=drive_link"/>
 
 ## 🖥️ Front-End  
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=HTML5&logoColor=white)
