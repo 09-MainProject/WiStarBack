@@ -72,10 +72,7 @@
 
 ## 🚀 Deploy / DevOps
 ![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=GitHub&logoColor=white)  
-![Nginx](https://img.shields.io/badge/Nginx-009639?style=for-the-badge&logo=Nginx&logoColor=white)  
-![Postman](https://img.shields.io/badge/Postman-FF6C37?style=for-the-badge&logo=Postman&logoColor=white)  
-![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=Discord&logoColor=white)  
-![Web](https://img.shields.io/badge/Web-4285F4?style=for-the-badge&logo=GoogleChrome&logoColor=white)  
+![Nginx](https://img.shields.io/badge/Nginx-009639?style=for-the-badge&logo=Nginx&logoColor=white)   
 ![Amazon EC2](https://img.shields.io/badge/EC2-FF9900?style=for-the-badge&logo=AmazonEC2&logoColor=white)  
 ![Amazon S3](https://img.shields.io/badge/S3-569A31?style=for-the-badge&logo=AmazonS3&logoColor=white)  
 ![Amazon RDS](https://img.shields.io/badge/RDS-527FFF?style=for-the-badge&logo=AmazonRDS&logoColor=white)  
@@ -89,14 +86,14 @@
 
 ### FE
 
-| <a href=https://github.com/><img src="https://avatars.githubusercontent.com/u/93540726?v=4" width=100px/><br/><sub><b>@GithubID</b></sub></a><br/> | <a href=https://github.com/><img src="https://avatars.githubusercontent.com/u/93540726?v=4" width=100px/><br/><sub><b>@GithubID</b></sub></a><br/> | <a href=https://github.com/><img src="https://avatars.githubusercontent.com/u/93540726?v=4" width=100px/><br/><sub><b>@GithubID</b></sub></a><br/> | <a href=https://github.com/><img src="https://avatars.githubusercontent.com/u/111436967?v=4" width=100px/><br/><sub><b>@GithubID</b></sub></a><br/> |
+| <a href=https://github.com/><img src="https://avatars.githubusercontent.com/u/93540726?v=4" width=100px/><br/><sub><b>@kjy0124</b></sub></a><br/> | <a href=https://github.com/><img src="https://avatars.githubusercontent.com/u/93540726?v=4" width=100px/><br/><sub><b>@Leekwanyong</b></sub></a><br/> | <a href=https://github.com/><img src="https://avatars.githubusercontent.com/u/93540726?v=4" width=100px/><br/><sub><b>@PARKJINJIN222</b></sub></a><br/> |
 |:----------------------------------:|:----------:|:---------------------------------------------------------------------------------------------------------------------------------------------------------:|:----------:|
 |                홍길동                 |    김00     |                                                                            강00                                                                            |    송00     |
 
 
 ### BE
 
-| <a href=https://github.com/><img src="https://avatars.githubusercontent.com/u/85716720?v=4" width=100px/><br/><sub><b>@GithubID</b></sub></a><br/> | <a href=https://github.com/orioncsy><img src="https://avatars.githubusercontent.com/u/90237119?v=4" width=100px/><br/><sub><b>@GithubID</b></sub></a><br/> | <a href=https://github.com/><img src="https://avatars.githubusercontent.com/u/77969043?v=4" width=100px/><br/><sub><b>@GithubID</b></sub></a><br/> |
+| <a href=https://github.com/><img src="https://avatars.githubusercontent.com/u/85716720?v=4" width=100px/><br/><sub><b>@gkw314</b></sub></a><br/> | <a href=https://github.com/orioncsy><img src="https://avatars.githubusercontent.com/u/90237119?v=4" width=100px/><br/><sub><b>@LucasKim4321</b></sub></a><br/> | <a href=https://github.com/><img src="https://avatars.githubusercontent.com/u/77969043?v=4" width=100px/><br/><sub><b>@hyazzang</b></sub></a><br/> | <a href=https://github.com/><img src="https://avatars.githubusercontent.com/u/77969043?v=4" width=100px/><br/><sub><b>@myeongbogyeong</b></sub></a><br/> |
 |:----------------------------------------------------------------------------------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------:|
 |                                                                            박00                                                                             |                                                                            이00                                                                             |                                          한00                                           |
 
