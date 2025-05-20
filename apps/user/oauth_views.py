@@ -149,7 +149,6 @@ class OAuthCallbackView(APIView, ABC):
         # 커스텀 CSRF 토큰 발급
         csrf_token = get_token(request=request)
 
-
         # 프론트로 토큰 전달
         response = Response(
             {

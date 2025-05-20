@@ -89,7 +89,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-CSRF_FAILURE_VIEW = 'utils.csrf_views.csrf_failure_view'
+CSRF_FAILURE_VIEW = "utils.csrf_views.csrf_failure_view"
 
 
 # 프론트 도메인 등록

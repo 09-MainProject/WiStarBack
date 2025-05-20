@@ -436,7 +436,7 @@ class LogoutAPIView(APIView):
 
 
 # 엑세스 토큰 리프레시
-@method_decorator(csrf_protect, name='dispatch')
+@method_decorator(csrf_protect, name="dispatch")
 class CustomTokenRefreshView(APIView):
     @swagger_auto_schema(
         tags=["유저"],
