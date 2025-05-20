@@ -9,14 +9,14 @@
 ---
 ## :link: 배포 링크
 
-> ### [⛪ 배포 링크 예시 - 네이버](https:www.naver.com)
+> ### [⛪ 배포 링크 예시 - WiStar](https://wistar.o-r.kr)
 
 ---
 ## 🗣️ 프로젝트 발표 영상 & 발표 문서
 
 > ### 🗓️ 2024.00-.00 - 2024.00.00
 > ### [📺 발표 영상 예시]()
-> ### [📑 발표 문서 예시]()
+> ### [📑 발표 문서 예시](https://legend-palm-1f1.notion.site/WeStar-1d5caf5650aa81c3b053fef36809d3fa)
 
 ---
 
@@ -51,7 +51,7 @@
 
 ### :wrench: System Architecture
 
-![기술 스택 (1).png](../../../Downloads/%EA%B8%B0%EC%88%A0%20%EC%8A%A4%ED%83%9D%20%281%29.png)
+<img width="950" alt="Image" src="https://github.com/user-attachments/assets/e36ae17f-dd00-4c68-b39b-9fe8b2d061f3" />
 
 ## 🖥️ Front-End  
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=HTML5&logoColor=white)
