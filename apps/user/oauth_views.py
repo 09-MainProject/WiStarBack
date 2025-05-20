@@ -8,6 +8,8 @@ from django.contrib.auth import get_user_model
 from django.core import signing
 from django.shortcuts import redirect, render
 from django.views.generic import RedirectView
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -52,20 +54,26 @@ def get_social_login_params(provider_info, callback_url):
     return params
 
 
-class OauthLoginRedirectView(RedirectView, ABC):
+class OauthLoginRedirectView(APIView, ABC):
+    permission_classes = [AllowAny]
 
     @abstractmethod
     def get_provider_info(self):
         pass
 
-    def get_redirect_url(self, *args, **kwargs):
+    @swagger_auto_schema(
+        operation_summary="소셜 로그인 리디렉션",
+        operation_description="OAuth 제공자 로그인 페이지로 리디렉션됩니다.",
+        responses={302: "로그인 페이지로 리디렉션"},
+        tags=["소셜 로그인"],
+    )
+    def get(self, request, *args, **kwargs):
         provider_info = self.get_provider_info()
         callback_url = settings.FRONTEND_URL + provider_info["callback_url"]
         state = signing.dumps(provider_info["state"])
-
         params = get_social_login_params(provider_info, callback_url)
-        # print(f"{GOOGLE_LOGIN_URL}?{urlencode(params)}")
-        return f"{provider_info["login_url"]}?{urlencode(params)}"
+        login_url = f"{provider_info['login_url']}?{urlencode(params)}"
+        return redirect(login_url)
 
 
 class OAuthCallbackView(APIView, ABC):
@@ -75,6 +83,20 @@ class OAuthCallbackView(APIView, ABC):
     def get_provider_info(self):
         pass
 
+    @swagger_auto_schema(
+        operation_summary="소셜 로그인 콜백 처리",
+        operation_description="프론트엔드에서 받은 code와 state를 통해 access_token을 발급받고, 유저 정보를 기반으로 로그인 처리 후 JWT 토큰을 반환합니다.",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=["code", "state"],
+            properties={
+                "code": openapi.Schema(type=openapi.TYPE_STRING, description="OAuth 인가 코드"),
+                "state": openapi.Schema(type=openapi.TYPE_STRING, description="OAuth 요청 시 보낸 state 값"),
+            },
+        ),
+        responses={200: "로그인 성공", 400: "잘못된 요청", 401: "인증 실패"},
+        tags=["소셜 로그인"],
+    )
     def post(self, request, *args, **kwargs):
         code = request.data.get("code")
         state = request.data.get("state")
