@@ -88,14 +88,14 @@
 
 | <a href="https://github.com/kjy0124"><img src="https://avatars.githubusercontent.com/u/93540726?v=4" width="100px"/><br/><sub><b>@kjy0124</b></sub></a> | <a href="https://github.com/Leekwanyong"><img src="https://avatars.githubusercontent.com/u/93540726?v=4" width="100px"/><br/><sub><b>@Leekwanyong</b></sub></a> | <a href="https://github.com/PARKJINJIN222"><img src="https://avatars.githubusercontent.com/u/93540726?v=4" width="100px"/><br/><sub><b>@PARKJINJIN222</b></sub></a> |
 |:--------------------------------------------------------------------------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
-| 김00 | 이00 | 박00 |
+| 김종엽 | 이관용 | 박진호 |
 
 
 ### BE
 
 | <a href="https://github.com/gkw314"><img src="https://avatars.githubusercontent.com/u/85716720?v=4" width="100px"/><br/><sub><b>@gkw314</b></sub></a> | <a href="https://github.com/orioncsy"><img src="https://avatars.githubusercontent.com/u/90237119?v=4" width="100px"/><br/><sub><b>@LucasKim4321</b></sub></a> | <a href="https://github.com/hyazzang"><img src="https://avatars.githubusercontent.com/u/77969043?v=4" width="100px"/><br/><sub><b>@hyazzang</b></sub></a> | <a href="https://github.com/myeongbogyeong"><img src="https://avatars.githubusercontent.com/u/77969043?v=4" width="100px"/><br/><sub><b>@myeongbogyeong</b></sub></a> |
 |:--------------------------------------------------------------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
-| 고00 | 김00 | 정00 | 명00 |
+| 고근우 | 김태진 | 정영하 | 명보경 |
 
 
 ## 📑 프로젝트 규칙
@@ -178,7 +178,7 @@
 > 
 > [📜 요구사항 정의서](https://docs.google.com/spreadsheets/d/1j6LmhFHiRqi9j7MlOIx9FTuPqTV3b5InJgEGm05m4CI/edit?gid=428803499#gid=428803499)
 > 
-> [📜 ERD 예시](https://drive.google.com/file/d/1jvaFIwfOkKLRriFZxzOwJTE-FJ7H3IFe/view?usp=sharing)
+> [📜 ERD 예시](https://drive.google.com/file/d/13ADl5WzuDYPcgHTkB6wKpu2tTwsJDX3s/view?usp=sharing)
 > 
 > [📜 테이블 명세서](https://docs.google.com/spreadsheets/d/12pDVQs0daAvF2T8SBJ7TGTXsyEkNbVAuEVa_CjuTdoo/edit?gid=0#gid=0)
 >
