@@ -90,8 +90,12 @@ class OAuthCallbackView(APIView, ABC):
             type=openapi.TYPE_OBJECT,
             required=["code", "state"],
             properties={
-                "code": openapi.Schema(type=openapi.TYPE_STRING, description="OAuth 인가 코드"),
-                "state": openapi.Schema(type=openapi.TYPE_STRING, description="OAuth 요청 시 보낸 state 값"),
+                "code": openapi.Schema(
+                    type=openapi.TYPE_STRING, description="OAuth 인가 코드"
+                ),
+                "state": openapi.Schema(
+                    type=openapi.TYPE_STRING, description="OAuth 요청 시 보낸 state 값"
+                ),
             },
         ),
         responses={200: "로그인 성공", 400: "잘못된 요청", 401: "인증 실패"},
