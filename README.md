@@ -86,16 +86,17 @@
 
 ### FE
 
-| <a href=https://github.com/><img src="https://avatars.githubusercontent.com/u/93540726?v=4" width=100px/><br/><sub><b>@kjy0124</b></sub></a><br/> | <a href=https://github.com/><img src="https://avatars.githubusercontent.com/u/93540726?v=4" width=100px/><br/><sub><b>@Leekwanyong</b></sub></a><br/> | <a href=https://github.com/><img src="https://avatars.githubusercontent.com/u/93540726?v=4" width=100px/><br/><sub><b>@PARKJINJIN222</b></sub></a><br/> |
-|:----------------------------------:|:----------:|:---------------------------------------------------------------------------------------------------------------------------------------------------------:|:----------:|
-|                김00                 |    이00     |                                                                            박00                                                                            |
+| <a href="https://github.com/kjy0124"><img src="https://avatars.githubusercontent.com/u/93540726?v=4" width="100px"/><br/><sub><b>@kjy0124</b></sub></a> | <a href="https://github.com/Leekwanyong"><img src="https://avatars.githubusercontent.com/u/93540726?v=4" width="100px"/><br/><sub><b>@Leekwanyong</b></sub></a> | <a href="https://github.com/PARKJINJIN222"><img src="https://avatars.githubusercontent.com/u/93540726?v=4" width="100px"/><br/><sub><b>@PARKJINJIN222</b></sub></a> |
+|:--------------------------------------------------------------------------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
+| 김00 | 이00 | 박00 |
 
 
 ### BE
 
-| <a href=https://github.com/><img src="https://avatars.githubusercontent.com/u/85716720?v=4" width=100px/><br/><sub><b>@gkw314</b></sub></a><br/> | <a href=https://github.com/orioncsy><img src="https://avatars.githubusercontent.com/u/90237119?v=4" width=100px/><br/><sub><b>@LucasKim4321</b></sub></a><br/> | <a href=https://github.com/><img src="https://avatars.githubusercontent.com/u/77969043?v=4" width=100px/><br/><sub><b>@hyazzang</b></sub></a><br/> | <a href=https://github.com/><img src="https://avatars.githubusercontent.com/u/77969043?v=4" width=100px/><br/><sub><b>@myeongbogyeong</b></sub></a><br/> |
-|:----------------------------------------------------------------------------------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------:|
-|                                                                            박00                                                                             |                                                                            이00                                                                             |                                          한00                                           |
+| <a href="https://github.com/gkw314"><img src="https://avatars.githubusercontent.com/u/85716720?v=4" width="100px"/><br/><sub><b>@gkw314</b></sub></a> | <a href="https://github.com/orioncsy"><img src="https://avatars.githubusercontent.com/u/90237119?v=4" width="100px"/><br/><sub><b>@LucasKim4321</b></sub></a> | <a href="https://github.com/hyazzang"><img src="https://avatars.githubusercontent.com/u/77969043?v=4" width="100px"/><br/><sub><b>@hyazzang</b></sub></a> | <a href="https://github.com/myeongbogyeong"><img src="https://avatars.githubusercontent.com/u/77969043?v=4" width="100px"/><br/><sub><b>@myeongbogyeong</b></sub></a> |
+|:--------------------------------------------------------------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
+| 박00 | 이00 | 한00 | 명00 |
+
 
 ## 📑 프로젝트 규칙
 
