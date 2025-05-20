@@ -51,7 +51,7 @@
 
 ### :wrench: System Architecture
 
-![기술 스택 (1).png](../../../Downloads/%EA%B8%B0%EC%88%A0%20%EC%8A%A4%ED%83%9D%20%281%29.png)
+<img width="950" alt="Image" src="https://github.com/user-attachments/assets/e36ae17f-dd00-4c68-b39b-9fe8b2d061f3" />
 
 ## 🖥️ Front-End  
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=HTML5&logoColor=white)
