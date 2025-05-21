@@ -36,6 +36,13 @@ from utils.responses.user import (
 
 User = get_user_model()
 
+# 소셜로그인에 사용할 url
+FRONTEND_URL = "https://wistar.o-r.kr"
+# FRONTEND_URL = "http://127.0.0.1:5173"
+# FRONTEND_URL = "http://localhost:5173"
+# 백엔드에서 임시로 테스트
+# FRONTEND_URL = "/api/users"
+
 
 def get_social_login_params(provider_info, callback_url):
     state = signing.dumps(provider_info["state"])
