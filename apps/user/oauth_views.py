@@ -1,6 +1,6 @@
 # views/oauth_views.py
 from abc import ABC, abstractmethod
-from urllib.parse import urlencode
+from urllib.parse import unquote, urlencode
 
 import requests
 from django.conf import settings
@@ -35,13 +35,6 @@ from utils.responses.user import (
 )
 
 User = get_user_model()
-
-# 소셜로그인에 사용할 url
-FRONTEND_URL = "https://wistar.o-r.kr"
-# FRONTEND_URL = "http://127.0.0.1:5173"
-# FRONTEND_URL = "http://localhost:5173"
-# 백엔드에서 임시로 테스트
-# FRONTEND_URL = "/api/users"
 
 
 def get_social_login_params(provider_info, callback_url):
@@ -80,7 +73,6 @@ class OauthLoginRedirectView(APIView, ABC):
     def get(self, request, *args, **kwargs):
         provider_info = self.get_provider_info()
         callback_url = settings.FRONTEND_URL + provider_info["callback_url"]
-        state = signing.dumps(provider_info["state"])
         params = get_social_login_params(provider_info, callback_url)
         login_url = f"{provider_info['login_url']}?{urlencode(params)}"
         return redirect(login_url)
@@ -112,8 +104,8 @@ class OAuthCallbackView(APIView, ABC):
         tags=["소셜 로그인"],
     )
     def post(self, request, *args, **kwargs):
-        code = request.data.get("code")
-        state = request.data.get("state")
+        code = unquote(request.data.get("code"))
+        state = unquote(request.data.get("state"))
 
         if not code or not state:
             return Response(OAUTH_CODE_OR_STATE_MISSING, status=400)
@@ -131,6 +123,7 @@ class OAuthCallbackView(APIView, ABC):
 
         # 엑세스 토큰 요청
         token_response = self.get_access_token(code, state, provider_info)
+        print("1111", token_response.status_code)
         if token_response.status_code != 200:
             return Response(OAUTH_TOKEN_FAILED, status=401)
 
