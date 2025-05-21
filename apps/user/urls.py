@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.urls import path
 from rest_framework_simplejwt.views import TokenVerifyView
 
@@ -57,41 +58,44 @@ urlpatterns = [
         name="google_login",
     ),
     path("google/callback", GoogleCallbackView.as_view(), name="google_callback"),
-    # test
-    # path(
-    #     "naver/login-test",
-    #     oauth_views_old.NaverLoginRedirectView.as_view(),
-    #     name="naver_login_test",
-    # ),
-    # path(
-    #     "naver/callback-test",
-    #     oauth_views_old.NaverCallbackView.as_view(),
-    #     name="naver_callback_test",
-    # ),
-    # path(
-    #     "kakao/login-test",
-    #     oauth_views_old.KakaoLoginRedirectView.as_view(),
-    #     name="kakao_login_test",
-    # ),
-    # path(
-    #     "kakao/callback-test",
-    #     oauth_views_old.KakaoCallbackView.as_view(),
-    #     name="kakao_callback_test",
-    # ),
-    # path(
-    #     "google/login-test",
-    #     oauth_views_old.GoogleLoginRedirectView.as_view(),
-    #     name="google_login_test",
-    # ),
-    # path(
-    #     "google/callback-test",
-    #     oauth_views_old.GoogleCallbackView.as_view(),
-    #     name="google_callback_test",
-    # ),
-    # path(
-    #     "oauth/callback-test",
-    #     oauth_views_old.oauth_callback_test_page,
-    #     name="oauth-callback-test",
-    # ),
-    # path("nickname/", oauth_views.oauth_nickname, name="nickname"),
 ]
+
+# 개발 환경에서만 test용 OAuth URL 추가
+if settings.ENV.get("DJANGO_ENV", "local") == "local":
+    urlpatterns += [
+        path(
+            "naver/login-test",
+            oauth_views_old.NaverLoginRedirectView.as_view(),
+            name="naver_login_test",
+        ),
+        path(
+            "naver/callback-test",
+            oauth_views_old.NaverCallbackView.as_view(),
+            name="naver_callback_test",
+        ),
+        path(
+            "kakao/login-test",
+            oauth_views_old.KakaoLoginRedirectView.as_view(),
+            name="kakao_login_test",
+        ),
+        path(
+            "kakao/callback-test",
+            oauth_views_old.KakaoCallbackView.as_view(),
+            name="kakao_callback_test",
+        ),
+        path(
+            "google/login-test",
+            oauth_views_old.GoogleLoginRedirectView.as_view(),
+            name="google_login_test",
+        ),
+        path(
+            "google/callback-test",
+            oauth_views_old.GoogleCallbackView.as_view(),
+            name="google_callback_test",
+        ),
+        path(
+            "oauth/callback-test",
+            oauth_views_old.oauth_callback_test_page,
+            name="oauth-callback-test",
+        ),
+    ]

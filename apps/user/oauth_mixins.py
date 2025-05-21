@@ -20,7 +20,7 @@ class KaKaoProviderInfoMixin:
             "profile_image_field": "profile_image_url",
             "authorization_url": "https://kauth.kakao.com/oauth/authorize",
             "frontend_redirect_url": f"{settings.FRONTEND_URL}/oauth/callback",
-            "frontend_redirect_url_test": f"{settings.FRONTEND_URL}/oauth/callback-test",
+            "frontend_redirect_url_test": "/api/users/oauth/callback-test",
         }
 
 
@@ -42,7 +42,7 @@ class GoogleProviderInfoMixin:
             "profile_image_field": "picture",
             "authorization_url": "https://accounts.google.com/o/oauth2/v2/auth",
             "frontend_redirect_url": f"{settings.FRONTEND_URL}/oauth/callback",
-            "frontend_redirect_url_test": f"{settings.FRONTEND_URL}/oauth/callback-test",
+            "frontend_redirect_url_test": "/api/users/oauth/callback-test",
         }
 
 
@@ -64,5 +64,5 @@ class NaverProviderInfoMixin:
             "profile_image_field": "profile_image",
             "authorization_url": "https://nid.naver.com/oauth2.0/authorize",
             "frontend_redirect_url": f"{settings.FRONTEND_URL}/oauth/callback",
-            "frontend_redirect_url_test": f"{settings.FRONTEND_URL}/oauth/callback-test",
+            "frontend_redirect_url_test": "/api/users/oauth/callback-test",
         }
