@@ -38,10 +38,13 @@ class UserScheduleListCreateView(generics.ListCreateAPIView):
         user_schedule_data = self.get_serializer(user_schedules, many=True).data
 
         # 팔로우한 아이돌의 일정 조회
-        followed_idol_ids = Follow.objects.filter(user=user).values_list("idol_id", flat=True)
-        idol_schedules = Schedule.objects.select_related("idol").filter(idol_id__in=followed_idol_ids)
+        followed_idol_ids = Follow.objects.filter(user=user).values_list(
+            "idol_id", flat=True
+        )
+        idol_schedules = Schedule.objects.select_related("idol").filter(
+            idol_id__in=followed_idol_ids
+        )
         idol_schedule_data = IdolScheduleSerializer(idol_schedules, many=True).data
-
 
         return Response(
             {

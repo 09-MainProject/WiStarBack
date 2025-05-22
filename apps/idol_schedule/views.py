@@ -8,6 +8,7 @@ from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 
 from utils.responses import idol_schedule as S
+
 from .models import Idol, Schedule
 from .serializers import ScheduleSerializer
 
@@ -26,7 +27,9 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
     serializer_class = ScheduleSerializer
 
     def get_permissions(self):
-        return [permissions.AllowAny()] if self.request.method == "GET" else [IsManager()]
+        return (
+            [permissions.AllowAny()] if self.request.method == "GET" else [IsManager()]
+        )
 
     def get_queryset(self):
         idol_id = self.kwargs["idol_id"]
@@ -52,11 +55,26 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
         operation_summary="아이돌 일정 목록 조회",
         tags=["아이돌 일정"],
         manual_parameters=[
-            openapi.Parameter(p, openapi.IN_QUERY, description=f"{p} 검색", type=openapi.TYPE_STRING)
+            openapi.Parameter(
+                p, openapi.IN_QUERY, description=f"{p} 검색", type=openapi.TYPE_STRING
+            )
             for p in ["title", "description", "location"]
-        ] + [
-            openapi.Parameter("start_date", openapi.IN_QUERY, description="시작일 이후", type=openapi.TYPE_STRING, format="date"),
-            openapi.Parameter("end_date", openapi.IN_QUERY, description="종료일 이전", type=openapi.TYPE_STRING, format="date"),
+        ]
+        + [
+            openapi.Parameter(
+                "start_date",
+                openapi.IN_QUERY,
+                description="시작일 이후",
+                type=openapi.TYPE_STRING,
+                format="date",
+            ),
+            openapi.Parameter(
+                "end_date",
+                openapi.IN_QUERY,
+                description="종료일 이전",
+                type=openapi.TYPE_STRING,
+                format="date",
+            ),
         ],
         responses={200: ScheduleSerializer(many=True)},
     )
@@ -118,13 +136,19 @@ class ScheduleRetrieveUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ScheduleSerializer
 
     def get_permissions(self):
-        return [permissions.AllowAny()] if self.request.method == "GET" else [IsIdolManagerOrOwner()]
+        return (
+            [permissions.AllowAny()]
+            if self.request.method == "GET"
+            else [IsIdolManagerOrOwner()]
+        )
 
     def get_queryset(self):
         # swagger 문서 생성용 가짜 요청 처리 (문서화 시 필요)
         if getattr(self, "swagger_fake_view", False):
             return Schedule.objects.none()
-        return Schedule.objects.select_related("idol", "user").filter(idol_id=self.kwargs["idol_id"])
+        return Schedule.objects.select_related("idol", "user").filter(
+            idol_id=self.kwargs["idol_id"]
+        )
 
     @swagger_auto_schema(
         operation_summary="아이돌 일정 상세 조회",
