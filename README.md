@@ -21,30 +21,29 @@ WiStar는 이러한 흐름에 착안해, 팬들이 원하는 아티스트의 일
 ---
 
 ## 🖥️ 서비스 소개
-|   메인 화면 1  |  메인 화면 2  |   메인 화면 3   |
-|:--------:|:------:|:--------:|
-| ![메인 화면 1](./readme_files/메인화면_움짤1.gif) |  ![메인 화면 2](./readme_files/메인화면_움짤2.gif)  | ![메인 화면 3](./readme_files/메인화면_스샷_오늘의_스케줄.png) |
+| <img src="readme_files/메인화면_스샷.png" width="250"/> | <img src="readme_files/메인화면_스샷_오늘의_스케줄.png" width="250"/> | <img src="readme_files/메인화면_움짤1.gif" width="250"/> |
+|:--:|:--:|:--:|
+| 메인화면 | 오늘의 스케줄 | 메인 움짤 1 |
 
-|                                                                                                          소셜 로그인 2                                                                                                           |                                                                                                              나눔글 등록 및 수정                                                                                                               |                                                                                                             나눔글 목록                                                                                                             |
-|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
-| <img src="https://lh3.googleusercontent.com/_WEmqGBbE04OIWsmijjjMk7eyk2jKBC9qXLFTWJjpWHfcUknRcVfOSA5Xy5QqTILk75qm4EcbgyXNM5h8dtitdmfuQ7Gg7YSR_Hb8GBffFeiEMLx6NYXVPDLA8BwHVUHrfZtHl-yATyXIiJhtdsaOMoMqA=s2048" alt="Login2"> | <img src="https://lh6.googleusercontent.com/wQiDqzndpvTRfIsHy-l3_eCjPDQ0JF28pCmLrDdSFQfR0UTuJHiF_erHsz57FuHFDWbHMnmOLquWxJxqUwjeAy_JnhaOzpjdemsvAzwPQdfK6J-H6vqOj3GwrnpBMs43Gl6BhC_idUh9lVyONEgCdIHMPQ=s2048" alt="CreateUpdateShare"> | <img src="https://lh6.googleusercontent.com/l6hiRBG-gYZpIp_E23PVm4sOBS-W2wFvncoP5bKlZQfU66NRMzxmfdgyJDagDmnqJLwxnJ9P7tu1eBlmOerah9AOx8NcBDLQR1lmLTZ083GR4zr0kBpI9XVdqVHDe571bTYFZ5fnCztg4Yw2JVyv0W-Sug=s2048" alt="ShareList"> |
+| <img src="readme_files/메인화면_움짤2.gif" width="250"/> | <img src="readme_files/로그인.png" width="250"/> | <img src="readme_files/회원가입.png" width="250"/> |
+|:--:|:--:|:--:|
+| 메인 움짤 2 | 로그인 | 회원가입 |
 
-|                                                                                                             나눔글 이미지 업로드                                                                                                             |      나눔글 댓글      |      나눔 상태 토글    |
-|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:-------:|:---------:|
-| <img src="https://lh6.googleusercontent.com/uQJWChKZY7rtI-IdUgG9AxKSUfEeAUbFu3vnfrEkxDXSYHF7-e2ban3omp9Hn0yjtIh6uyQUC3DY8FXOOTLZEk5oK5t3BhD4WS6_jdJclc-L-zn8iavUnRgtLf0In1yH_C933V2MVtYE6_a40slzphM88A=s2048" alt="UpdateShareImg"> | <img src="https://lh6.googleusercontent.com/gs8HXpN_GGwlXTG9ZXldKc2rIYwqKE3IzQY3r6SYVwmp1M7-0_KJggGrbM0-VY_yL_Gh8V4_1argDczgglGIKjGuteRAFVKNCyK8BtM_Gsarut-Y4K-_1H7_Bj168cxmw1f7zRT9FUVjYnoGl2AG574nIg=s2048" alt="ShareComment"> | <img src="https://lh4.googleusercontent.com/iFbgPqWgK__YmSB8ha53yHTLfU_LtwJNEAf7KCDUxbraZbJhh1vQkAjTMLhaQF24HN2s3oniEsOL75mfiiMV2gRUs0exNptePw0hp0a9Q0Ko3XzfN3l4lPoWY5NP3Eif4KONMmgWQ-kKTYamb2mOiGiMlw=s2048" alt="ShareStatus"> |
+| <img src="readme_files/소셜 로그인.png" width="250"/> | <img src="readme_files/게시글 목록.png" width="250"/> | <img src="readme_files/게시글 상세.png" width="250"/> |
+|:--:|:--:|:--:|
+| 소셜 로그인 | 게시글 목록 | 게시글 상세 |
 
-|                                                                                                             나눔 게시글 검색                                                                                                             |              요청글 등록              |              요청글 수정              |
-|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:--------------------------------:|:--------------------------------:|
-| <img src="https://lh4.googleusercontent.com/TBqn1-oJm59EbLQyqSPLZ5_cidaanTljcr1Qq_XTPxcdTzD-IwxHrKL0ZfQhoZrkOVjokRLckca1x-9w8k0me4-6JTHPG6rbwuQ4pkmrgjEpAJZxAMM8HxR5x6vDtiCotwODnUJbo0wYK-Y62U4BTx17Cw=s2048" alt="SearchShare">  | <img src="https://lh4.googleusercontent.com/3od9me49rKBnI9saCG7TuRqlg4RQGb9JX4z8PyXMHfpqW6jF4gLgly_fZympLUsQUzxVBfWeEDIOha2-TyV-6pV_BiIbafOb9AG6vZVAgBomqyfgr8r6I_Xilqyi-p5rTA6q8lJeVqt-en4I1jnEGoK19Q=s2048" alt="CreateRequset"> | <img src="https://lh4.googleusercontent.com/vJ2PSqYwWttmoXqED3pfS8HQxiaL-FSLZAjJa45u3KQ7bqkNbLW9_y8HN5MjURQGTmClDCqnkJxLvxJ5gX6v96iQKuTpmRY2fekNh22LPfuJrah7QgNGe7z6P45e4sZ3bAig0vei49TauuLdwPcAQPGDzg=s2048" alt="UpdateRequest"> |
+| <img src="readme_files/게시글 작성.png" width="250"/> | <img src="readme_files/스케줄 목록.png" width="250"/> | <img src="readme_files/스케줄 상세.png" width="250"/> |
+|:--:|:--:|:--:|
+| 게시글 작성 | 스케줄 목록 | 스케줄 상세 |
 
-|                                                                                                               요청글 댓글                                                                                                                |              요청글 검색              |            도서 평점 등록             |
-|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:--------------------------------:|:-------------------------------:|
-| <img src="https://lh5.googleusercontent.com/ngtbM1TwsYkrv1gAbcs7S61jJtgIKb66IdtppaIvVCT9mbthSK3Q66YBV9EOZ3ipc3SrlahE7OlVw7Bu-nwLeACpUKZ0BzYmoFTZSNPwgC0xVA_pZ69Spq34yk5xfNo7AgTN0FEiTmRVNs0_vXnlfrwUCQ=s2048" alt="RequestComment"> | <img src="https://lh6.googleusercontent.com/AV4lIIXPUjDm9RTAmZSn8vkyJx8Ltiybi5wD6gyrydKw5uXa0EMRK3ysShfVhHLdZYoDSHNbdfEr_pc9yUEDWEwT2cTdf7vDSZcbCKxcy_gDiBjL15ofE94LCoXZu4VuQ5BTkImsh8RzgwL31sSib5VBVg=s2048" alt="SearchRequest"> | <img src="https://lh6.googleusercontent.com/16_o-x4RHI9TU7pypuH0E2dypPuYE2G2jP8VhTxWwiiZuNSVTxqdkprKOigJ2F0okPILkVNd9BnYyKjgEYTH9uKkuEtEm5TBqy9gJOxRli6DP7DRCqORo6o07ym1onjJVsCbOvEIAVSMYL6-oGroAVJyjw=s2048" alt="CreateRating"> |
+| <img src="readme_files/스케줄 생성.png" width="250"/> | <img src="readme_files/아티스트 페이지.png" width="250"/> | <img src="readme_files/아티스트 상세페이지.png" width="250"/> |
+|:--:|:--:|:--:|
+| 스케줄 생성 | 아티스트 메인 | 아티스트 상세 |
 
-|                                                                                                          도서 평점 수정 및 삭제                                                                                                           |             마이페이지 1             |           마이페이지2           |
-|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:----------:|:--------------------------:|
-| <img src="https://lh5.googleusercontent.com/KjjwMZ-FrNzlWa0N8IS2iYAr92JgQCMbOFEwZdtScJJwzt5XY70dZII-OyvHUSbWV_7qBNCFc3pslsgcfLX9ZAM54y0F5pRrO4e2EMv8ee1K2FzzieU5ByAn9UhBqB08Fk1pHUaGvRzxGt8HhFh17fongw=s2048" alt="UpateRating"> |<img src="https://lh5.googleusercontent.com/KRfPZ8P2TzvLBeHAcApzzHDn6xbkCYp8Z9sDmWSifQNwQwfC7HAjczd-KHVs5dGbKhi2AO5O3A8wd8mewcze3TKb_yM9y5-PHQVE7axz5HVdWsI1alg2-qatjn7G2c0Y6Fx786KMjoiIULFLpCoQx6HWJA=s2048" alt="MyPage1"> | <img src="https://lh5.googleusercontent.com/eTvLqwjRti-QhqDMWb2gMw692w-qmSipvVOjcXHvVIetlZiBvgbzcDakCP2Gmf-kGNx5vuZ5fm_3ExzA3_rD3ux4DaDK5xaP90LgDmK6fRYPdGdolg8dJrdh8fKT7a4H0odAYlK9t4-iLxjtsbinTnz0ow=s2048" alt="MyPage2"> |
----
+| <img src="readme_files/아티스트 추가.png" width="250"/> | <img src="readme_files/스웨거.png" width="250"/> | <img src="readme_files/reDoc.png" width="250"/> |
+|:--:|:--:|:--:|
+| 아티스트 추가 | Swagger 문서 | ReDoc 문서 |
 
 ## 🧰 사용 스택
 
