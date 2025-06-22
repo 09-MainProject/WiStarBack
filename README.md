@@ -26,18 +26,23 @@ WiStar는 이러한 흐름에 착안해, 팬들이 원하는 아티스트의 일
 | 오늘의 스케줄 | 메인 움짤 1 | 메인 움짤 2 |
 |:--:|:--:|:--:|
 | <img src="readme_files/메인화면_스샷_오늘의_스케줄.png" width="250"/> | <img src="readme_files/메인화면_움짤1.gif" width="250"/> | <img src="readme_files/메인화면_움짤2.gif" width="250"/> |
+
 | 로그인 | 회원가입 | 소셜 로그인 |
 |:--:|:--:|:--:|
 | <img src="readme_files/로그인.png" width="250"/> | <img src="readme_files/회원가입.png" width="250"/> | <img src="readme_files/소셜 로그인.png" width="250"/> |
+
 | 게시글 목록 | 게시글 상세 | 게시글 작성 |
 |:--:|:--:|:--:|
 | <img src="readme_files/게시글 목록.png" width="250"/> | <img src="readme_files/게시글 상세.png" width="250"/> | <img src="readme_files/게시글 작성.png" width="250"/> |
+
 | 스케줄 목록 | 스케줄 상세 | 스케줄 생성 |
 |:--:|:--:|:--:|
 | <img src="readme_files/스케줄 목록.png" width="250"/> | <img src="readme_files/스케줄 상세.png" width="250"/> | <img src="readme_files/스케줄 생성.png" width="250"/> |
+
 | 아티스트 메인 | 아티스트 상세 | 아티스트 추가 |
 |:--:|:--:|:--:|
 | <img src="readme_files/아티스트 페이지.png" width="250"/> | <img src="readme_files/아티스트 상세페이지.png" width="250"/> | <img src="readme_files/아티스트 추가.png" width="250"/> |
+
 | Swagger 문서 | ReDoc 문서 |  |
 |:--:|:--:|:--:|
 | <img src="readme_files/스웨거.png" width="250"/> | <img src="readme_files/reDoc.png" width="250"/> |  |
