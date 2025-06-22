@@ -123,10 +123,10 @@ WiStar는 이러한 흐름에 착안해, 팬들이 원하는 아티스트의 일
 > | ♻️ refactor     | ♻️      | 코드 리팩토링 (동작은 그대로, 내부 구조 개선)                  |
 > | ✅ test         | ✅      | 테스트 코드 추가 및 수정 (프로덕션 코드 변경 없음)             |
 > | 🚀 deploy       | 🚀      | 배포 관련 커밋 (버전 업데이트, 배포 스크립트 등)               |
-> | 🛠️ build        | 🚚      | 빌드 관련 파일 수정, 의존성 추가/제거 등                       |
+> | 🚚 build        | 🚚      | 빌드 관련 파일 수정, 의존성 추가/제거 등                       |
 > | ⚙️ conf         | ⚙️      | 환경설정, 설정 파일 수정 (ex. Webpack, Docker 등)              |
 > | ➕ add          | ➕      | 이미지, 폰트 등 에셋 파일 추가                                 |
-> | 🔧 chore        | 💡      | 사소한 수정, 주석, 오타, lint 등 기타 자잘한 작업              |
+> | 💡 chore        | 💡      | 사소한 수정, 주석, 오타, lint 등 기타 자잘한 작업              |
 > | 🚑 hotfix       | 🚑      | 긴급 수정 (서비스 장애, 에러 발생 등)                          |
 
 
@@ -180,8 +180,8 @@ WiStar는 이러한 흐름에 착안해, 팬들이 원하는 아티스트의 일
 > 
 > [📜 요구사항 정의서](https://docs.google.com/spreadsheets/d/1j6LmhFHiRqi9j7MlOIx9FTuPqTV3b5InJgEGm05m4CI/edit?gid=428803499#gid=428803499)
 > 
-> [📜 ERD 예시](https://drive.google.com/file/d/13ADl5WzuDYPcgHTkB6wKpu2tTwsJDX3s/view?usp=sharing)
+> [📜 ERD 다이어그램](https://drive.google.com/file/d/13ADl5WzuDYPcgHTkB6wKpu2tTwsJDX3s/view?usp=sharing)
 > 
 > [📜 테이블 명세서](https://docs.google.com/spreadsheets/d/12pDVQs0daAvF2T8SBJ7TGTXsyEkNbVAuEVa_CjuTdoo/edit?gid=0#gid=0)
 >
-> [📜 화면 정의서 예시](https://docs.google.com/spreadsheets/d/1vud5xV8rB9Y6akOIma49hSzdZsoj8DVG0-fYE4NdP_g/edit?usp=sharing)
+> [📜 화면 정의서](https://www.figma.com/design/ItmTtXoVbTqDyUwyAjsnNe/%EC%98%A4%EC%A6%88%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8idol)
