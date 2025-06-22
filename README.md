@@ -15,7 +15,6 @@ WiStar는 이러한 흐름에 착안해, 팬들이 원하는 아티스트의 일
 ---
 ## 🗣️ 프로젝트 발표 영상 & 발표 문서
 
-> ### 🗓️ 2024.00-.00 - 2024.00.00
 > ### [📑 발표 문서 ](https://www.canva.com/design/DAGn8XvgEVY/XTSkiXu6RWj9odMcOsRNGw/edit)
 
 ---
@@ -89,14 +88,14 @@ WiStar는 이러한 흐름에 착안해, 팬들이 원하는 아티스트의 일
 ### FE
 
 | <a href="https://github.com/kjy0124"><img src="https://avatars.githubusercontent.com/u/93540726?v=4" width="100px"/><br/><sub><b>@kjy0124</b></sub></a> | <a href="https://github.com/Leekwanyong"><img src="https://avatars.githubusercontent.com/u/93540726?v=4" width="100px"/><br/><sub><b>@Leekwanyong</b></sub></a> | <a href="https://github.com/PARKJINJIN222"><img src="https://avatars.githubusercontent.com/u/93540726?v=4" width="100px"/><br/><sub><b>@PARKJINJIN222</b></sub></a> |
-|:--------------------------------------------------------------------------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
+|:--:|:--:|:--:|
 | 김종엽 | 이관용 | 박진호 |
 
 
 ### BE
 
 | <a href="https://github.com/gkw314"><img src="https://avatars.githubusercontent.com/u/85716720?v=4" width="100px"/><br/><sub><b>@gkw314</b></sub></a> | <a href="https://github.com/orioncsy"><img src="https://avatars.githubusercontent.com/u/90237119?v=4" width="100px"/><br/><sub><b>@LucasKim4321</b></sub></a> | <a href="https://github.com/hyazzang"><img src="https://avatars.githubusercontent.com/u/77969043?v=4" width="100px"/><br/><sub><b>@hyazzang</b></sub></a> | <a href="https://github.com/myeongbogyeong"><img src="https://avatars.githubusercontent.com/u/77969043?v=4" width="100px"/><br/><sub><b>@myeongbogyeong</b></sub></a> |
-|:--------------------------------------------------------------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
+|:--:|:--:|:--:|
 | 고근우 | 김태진 | 정영하 | 명보경 |
 
 
@@ -176,6 +175,8 @@ WiStar는 이러한 흐름에 착안해, 팬들이 원하는 아티스트의 일
 
 
 ## :clipboard: Documents
+> [📜 노션 페이지](https://legend-palm-1f1.notion.site/WeStar-1d5caf5650aa81c3b053fef36809d3fa)
+>
 > [📜 API 명세서](https://docs.google.com/spreadsheets/d/1iRFoYlJupYTs26U1PBsnsIMU6Yf5ulGjj6_-FxASFGc/edit?gid=69946276#gid=69946276)
 > 
 > [📜 요구사항 정의서](https://docs.google.com/spreadsheets/d/1j6LmhFHiRqi9j7MlOIx9FTuPqTV3b5InJgEGm05m4CI/edit?gid=428803499#gid=428803499)
