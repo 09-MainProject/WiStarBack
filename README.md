@@ -95,7 +95,7 @@ WiStar는 이러한 흐름에 착안해, 팬들이 원하는 아티스트의 일
 ### BE
 
 | <a href="https://github.com/gkw314"><img src="https://avatars.githubusercontent.com/u/85716720?v=4" width="100px"/><br/><sub><b>@gkw314</b></sub></a> | <a href="https://github.com/orioncsy"><img src="https://avatars.githubusercontent.com/u/90237119?v=4" width="100px"/><br/><sub><b>@LucasKim4321</b></sub></a> | <a href="https://github.com/hyazzang"><img src="https://avatars.githubusercontent.com/u/77969043?v=4" width="100px"/><br/><sub><b>@hyazzang</b></sub></a> | <a href="https://github.com/myeongbogyeong"><img src="https://avatars.githubusercontent.com/u/77969043?v=4" width="100px"/><br/><sub><b>@myeongbogyeong</b></sub></a> |
-|:--:|:--:|:--:|
+|:--:|:--:|:--:|:--:|
 | 고근우 | 김태진 | 정영하 | 명보경 |
 
 
