@@ -87,7 +87,13 @@ WiStar는 이러한 흐름에 착안해, 팬들이 원하는 아티스트의 일
 
 ### FE
 
-| <a href="https://github.com/kjy0124"><img src="https://avatars.githubusercontent.com/u/93540726?v=4" width="100px"/><br/><sub><b>@kjy0124</b></sub></a> | <a href="https://github.com/Leekwanyong"><img src="https://avatars.githubusercontent.com/u/93540726?v=4" width="100px"/><br/><sub><b>@Leekwanyong</b></sub></a> | <a href="https://github.com/PARKJINJIN222"><img src="https://avatars.githubusercontent.com/u/93540726?v=4" width="100px"/><br/><sub><b>@PARKJINJIN222</b></sub></a> |
+### 🛠️ FE 사용 기술 스택
+
+| ![React](https://img.shields.io/badge/React-20232A?style=flat&logo=react&logoColor=61DAFB) | ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-2088FF?style=flat&logo=githubactions&logoColor=white) |
+| ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=typescript&logoColor=white) | ![AWS](https://img.shields.io/badge/AWS-232F3E?style=flat&logo=amazonaws&logoColor=FF9900) |
+| ![Axios](https://img.shields.io/badge/Axios-5A29E4?style=flat&logo=axios&logoColor=white) | ![Cloudinary](https://img.shields.io/badge/Cloudinary-3448C5?style=flat&logo=cloudinary&logoColor=white) |
+| ![Zustand](https://img.shields.io/badge/Zustand-000000?style=flat&logo=Zustand&logoColor=white) | ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=flat&logo=tailwindcss&logoColor=white) |
+| ![React Router](https://img.shields.io/badge/React_Router-CA4245?style=flat&logo=reactrouter&logoColor=white) |  |
 |:--:|:--:|:--:|
 | 김종엽 | 이관용 | 박진호 |
 
